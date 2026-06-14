@@ -1,0 +1,10 @@
+{
+  "name": "blackhorizon",
+  "version": "1.0.0",
+  "description": "Black Horizon: Progenitor Awakening",
+  "main": "main.js",
+  "author": "GameProject",
+  "dependencies": {
+    "electron": "^25.0.0"
+  }
+}
