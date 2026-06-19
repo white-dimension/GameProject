@@ -2498,7 +2498,7 @@ window.UISystem = (function () {
     // 构建完整tooltip文本
     var _buildCompTooltip = function(cid) {
         var d = _buildCompDetail(cid);
-        var tip = '<b>' + _fmtRoman(cid) + '</b>';
+        var tip = '<b>' + cid + '</b>';
         if (d.affixText) tip += '&#10;' + d.affixText;
         if (d.slotText) tip += '&#10;<b>可装备：</b>' + d.slotText;
         if (d.coatingText) tip += '&#10;<b>可用于涂抹：</b>' + d.coatingText;
