@@ -1448,26 +1448,10 @@ window.UISystem = (function () {
             var comps = GD().COMPONENTS || {};
             [0,1].forEach(function(si) {
                 var cid = slots[si];
-                if (cid && comps[cid] && comps[cid].affixes) {
-                    var sa = comps[cid].affixes; var sp2 = [];
-                    if (sa.atkBonus) sp2.push('攻击+' + sa.atkBonus);
-                    if (sa.defBonus) sp2.push('防御+' + sa.defBonus);
-                    if (sa.flatDefBonus) sp2.push('防御+' + sa.flatDefBonus);
-                    if (sa.shieldBonus) sp2.push('生命+' + sa.shieldBonus);
-                    if (sa.physMultiplier) sp2.push('物理×' + sa.physMultiplier);
-                    if (sa.armorPenetration) sp2.push('破甲' + Math.round(sa.armorPenetration*100) + '%');
-                    if (sa.toxinConversion) sp2.push('毒转' + Math.round(sa.toxinConversion*100) + '%');
-                    if (sa.lifeDrainChance) sp2.push('吸血' + Math.round(sa.lifeDrainChance*100) + '%' + (sa.lifeDrainAmount ? '·' + sa.lifeDrainAmount + 'HP' : ''));
-                    if (sa.thornsPercent) sp2.push('反伤' + Math.round(sa.thornsPercent*100) + '%');
-                    if (sa.dotBonus) sp2.push('毒伤+' + sa.dotBonus);
-                    if (sa.killHeal) sp2.push('击杀恢复+' + sa.killHeal + 'HP');
-                    if (sa.deathDefy) sp2.push('免死一次');
-                    if (sa.processOnHit) sp2.push('受击回能+' + sa.processOnHit);
-                    if (sa.critChance) sp2.push('暴击率+' + Math.round(sa.critChance*100) + '%');
-                    if (sa.critMultiplier) sp2.push('暴伤×' + sa.critMultiplier);
-                    if (sa.poisonImmune) sp2.push('免疫中毒');
-                    if (sa.bonusVsSwarm) sp2.push('对寄生+' + Math.round(sa.bonusVsSwarm*100) + '%');
-                    organHTML += '<span class="txt-xs txt-dim"> 组件: </span><span class="help-tip" style="padding:6px 10px;font-size:13px;background:rgba(255,213,79,0.08);border:1px solid rgba(255,213,79,0.2);border-radius:4px;color:var(--accent-yellow);" data-tip="<b>' + cid + '</b>&#10;' + sp2.join(' · ') + '">' + cid + '</span>';
+                if (cid) {
+                    var dtl = _buildCompDetail(cid);
+                    var tipText = '<b>' + cid + '</b>' + (dtl.affixText ? '&#10;' + dtl.affixText : '') + (dtl.slotText ? '&#10;可装备：' + dtl.slotText : '');
+                    organHTML += '<span class="txt-xs txt-dim"> 组件: </span><span class="help-tip" style="padding:6px 10px;font-size:13px;background:rgba(255,213,79,0.08);border:1px solid rgba(255,213,79,0.2);border-radius:4px;color:var(--accent-yellow);" data-tip="' + tipText + '">' + cid + '</span>';
                 } else if (!cid) {
                     organHTML += '<span class="txt-xs txt-dim"> 组件: </span><span style="padding:6px 10px;font-size:13px;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.15);border-radius:4px;color:var(--text-dim);">空槽</span>';
                 }
@@ -2033,27 +2017,15 @@ window.UISystem = (function () {
                 }
 
                 var nextName = baseName + tiers[currentTier + 1];
-                var parts = [];
-                // 属性翻倍逻辑保持一致
-                if (affixes.atkBonus) parts.push('攻击+' + (affixes.atkBonus*2));
-                if (affixes.defBonus) parts.push('防御+' + affixes.defBonus);
-                if (affixes.flatDefBonus) parts.push('防御+' + (affixes.flatDefBonus*2));
-                if (affixes.shieldBonus) parts.push('生命+' + (affixes.shieldBonus*2));
-                if (affixes.physMultiplier) parts.push('物理×' + (affixes.physMultiplier*2).toFixed(1));
-                if (affixes.armorPenetration) parts.push('破甲' + Math.round(affixes.armorPenetration*200) + '%');
-                if (affixes.toxinConversion) parts.push('毒转' + Math.round(affixes.toxinConversion*200) + '%');
-                if (affixes.lifeDrainChance) parts.push('吸血' + Math.round(affixes.lifeDrainChance*200) + '%' + (affixes.lifeDrainAmount ? '·' + (affixes.lifeDrainAmount*2) + 'HP' : ''));
-                if (affixes.thornsPercent) parts.push('反伤' + Math.round(affixes.thornsPercent*200) + '%');
-                if (affixes.dotBonus) parts.push('毒伤+' + (affixes.dotBonus*2));
-                if (affixes.killHeal) parts.push('击杀恢复+' + (affixes.killHeal*2) + 'HP');
-                if (affixes.deathDefy) parts.push('免死一次');
-                if (affixes.processOnHit) parts.push('受击回能+' + affixes.processOnHit);
-                if (affixes.critChance) parts.push('暴击率+' + Math.round(affixes.critChance*200) + '%');
-                if (affixes.critMultiplier) parts.push('暴伤×' + (affixes.critMultiplier*2).toFixed(1));
-                if (affixes.poisonImmune) parts.push('免疫中毒');
-                if (affixes.bonusVsSwarm) parts.push('对寄生+' + Math.round(affixes.bonusVsSwarm*200) + '%');
-
-                preview.innerHTML = '<div class="txt-xs txt-gold">→ <b>' + nextName + '</b></div><div class="txt-xs txt-dim">' + parts.join(' · ') + '</div>';
+                // 构建升级后的属性（数值×2，bool不变）
+                var upgradedAffixes = {};
+                Object.keys(affixes).forEach(function(ak) {
+                    var v = affixes[ak];
+                    if (typeof v === 'boolean') upgradedAffixes[ak] = v;
+                    else upgradedAffixes[ak] = v * 2;
+                });
+                var nextText = _fmtAffixText(upgradedAffixes);
+                preview.innerHTML = '<div class="txt-xs txt-gold">→ <b>' + nextName + '</b></div><div class="txt-xs txt-dim">' + (nextText || '无属性') + '</div>';
             } else if (selectCount === 3) {
                 preview.innerHTML = '<div class="txt-xs txt-gold">→ 随机新组件</div>';
             } else {
@@ -2168,19 +2140,7 @@ window.UISystem = (function () {
             var ca = (curComp && curComp.affixes) ? curComp.affixes : {};
 
             var diffParts = [];
-            var fields = [
-                { k: 'atkBonus', l: '攻击' }, { k: 'defBonus', l: '防御' }, { k: 'flatDefBonus', l: '防御' },
-                { k: 'shieldBonus', l: '生命' },
-                { k: 'physMultiplier', l: '物理', mul: true }, { k: 'armorPenetration', l: '破甲', pct: true },
-                { k: 'toxinConversion', l: '毒转', pct: true }, { k: 'dotBonus', l: '毒伤' },
-                { k: 'lifeDrainChance', l: '吸血率', pct: true }, { k: 'thornsPercent', l: '反伤', pct: true },
-                { k: 'killHeal', l: '击杀恢复' }, { k: 'deathDefy', l: '免死', bool: true },
-                { k: 'processOnHit', l: '受击回能' }, { k: 'critChance', l: '暴击率', pct: true },
-                { k: 'critMultiplier', l: '暴伤', mul: true },
-                { k: 'poisonImmune', l: '免疫中毒', bool: true }, { k: 'bonusVsSwarm', l: '对寄生', pct: true }
-            ];
-
-            fields.forEach(function(f) {
+            _AFFIX_FIELDS.forEach(function(f) {
                 if (f.bool) {
                     var nv = !!sa[f.k], ov = !!ca[f.k];
                     if (!nv && !ov) return;
@@ -2317,6 +2277,79 @@ window.UISystem = (function () {
         }
         box.appendChild(body); _modalOverlay.appendChild(box);
     }
+
+    // --- 组件详情通用模板 ---
+    var _AFFIX_FIELDS = [
+        { k: 'atkBonus', l: '攻击' }, { k: 'defBonus', l: '防御' }, { k: 'flatDefBonus', l: '防御' },
+        { k: 'shieldBonus', l: '生命' },
+        { k: 'physMultiplier', l: '物理', mul: true }, { k: 'armorPenetration', l: '破甲', pct: true },
+        { k: 'toxinConversion', l: '毒转', pct: true }, { k: 'dotBonus', l: '毒伤' },
+        { k: 'lifeDrainChance', l: '吸血率', pct: true }, { k: 'thornsPercent', l: '反伤', pct: true },
+        { k: 'killHeal', l: '击杀恢复' }, { k: 'deathDefy', l: '免死', bool: true },
+        { k: 'processOnHit', l: '受击回能' }, { k: 'critChance', l: '暴击率', pct: true },
+        { k: 'critMultiplier', l: '暴伤', mul: true },
+        { k: 'poisonImmune', l: '免疫中毒', bool: true }, { k: 'bonusVsSwarm', l: '对寄生', pct: true }
+    ];
+    // 格式化为纯文本列表（组件库存/档案用）
+    var _fmtAffixText = function(affixes) {
+        var parts = [];
+        _AFFIX_FIELDS.forEach(function(f) {
+            var v = affixes[f.k]; if (v === undefined || v === null || v === 0 || v === false) return;
+            if (f.bool) { parts.push(f.l); return; }
+            if (f.pct) { parts.push(f.l + ' ' + Math.round(v*100) + '%'); return; }
+            if (f.mul) { parts.push(f.l + ' ×' + v.toFixed(1)); return; }
+            parts.push(f.l + ' +' + v);
+        });
+        return parts.join(' · ');
+    };
+    // 结构化返回所有组件信息
+    var _buildCompDetail = function(cid) {
+        var comps = GD().COMPONENTS || {};
+        var comp = comps[cid] || {};
+        var affixes = comp.affixes || {};
+        var baseName = cid.replace(/[ⅠⅡⅢ]$/, '');
+        var detail = { cid: cid, affixes: affixes };
+
+        // 属性文本
+        detail.affixText = _fmtAffixText(affixes);
+
+        // 可装备槽
+        var sn = { predatory_organ: '捕食器官', chitin_epidermis: '生物表皮', gland_core: '腺体核心' };
+        detail.slotText = (comp.allowedSlots || []).map(function(s){ return sn[s]||s; }).join('、');
+
+        // 涂层用途
+        var coats = []; var coatings = GD().COATINGS || {};
+        Object.keys(coatings).forEach(function(cid2) {
+            var cost = coatings[cid2].cost;
+            if (cost && (cost[cid] || cost[baseName])) coats.push(coatings[cid2].name);
+        });
+        detail.coatingText = coats.join('、');
+
+        // 掉落来源
+        var drops = []; var rm = { mutant: '#ff6b4a', swarm: '#9acd32', ember: '#4ab8ff' };
+        Object.keys(GD().MONSTERS||{}).forEach(function(mid) {
+            var mm = GD().MONSTERS[mid];
+            if (mm.drop && (mm.drop.id === cid || mm.drop.id === baseName))
+                drops.push('<span style=color:' + (rm[mm.race]||'#c8e6c9') + '>' + mm.name + '</span>');
+        });
+        detail.dropsHTML = drops.join('、');
+        detail.sourceNote = (drops.length === 0 && baseName === '原始基因') ? '击败区域领主（任务奖励）' : '';
+
+        return detail;
+    };
+
+    // 构建完整tooltip文本
+    var _buildCompTooltip = function(cid) {
+        var d = _buildCompDetail(cid);
+        var tip = '<b>' + cid + '</b>';
+        if (d.affixText) tip += '&#10;' + d.affixText;
+        if (d.slotText) tip += '&#10;<b>可装备：</b>' + d.slotText;
+        if (d.coatingText) tip += '&#10;<b>可用于涂抹：</b>' + d.coatingText;
+        tip += '&#10;<b>合成：</b>3个相同 → Ⅰ→Ⅱ→Ⅲ 逐级升级';
+        if (d.dropsHTML) tip += '&#10;<b>掉落：</b>' + d.dropsHTML;
+        else if (d.sourceNote) tip += '&#10;<b>来源：</b>' + d.sourceNote;
+        return tip;
+    };
 
     function showReorganizeModal() {
         var gs = GS(); var p = gs.player;
@@ -2547,60 +2580,7 @@ window.UISystem = (function () {
         var synBtn = totalCount >= 3 ? '<button class="btn btn-gold btn-sm" style="padding:2px 10px;font-size:12px;" onclick="UISystem._showSynthesizeModal()">合成 3→1</button>' : '';
         var invHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><span class="txt-xs txt-gold txt-bold">> 组件库存（' + totalCount + '个）</span>' + synBtn + '</div><div style="display:flex;flex-wrap:wrap;gap:8px;">';
         var hasAny = false;
-        var _buildCompTip = function(k, c) {
-            var tip = '<b>' + k + '</b>';
-            // 属性或描述
-            if (c && c.affixes) {
-                var d = c.affixes; var parts = [];
-                if (d.atkBonus) parts.push('攻击+' + d.atkBonus);
-                if (d.defBonus) parts.push('防御+' + d.defBonus);
-                if (d.flatDefBonus) parts.push('防御+' + d.flatDefBonus);
-                if (d.shieldBonus) parts.push('生命+' + d.shieldBonus);
-                if (d.physMultiplier) parts.push('物理×' + d.physMultiplier);
-                if (d.armorPenetration) parts.push('破甲' + Math.round(d.armorPenetration*100) + '%');
-                if (d.toxinConversion) parts.push('毒转' + Math.round(d.toxinConversion*100) + '%');
-                if (d.lifeDrainChance) parts.push('吸血' + Math.round(d.lifeDrainChance*100) + '%' + (d.lifeDrainAmount ? '·' + d.lifeDrainAmount + 'HP' : ''));
-                if (d.thornsPercent) parts.push('反伤' + Math.round(d.thornsPercent*100) + '%');
-                if (d.dotBonus) parts.push('毒伤+' + d.dotBonus);
-                if (d.killHeal) parts.push('击杀恢复+' + d.killHeal + 'HP');
-                if (d.deathDefy) parts.push('免死一次');
-                if (d.processOnHit) parts.push('受击回能+' + d.processOnHit);
-                if (d.critChance) parts.push('暴击率+' + Math.round(d.critChance*100) + '%');
-                if (d.critMultiplier) parts.push('暴伤×' + d.critMultiplier);
-                if (d.poisonImmune) parts.push('免疫中毒');
-                if (d.bonusVsSwarm) parts.push('对寄生+' + Math.round(d.bonusVsSwarm*100) + '%');
-                if (parts.length > 0) tip += '&#10;' + parts.join(' · ');
-            } else if (c && c.description) {
-                tip += '&#10;' + c.description;
-            }
-            // 可装备
-            if (c && c.allowedSlots) {
-                var sn = { predatory_organ: '捕食器官', chitin_epidermis: '生物表皮', gland_core: '腺体核心' };
-                tip += '&#10;<b>可装备：</b>' + c.allowedSlots.map(function(s){ return sn[s]||s; }).join('、');
-            }
-            // 升级版组件：用基础名称查涂层和掉落
-            var baseName = k.replace(/[ⅠⅡⅢ]$/, '');
-            // 可用于涂抹
-            var coatUses = [];
-            Object.keys(GD().COATINGS||{}).forEach(function(cid) {
-                var cost = GD().COATINGS[cid].cost;
-                if (cost && (cost[k] || cost[baseName])) coatUses.push(GD().COATINGS[cid].name);
-            });
-            if (coatUses.length > 0) tip += '&#10;<b>可用于涂抹：</b>' + coatUses.join('、');
-            // 合成
-            tip += '&#10;<b>合成：</b>3个相同 → Ⅰ→Ⅱ→Ⅲ 逐级升级';
-            // 掉落
-            var drops = [];
-            var rm = { mutant:'#ff6b4a', swarm:'#9acd32', ember:'#4ab8ff' };
-            Object.keys(GD().MONSTERS||{}).forEach(function(mid) {
-                var mm = GD().MONSTERS[mid];
-                if (mm.drop && (mm.drop.id === k || mm.drop.id === baseName)) drops.push('<span style=color:' + (rm[mm.race]||'#c8e6c9') + '>' + mm.name + '</span>');
-            });
-            if (drops.length > 0) tip += '&#10;<b>掉落：</b>' + drops.join('、');
-            else if (baseName === '原始基因') tip += '&#10;<b>来源：</b>击败区域领主（任务奖励）';
-            return tip;
-        };
-        Object.keys(inv).forEach(function(k) { if (inv[k] > 0) { hasAny = true; var c = comps[k]; var tip = _buildCompTip(k, c); invHTML += '<span class="txt-xs txt-gold help-tip" style="padding:4px 10px;background:rgba(255,213,79,0.1);border:1px solid rgba(255,213,79,0.2);border-radius:4px;" data-tip="' + tip + '" data-cname="' + k + '">' + k + ' ×' + inv[k] + '</span>'; } });
+        Object.keys(inv).forEach(function(k) { if (inv[k] > 0) { hasAny = true; var tip = _buildCompTooltip(k); invHTML += '<span class="txt-xs txt-gold help-tip" style="padding:4px 10px;background:rgba(255,213,79,0.1);border:1px solid rgba(255,213,79,0.2);border-radius:4px;" data-tip="' + tip + '" data-cname="' + k + '">' + k + ' ×' + inv[k] + '</span>'; } });
         if (!hasAny) invHTML += '<span class="txt-xs txt-dim">暂无组件 · 击败怪物获得</span>';
         invHTML += '</div>';
         invRow.innerHTML = invHTML;
