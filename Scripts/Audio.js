@@ -114,8 +114,8 @@ window.Sound = (function () {
         }
     }
 
-    function playExploreBGM() { _switchBGM('airy.mp3', 0.45, 'explore'); }
-    function playBattleBGM()  { _switchBGM('urgent.mp3', 0.50, 'battle'); }
+    function playExploreBGM() { _switchBGM('airy.mp3', 1.0, 'explore'); }
+    function playBattleBGM()  { _switchBGM('urgent.mp3', 1.0, 'battle'); }
 
     function stopBGM() {
         _stopFade();
