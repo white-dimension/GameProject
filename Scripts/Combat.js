@@ -1091,6 +1091,7 @@ window.CombatSystem = (function () {
     function _log(msg) { _battleState.log.push({ turn: _battleState.turn, msg: msg }); }
     function isInBattle() { return _battleState !== null; }
     function exitBattle() {
+        if (window.Sound) window.Sound.stopBGM();
         var gs = GS();
         // [修复] 战斗结束时将镜像进程同步回全局状态
         if (gs && _battleState) {
