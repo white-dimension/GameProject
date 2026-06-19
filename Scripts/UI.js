@@ -71,30 +71,15 @@ window.UISystem = (function () {
         _root.innerHTML = '';
         _root.style.cssText = 'width:100vw;height:100vh;display:flex;flex-direction:column;position:relative;background:var(--bg-deep);';
 
-        // 全屏背景视频（探索场景，手控循环 + 淡入淡出消除接缝）
+        // 全屏背景视频（探索场景，原生loop+静音启动规避浏览器拦截）
         _bgVideo = _ce('video');
         _bgVideo.src = '../Assets/Backgrounds/explore.mp4';
-        _bgVideo.loop = false;
-        _bgVideo.muted = false;
-        _bgVideo.volume = 1.0;
+        _bgVideo.loop = true;
+        _bgVideo.muted = true;
+        _bgVideo.volume = 0;
         _bgVideo.autoplay = true;
         _bgVideo.playsInline = true;
-        _bgVideo.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;display:none;pointer-events:none;transition:opacity 0.5s ease;';
-        var _videoFading = false;
-        var _videoLoop = function() {
-            if (_videoFading) return;
-            if (_bgVideo.duration && _bgVideo.currentTime > _bgVideo.duration - 0.6) {
-                _videoFading = true;
-                _bgVideo.style.opacity = '0';
-                setTimeout(function() {
-                    _bgVideo.currentTime = 0;
-                    _bgVideo.style.opacity = '1';
-                    _bgVideo.play().catch(function(){});
-                    _videoFading = false;
-                }, 500);
-            }
-        };
-        _bgVideo.addEventListener('timeupdate', _videoLoop);
+        _bgVideo.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;display:none;pointer-events:none;';
         _root.appendChild(_bgVideo);
 
         var topBar = _ce('div', 'hud-top');
@@ -345,6 +330,7 @@ window.UISystem = (function () {
             _root.className = isBoss ? 'bg-nest' : 'bg-battle';
         } else {
             _bgVideo.style.display = 'block';
+            _bgVideo.muted = false;
             _bgVideo.play().catch(function(){});
             _root.className = '';
         }
@@ -1884,9 +1870,11 @@ window.UISystem = (function () {
         _modalOverlay.style.display = 'none';
         _wakingUp = true;
         _bgVideo.style.display = 'block';
+        _bgVideo.muted = false;
+        _bgVideo.volume = 1.0;
         _bgVideo.play().catch(function(){});
         _root.className = '';
-        // 在用户点击手势上下文内激活音频（探索场景音轨由视频提供，这里只解锁click）
+        // 在用户点击手势上下文内激活音频
         if (window.Sound) { window.Sound.click(); }
         // [修复] 不再手动设置 _isFirstLoad = false，让 render() 统一处理启动序列
         UISystem.render();
