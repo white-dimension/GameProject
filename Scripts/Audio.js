@@ -129,7 +129,7 @@ window.Sound = (function () {
         if (!_enabled) {
             stopBGM();
         }
-        return _enabled;
+        return !_enabled;
     }
 
     function isMuted() { return !_enabled; }
