@@ -1,6 +1,6 @@
 # 02 — UI 设计规范
 
-> 合并自 Docs/UI/ 目录下全部 11 个子文档。最后更新：2026-06-14
+> 最后更新：2026-06-19
 
 ---
 
@@ -8,9 +8,9 @@
 
 ```css
 :root {
-    /* 背景体系 */
+    /* 背景体系 — 06-19统一透明度0.8 */
     --bg-deep:        #050508;
-    --bg-panel:       rgba(10,15,25,0.85);
+    --bg-panel:       rgba(5,5,10,0.8);
     --bg-card:        rgba(5,5,10,0.8);
     --bg-modal:       rgba(5,10,15,0.98);
     --border-dim:     #1a2a3a;
@@ -235,4 +235,44 @@
 
 ---
 
-> v1.0 初始 | v2.0 字体+状态条+光标 | v2.1 布局重构 | v3.6 颜色/图标/地图/战斗全面重制 | v3.8 逻辑同步与清理 | **V2.0 正式版 (2026-06-19)**
+## 14. 背景视频系统 (2026-06-19)
+
+**双视频互斥**
+- `_bgVideo` (探索) 和 `_bgBattleVideo` (战斗) 通过 `_createBgVideo(src)` 工厂创建
+- `_showBgVideo(v)` / `_hideBgVideo(v)` 统一管理显示/隐藏/静音/暂停
+- Boss战回退到静态 `bg-nest`（`#app::before`）
+
+**视频规格**
+- `position:fixed; object-fit:cover; filter:brightness(0.5)` 全屏覆盖
+- 循环淡入淡出：`loop=false`，`timeupdate` 检测末尾0.5s → opacity 0.4s过渡 → currentTime归零
+- `_fading` 锁 + `clearTimeout` 防重复触发
+- 静音启动规避浏览器 autoplay 限制，`_showBgVideo` 根据 `Sound.isMuted()` 解除
+
+**扩展方式**
+```js
+var newVid = _createBgVideo('../Assets/Backgrounds/xxx.mp4');
+_bgVideos.push(newVid);
+```
+
+## 15. 音频系统 (2026-06-19)
+
+**背景音乐**
+- 探索/战斗音轨由视频提供，不再使用独立BGM
+- Boss战：`playBossBGM(bossId)` 映射三首专属BGM (0.5音量)
+- 视频 `volume`：探索1.0 / 战斗0.25
+
+**音效**
+| 音效 | 音量 | 说明 |
+|------|------|------|
+| click | 0.5 | back_style_2_003.wav (Interface SFX Pack 1) |
+| monster | 0.5 | 种族分发：异变(roar) / 虫群(bug+alien) / 机械(electric) |
+| victory | 0.5 | 淡出过渡 |
+| 其余 | 1.0 | attack/hit/electric/defeat |
+
+**静音按钮** (顶栏 ♪/M)
+- `Sound.toggleMute()` 返回 `!_enabled`
+- 按钮同步切换：有声=蓝色♪ / 静音=灰色M
+
+---
+
+> v1.0 初始 | v2.0 字体+状态条+光标 | v2.1 布局重构 | v3.6 颜色/图标/地图/战斗全面重制 | v3.8 逻辑同步与清理 | **V2.1 视听升级 (2026-06-19)**

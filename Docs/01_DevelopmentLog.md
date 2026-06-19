@@ -1,5 +1,43 @@
 # 01 — 开发日志
 
+## V2.1 — 2026-06-19 🎬 视听升级
+
+### 多场景背景视频系统
+- 探索/战斗界面从静态PNG改为全屏循环MP4视频，Gemini生成
+- `_createBgVideo(src)` 通用工厂：一行创建视频，自动继承淡入淡出+静音控制+滤镜
+- `_showBgVideo(v)` / `_hideBgVideo(v)` 辅助函数管理显示/隐藏/静音状态
+- 视频循环淡入淡出：倒数0.5s触发opacity 0.4s过渡，消除头尾接缝
+- Boss战保留静态图 bg-nest
+
+### 背景音乐系统重构
+- 探索BGM替换为 Dark Sci-Fi Audio Pack (CC0) Sector / Urgent
+- 探索/战斗音轨由视频自带，移除 playExploreBGM / playBattleBGM 调用
+- 三首Boss专属BGM：暴君/蜂后/安保核心各0.5音量
+- 音频自动播放拦截处理：_fadeIn检测play()失败后注册点击重试
+- 全局静音开关（顶栏 ♪/M 按钮）：Sound._enabled + 视频muted 同步切换
+
+### 音效系统
+- 种族专属怪物音效：异变者(roar) / 虫群(bug+alien) / 机械(electric)
+- 切换目标触发对应种族音效(0.5)，战斗开场同样
+- 按钮音效替换为 Interface SFX Pack 1 back_style_2_003.wav (0.5)
+- 胜利音效 0.5，其余音效 1.0
+- victory/defeat/click 补上 _enabled 静音检查
+
+### UI优化
+- 所有卡片透明度统一：--bg-panel → rgba(5,5,10,0.8) 对齐日志面板
+- 顶栏+底栏半透明(0.65/0.75)，背景视频可透出
+- 视口径向渐变转半透明 rgba
+- 路径卡片 hover 微调：同色底0.8→0.7，绿色仅边框
+- 训练人偶 trainingOnly: true，从图鉴和怪物池过滤
+- 全局按钮点击监听器扩展覆盖范围
+
+### Boss立绘
+- 三张Boss PNG添加到 Data.js image字段
+- _renderBattle渲染 .boss-portrait (呼吸光晕动画)
+- 桌面图片复制到 Assets/Backgrounds + Assets/Bosses
+
+---
+
 ## V2.0 — 2026-06-19 🎮 正式版本
 
 > **黑地平线：原体觉醒** 经过 13 项底层审计修复 + 训练场 + 双专精补全 + UI 透明化，正式进入 V2.0。
