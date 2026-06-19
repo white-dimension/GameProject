@@ -932,7 +932,10 @@ window.CombatSystem = (function () {
 
     function _winBattle() {
         _battleState.phase = 'victory';
-        if (window.Sound) window.Sound.victory();
+        if (window.Sound) {
+            window.Sound.stopBGM();
+            window.Sound.victory();
+        }
         var gs = GS();
         if (!gs.bestiary.killCount) gs.bestiary.killCount = {};
 

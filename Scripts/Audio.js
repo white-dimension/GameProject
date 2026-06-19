@@ -137,9 +137,13 @@ window.Sound = (function () {
     }
 
     function stopBGM() {
-        _stopFade();
-        if (_bgm) { _bgm.pause(); _bgm.currentTime = 0; _bgm = null; }
-        _bgmType = null;
+        if (_bgm && !_bgm.paused) {
+            _fadeOut(_bgm, function() { _bgmType = null; });
+        } else {
+            _stopFade();
+            if (_bgm) { _bgm.pause(); _bgm.currentTime = 0; _bgm = null; }
+            _bgmType = null;
+        }
     }
 
     function toggleMute() {
