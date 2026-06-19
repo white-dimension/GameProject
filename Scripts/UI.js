@@ -2549,7 +2549,7 @@ window.UISystem = (function () {
         var hasAny = false;
         var _buildCompTip = function(k, c) {
             var tip = '<b>' + k + '</b>';
-            // 属性
+            // 属性或描述
             if (c && c.affixes) {
                 var d = c.affixes; var parts = [];
                 if (d.atkBonus) parts.push('攻击+' + d.atkBonus);
@@ -2570,6 +2570,8 @@ window.UISystem = (function () {
                 if (d.poisonImmune) parts.push('免疫中毒');
                 if (d.bonusVsSwarm) parts.push('对寄生+' + Math.round(d.bonusVsSwarm*100) + '%');
                 if (parts.length > 0) tip += '&#10;' + parts.join(' · ');
+            } else if (c && c.description) {
+                tip += '&#10;<span style="color:var(--text-dim)">' + c.description + '</span>';
             }
             // 可装备
             if (c && c.allowedSlots) {
