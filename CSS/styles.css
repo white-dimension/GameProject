@@ -31,15 +31,13 @@
 /* 2. 基础重置 */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* 罗马数字强制无衬线 */
-@font-face { font-family: 'RomanSans'; src: local('Segoe UI'), local('Helvetica Neue'), local('Arial'); unicode-range: U+2160-218B; }
 
 /* 自定义光标 — 生物终端扫描准星 */
 body, html {
     width: 100vw; height: 100vh;
     background: var(--bg-deep);
     overflow: hidden;
-    font-family: "Sarasa Mono SC", "Space Mono", RomanSans, monospace;
+    font-family: "Sarasa Mono SC", "Space Mono", sans-serif;
     color: var(--text-main);
     font-size: 15px; /* 基准字号提升至 15px */
     line-height: 1.6;
