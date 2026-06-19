@@ -79,7 +79,7 @@ window.UISystem = (function () {
         _bgVideo.volume = 0;
         _bgVideo.autoplay = true;
         _bgVideo.playsInline = true;
-        _bgVideo.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;display:none;pointer-events:none;';
+        _bgVideo.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;display:none;pointer-events:none;filter:brightness(0.5);';
         _root.appendChild(_bgVideo);
 
         var topBar = _ce('div', 'hud-top');
