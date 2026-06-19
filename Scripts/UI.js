@@ -309,9 +309,7 @@ window.UISystem = (function () {
 
         var inBattle = CS() && CS().isInBattle();
         // 多场景背景切换
-        if (_wakingUp) {
-            _viewport.className = 'main-viewport bg-title';
-        } else if (inBattle) {
+        if (inBattle) {
             var bs = CS().getBattleState();
             var isBoss = bs && bs.monsters && bs.monsters.some(function(mon) {
                 var md = GD().MONSTERS[mon.id];
@@ -1855,6 +1853,7 @@ window.UISystem = (function () {
         var gs = GS(); if (gs) { gs.player.introSeen = true; GameState.save(); }
         _modalOverlay.style.display = 'none';
         _wakingUp = true;
+        _viewport.className = 'main-viewport bg-explore';
         // [修复] 不再手动设置 _isFirstLoad = false，让 render() 统一处理启动序列
         UISystem.render();
     }
