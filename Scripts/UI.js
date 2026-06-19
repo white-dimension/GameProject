@@ -2597,7 +2597,7 @@ window.UISystem = (function () {
                 if (mm.drop && (mm.drop.id === k || mm.drop.id === baseName)) drops.push('<span style=color:' + (rm[mm.race]||'#c8e6c9') + '>' + mm.name + '</span>');
             });
             if (drops.length > 0) tip += '&#10;<b>掉落：</b>' + drops.join('、');
-            else if (k === '原始基因') tip += '&#10;<b>来源：</b>击败区域领主（任务奖励）';
+            else if (baseName === '原始基因') tip += '&#10;<b>来源：</b>击败区域领主（任务奖励）';
             return tip;
         };
         Object.keys(inv).forEach(function(k) { if (inv[k] > 0) { hasAny = true; var c = comps[k]; var tip = _buildCompTip(k, c); invHTML += '<span class="txt-xs txt-gold help-tip" style="padding:4px 10px;background:rgba(255,213,79,0.1);border:1px solid rgba(255,213,79,0.2);border-radius:4px;" data-tip="' + tip + '" data-cname="' + k + '">' + k + ' ×' + inv[k] + '</span>'; } });
