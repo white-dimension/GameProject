@@ -72,7 +72,7 @@ window.UISystem = (function () {
         _root.style.cssText = 'width:100vw;height:100vh;display:flex;flex-direction:column;position:relative;background:var(--bg-deep);';
 
         var topBar = _ce('div', 'hud-top');
-        topBar.style.cssText = 'position:relative;display:flex;flex-direction:row;justify-content:center;padding:8px 25px 4px 25px;min-height:60px;background:rgba(10,14,20,0.95);border-bottom:1px solid var(--border-dim);box-shadow: 0 4px 20px rgba(0,0,0,0.5);z-index:500;';
+        topBar.style.cssText = 'position:relative;display:flex;flex-direction:row;justify-content:center;padding:8px 25px 4px 25px;min-height:60px;background:rgba(10,14,20,0.65);border-bottom:1px solid var(--border-dim);box-shadow: 0 4px 20px rgba(0,0,0,0.5);z-index:500;';
         _root.appendChild(topBar);
 
         _viewport = _ce('div', 'main-viewport');
@@ -165,7 +165,7 @@ window.UISystem = (function () {
 
         var actionBar = _ce('div', 'action-bar');
         actionBar.id = 'ui-action-bar';
-        actionBar.style.cssText = 'position:relative;height:130px;background:#050508;border-top:1px solid var(--border-dim);box-shadow: 0 -4px 20px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;gap:20px;z-index:500;';
+        actionBar.style.cssText = 'position:relative;height:130px;background:rgba(5,5,8,0.75);border-top:1px solid var(--border-dim);box-shadow: 0 -4px 20px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;gap:20px;z-index:500;';
         _root.appendChild(actionBar);
 
         _modalOverlay = _ce('div', 'modal-overlay');
@@ -308,16 +308,16 @@ window.UISystem = (function () {
         }
 
         var inBattle = CS() && CS().isInBattle();
-        // 多场景背景切换
+        // 多场景背景切换（设置到root以覆盖顶栏底栏）
         if (inBattle) {
             var bs = CS().getBattleState();
             var isBoss = bs && bs.monsters && bs.monsters.some(function(mon) {
                 var md = GD().MONSTERS[mon.id];
                 return md && md.tier === 'world_boss';
             });
-            _viewport.className = isBoss ? 'main-viewport bg-nest' : 'main-viewport bg-battle';
+            _root.className = isBoss ? 'bg-nest' : 'bg-battle';
         } else {
-            _viewport.className = 'main-viewport bg-explore';
+            _root.className = 'bg-explore';
         }
         var taskEl = document.getElementById('ui-task-panel');
         if (taskEl) taskEl.style.display = inBattle ? 'none' : '';
@@ -1810,7 +1810,7 @@ window.UISystem = (function () {
 
     function _showIntro(gs) {
         _introActive = true;
-        _viewport.className = 'main-viewport bg-title';
+        _root.className = 'bg-title';
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
         var box = _ce('div');
@@ -1854,7 +1854,7 @@ window.UISystem = (function () {
         var gs = GS(); if (gs) { gs.player.introSeen = true; GameState.save(); }
         _modalOverlay.style.display = 'none';
         _wakingUp = true;
-        _viewport.className = 'main-viewport bg-explore';
+        _root.className = 'bg-explore';
         // 在用户点击手势上下文内激活音频，解除浏览器自动播放限制
         if (window.Sound) { window.Sound.playExploreBGM(); window.Sound.click(); }
         // [修复] 不再手动设置 _isFirstLoad = false，让 render() 统一处理启动序列
