@@ -2122,8 +2122,8 @@ window.UISystem = (function () {
             UISystem.showReorganizeModal();
         };
         btnRow.appendChild(confirmBtn);
-        body.appendChild(btnRow);
         box.appendChild(body);
+        box.appendChild(btnRow);
         _modalOverlay.appendChild(box);
     }
 
