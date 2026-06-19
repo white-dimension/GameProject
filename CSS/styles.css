@@ -39,12 +39,10 @@ body, html {
     overflow: hidden;
     font-size: 15px;
     line-height: 1.6;
-    font-family: "Sarasa Mono SC", "Space Mono", RomanSans, sans-serif;
+    font-family: "Sarasa Mono SC", "Space Mono", sans-serif;
     color: var(--text-main);
 }
 
-/* 罗马数字强制无衬线 — 用Arial拦截（Windows100%存在） */
-@font-face { font-family: 'RomanSans'; src: local('Arial'); unicode-range: U+2160-218B; }
 body, html { font-family: "Sarasa Mono SC", "Space Mono", RomanSans, sans-serif;
     color: var(--text-main);
 }

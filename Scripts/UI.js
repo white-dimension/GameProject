@@ -1451,7 +1451,7 @@ window.UISystem = (function () {
                 if (cid) {
                     var dtl = _buildCompDetail(cid);
                     var tipText = '<b>' + cid + '</b>' + (dtl.affixText ? '&#10;' + dtl.affixText : '') + (dtl.slotText ? '&#10;可装备：' + dtl.slotText : '');
-                    organHTML += '<span class="txt-xs txt-dim"> 组件: </span><span class="help-tip" style="padding:6px 10px;font-size:13px;background:rgba(255,213,79,0.08);border:1px solid rgba(255,213,79,0.2);border-radius:4px;color:var(--accent-yellow);" data-tip="' + tipText + '">' + cid + '</span>';
+                    organHTML += '<span class="txt-xs txt-dim"> 组件: </span><span class="help-tip" style="padding:6px 10px;font-size:13px;background:rgba(255,213,79,0.08);border:1px solid rgba(255,213,79,0.2);border-radius:4px;color:var(--accent-yellow);" data-tip="' + tipText + '">' + _fmtRoman(cid) + '</span>';
                 } else if (!cid) {
                     organHTML += '<span class="txt-xs txt-dim"> 组件: </span><span style="padding:6px 10px;font-size:13px;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.15);border-radius:4px;color:var(--text-dim);">空槽·未嵌入</span>';
                 }
@@ -2432,6 +2432,11 @@ window.UISystem = (function () {
         return detail;
     };
 
+    // 罗马数字强制无衬线显示
+    var _fmtRoman = function(str) {
+        return str.replace(/[ⅠⅡⅢ]/g, function(m) { return '<span style="font-family:sans-serif">' + m + '</span>'; });
+    };
+
     // --- 种族/专精通用的颜色和名称映射 ---
     var _RACE_COLORS = {
         mutant: { hex: '#ff6b4a', bg: 'rgba(255,107,74,0.08)', bd: 'rgba(255,107,74,0.2)' },
@@ -2493,7 +2498,7 @@ window.UISystem = (function () {
     // 构建完整tooltip文本
     var _buildCompTooltip = function(cid) {
         var d = _buildCompDetail(cid);
-        var tip = '<b>' + cid + '</b>';
+        var tip = '<b>' + _fmtRoman(cid) + '</b>';
         if (d.affixText) tip += '&#10;' + d.affixText;
         if (d.slotText) tip += '&#10;<b>可装备：</b>' + d.slotText;
         if (d.coatingText) tip += '&#10;<b>可用于涂抹：</b>' + d.coatingText;
@@ -2765,7 +2770,7 @@ window.UISystem = (function () {
         var synBtn = totalCount >= 3 ? '<button class="btn btn-gold btn-sm" style="padding:2px 10px;font-size:12px;" onclick="UISystem._showSynthesizeModal()">合成 3→1</button>' : '';
         var invHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><span class="txt-xs txt-gold txt-bold">> 组件库存（' + totalCount + '个）</span>' + synBtn + '</div><div style="display:flex;flex-wrap:wrap;gap:8px;">';
         var hasAny = false;
-        Object.keys(inv).forEach(function(k) { if (inv[k] > 0) { hasAny = true; var tip = _buildCompTooltip(k); invHTML += '<span class="txt-xs txt-gold help-tip" style="padding:4px 10px;background:rgba(255,213,79,0.1);border:1px solid rgba(255,213,79,0.2);border-radius:4px;" data-tip="' + tip + '" data-cname="' + k + '">' + k + ' ×' + inv[k] + '</span>'; } });
+        Object.keys(inv).forEach(function(k) { if (inv[k] > 0) { hasAny = true; var tip = _buildCompTooltip(k); invHTML += '<span class="txt-xs txt-gold help-tip" style="padding:4px 10px;background:rgba(255,213,79,0.1);border:1px solid rgba(255,213,79,0.2);border-radius:4px;" data-tip="' + tip + '" data-cname="' + k + '">' + _fmtRoman(k) + ' ×' + inv[k] + '</span>'; } });
         if (!hasAny) invHTML += '<span class="txt-xs txt-dim">暂无组件 · 击败怪物获得</span>';
         invHTML += '</div>';
         invRow.innerHTML = invHTML;
