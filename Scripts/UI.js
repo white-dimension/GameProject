@@ -360,6 +360,7 @@ window.UISystem = (function () {
             }
             _mainView.style.display = 'flex'; _mainView.style.visibility = 'visible';
             _renderDiscovery(gs);
+            if (window.Sound) window.Sound.playExploreBGM();
         }
         _renderActions(gs, inBattle); _updateLog();
     }
