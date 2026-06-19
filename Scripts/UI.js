@@ -2321,9 +2321,26 @@ window.UISystem = (function () {
     // 结构化返回所有组件信息
     var _buildCompDetail = function(cid) {
         var comps = GD().COMPONENTS || {};
-        var comp = comps[cid] || {};
-        var affixes = comp.affixes || {};
         var baseName = cid.replace(/[ⅠⅡⅢ]$/, '');
+        var comp = comps[cid];
+        // Ⅰ/Ⅱ/Ⅲ 动态生成，DB中不存在则回退基础版并推算升级属性
+        if (!comp && baseName !== cid) {
+            var baseComp = comps[baseName];
+            comp = {};
+            if (baseComp) {
+                comp.allowedSlots = baseComp.allowedSlots;
+                if (baseComp.affixes) {
+                    comp.affixes = {};
+                    Object.keys(baseComp.affixes).forEach(function(ak) {
+                        var v = baseComp.affixes[ak];
+                        if (typeof v === 'boolean') comp.affixes[ak] = v;
+                        else comp.affixes[ak] = v * 2;
+                    });
+                }
+            }
+        }
+        if (!comp) comp = {};
+        var affixes = comp.affixes || {};
         var detail = { cid: cid, affixes: affixes };
 
         // 属性文本
