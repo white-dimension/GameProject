@@ -2434,7 +2434,7 @@ window.UISystem = (function () {
 
     // 罗马数字强制无衬线显示
     var _fmtRoman = function(str) {
-        return str.replace(/[ⅠⅡⅢ]/g, function(m) { return "<span style='font-family:sans-serif'>" + m + "</span>"; });
+        return str.replace(/[ⅠⅡⅢ]/g, function(m) { return "<span class='roman-sans'>" + m + "</span>"; });
     };
 
     // --- 种族/专精通用的颜色和名称映射 ---

@@ -498,9 +498,12 @@ body::after {
 /* 档案数值高亮 */
 .stat-val { color: var(--text-white); }
 
-/* 罗马数字缩放修正 - 强制无衬线 */
-.roman {
+/* 罗马数字强制无衬线 */
+.roman, .roman-sans {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+}
+/* 罗马数字缩放修正 */
+.roman {
     font-weight: 800;
     font-size: 1.1em;
     vertical-align: baseline;
