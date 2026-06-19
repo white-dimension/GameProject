@@ -359,8 +359,10 @@ window.GameState = (function () {
                 if (!cid || !data.COMPONENTS || !data.COMPONENTS[cid]) return;
                 var aff = data.COMPONENTS[cid].affixes; if (!aff) return;
                 if (aff.atkBonus) p.atk += aff.atkBonus;
+                if (aff.defBonus) p.def += aff.defBonus;
                 if (aff.flatDefBonus) p.def += aff.flatDefBonus;
                 if (aff.shieldBonus) p.hp_max += aff.shieldBonus;
+                if (aff.poisonImmune) p.poisonImmune = true;
                 if (aff.physMultiplier) p.atk = Math.ceil(p.atk * aff.physMultiplier);
             });
         });

@@ -2029,6 +2029,7 @@ window.UISystem = (function () {
                 var parts = [];
                 // 属性翻倍逻辑保持一致
                 if (affixes.atkBonus) parts.push('攻击+' + (affixes.atkBonus*2));
+                if (affixes.defBonus) parts.push('防御+' + affixes.defBonus);
                 if (affixes.flatDefBonus) parts.push('防御+' + (affixes.flatDefBonus*2));
                 if (affixes.shieldBonus) parts.push('生命+' + (affixes.shieldBonus*2));
                 if (affixes.physMultiplier) parts.push('物理×' + (affixes.physMultiplier*2).toFixed(1));
@@ -2037,6 +2038,7 @@ window.UISystem = (function () {
                 if (affixes.lifeDrainChance) parts.push('吸血' + Math.round(affixes.lifeDrainChance*200) + '%' + (affixes.lifeDrainAmount ? '·' + (affixes.lifeDrainAmount*2) + 'HP' : ''));
                 if (affixes.thornsPercent) parts.push('反伤' + Math.round(affixes.thornsPercent*200) + '%');
                 if (affixes.dotBonus) parts.push('毒伤+' + (affixes.dotBonus*2));
+                if (affixes.poisonImmune) parts.push('免疫中毒');
                 if (affixes.bonusVsSwarm) parts.push('对寄生+' + Math.round(affixes.bonusVsSwarm*200) + '%');
 
                 preview.innerHTML = '<div class="txt-xs txt-gold">→ <b>' + nextName + '</b></div><div class="txt-xs txt-dim">' + parts.join(' · ') + '</div>';
