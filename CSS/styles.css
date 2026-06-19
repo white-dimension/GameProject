@@ -5,7 +5,7 @@
 :root {
     /* 1. 设计令牌 (Design Tokens) */
     --bg-deep:        #050508;
-    --bg-panel:       rgba(10, 15, 25, 0.85);
+    --bg-panel:       rgba(5, 5, 10, 0.8);
     --bg-card:        rgba(5, 5, 10, 0.8);
     --bg-modal:       rgba(5, 10, 15, 0.98);
     --border-dim:     #1a2a3a;
