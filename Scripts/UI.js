@@ -2434,7 +2434,7 @@ window.UISystem = (function () {
 
     // 罗马数字强制无衬线显示
     var _fmtRoman = function(str) {
-        return str.replace(/[ⅠⅡⅢ]/g, function(m) { return '<span style="font-family:sans-serif">' + m + '</span>'; });
+        return str.replace(/[ⅠⅡⅢ]/g, function(m) { return "<span style='font-family:sans-serif'>" + m + "</span>"; });
     };
 
     // --- 种族/专精通用的颜色和名称映射 ---
@@ -2498,7 +2498,7 @@ window.UISystem = (function () {
     // 构建完整tooltip文本
     var _buildCompTooltip = function(cid) {
         var d = _buildCompDetail(cid);
-        var tip = '<b>' + cid + '</b>';
+        var tip = '<b>' + _fmtRoman(cid) + '</b>';
         if (d.affixText) tip += '&#10;' + d.affixText;
         if (d.slotText) tip += '&#10;<b>可装备：</b>' + d.slotText;
         if (d.coatingText) tip += '&#10;<b>可用于涂抹：</b>' + d.coatingText;
