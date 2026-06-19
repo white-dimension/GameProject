@@ -101,6 +101,7 @@ window.UISystem = (function () {
 
         _bgVideo = _createBgVideo('../Assets/Backgrounds/explore.mp4');
         _bgBattleVideo = _createBgVideo('../Assets/Backgrounds/battle.mp4');
+        _bgBattleVideo.volume = 0.25;
         _bgVideos = [_bgVideo, _bgBattleVideo];
 
         // 显示/隐藏背景视频（尊重静音状态）
