@@ -698,6 +698,7 @@ window.UISystem = (function () {
             // 怪物卡片
             var card = _ce('div');
             card.className = 'monster-card';
+            card.setAttribute('data-monster-idx', idx);
             var cardBorder = dead ? 'var(--border-dim)' : mclr;
             var cardGlow = (isTarget && !dead && !isVictory) ? 'box-shadow:0 0 20px ' + (raceCardClrs[md.race] || '#ff4455') + ';' : '';
             var cardBg = (isBoss && !dead)
@@ -1772,11 +1773,26 @@ window.UISystem = (function () {
     }
 
     function showDamageFloat(val, color, targetId) {
-        var el = _ce('div', 'damage-float'); el.style.cssText = 'position:fixed;font-weight:bold;font-size:32px;color:' + color + ';z-index:4000;pointer-events:none;transition:all 0.8s ease-out;'; el.innerHTML = val;
-        var startX = (targetId === 'monster') ? window.innerWidth / 2 : 200;
-        var startY = (targetId === 'monster') ? window.innerHeight / 2 - 50 : 100;
+        var el = _ce('div', 'damage-float'); el.style.cssText = 'position:fixed;font-weight:bold;font-size:28px;color:' + color + ';z-index:4000;pointer-events:none;transition:all 0.8s ease-out;text-shadow:0 0 8px rgba(0,0,0,0.8);'; el.innerHTML = val;
+        var startX, startY;
+        if (targetId === 'monster') {
+            var bs = window.CombatSystem && window.CombatSystem.getBattleState ? window.CombatSystem.getBattleState() : null;
+            var targetIdx = bs ? bs.currentTarget : 0;
+            var card = document.querySelector('.monster-card[data-monster-idx="' + targetIdx + '"]');
+            if (card) {
+                var rect = card.getBoundingClientRect();
+                startX = rect.left + rect.width / 2 - 30;
+                startY = rect.top + 10;
+            } else {
+                startX = window.innerWidth / 2;
+                startY = window.innerHeight / 2 - 50;
+            }
+        } else {
+            startX = window.innerWidth / 2 - 80;
+            startY = 100;
+        }
         el.style.left = startX + 'px'; el.style.top = startY + 'px'; document.body.appendChild(el);
-        requestAnimationFrame(function() { el.style.opacity = '0'; el.style.transform = 'translateY(-80px) scale(1.5)'; });
+        requestAnimationFrame(function() { el.style.opacity = '0'; el.style.transform = 'translateY(-60px) scale(1.3)'; });
         setTimeout(function() { document.body.removeChild(el); }, 800);
     }
 
