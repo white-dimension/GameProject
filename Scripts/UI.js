@@ -8,7 +8,7 @@ window.UISystem = (function () {
     var CS = function () { return window.CombatSystem; };
     var GD = function () { return window.GameData; };
 
-    var _root, _mainView, _battleView, _viewport, _modalOverlay, _msgOverlay, _juiceContainer;
+    var _root, _mainView, _battleView, _viewport, _modalOverlay, _msgOverlay, _juiceContainer, _bgVideo;
     var _wakingUp = true, _showScan = false, _tasksDone = false, _tasksAnimating = false, _discoveryDone = false, _discoveryAnimating = false;
     var _isFirstLoad = true;
     var _introActive = false;
@@ -70,6 +70,16 @@ window.UISystem = (function () {
         _root = document.getElementById('app'); if (!_root) return;
         _root.innerHTML = '';
         _root.style.cssText = 'width:100vw;height:100vh;display:flex;flex-direction:column;position:relative;background:var(--bg-deep);';
+
+        // 全屏背景视频（探索场景）
+        _bgVideo = _ce('video');
+        _bgVideo.src = '../Assets/Backgrounds/explore.mp4';
+        _bgVideo.loop = true;
+        _bgVideo.muted = true;
+        _bgVideo.autoplay = true;
+        _bgVideo.playsInline = true;
+        _bgVideo.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;display:none;pointer-events:none;';
+        _root.appendChild(_bgVideo);
 
         var topBar = _ce('div', 'hud-top');
         topBar.style.cssText = 'position:relative;display:flex;flex-direction:row;justify-content:center;padding:8px 25px 4px 25px;min-height:60px;background:rgba(10,14,20,0.65);border-bottom:1px solid var(--border-dim);box-shadow: 0 4px 20px rgba(0,0,0,0.5);z-index:500;';
@@ -308,8 +318,9 @@ window.UISystem = (function () {
         }
 
         var inBattle = CS() && CS().isInBattle();
-        // 多场景背景切换（设置到root以覆盖顶栏底栏）
+        // 多场景背景切换：探索=视频，战斗/Boss=静态图
         if (inBattle) {
+            _bgVideo.style.display = 'none';
             var bs = CS().getBattleState();
             var isBoss = bs && bs.monsters && bs.monsters.some(function(mon) {
                 var md = GD().MONSTERS[mon.id];
@@ -317,7 +328,9 @@ window.UISystem = (function () {
             });
             _root.className = isBoss ? 'bg-nest' : 'bg-battle';
         } else {
-            _root.className = 'bg-explore';
+            _bgVideo.style.display = 'block';
+            _bgVideo.play().catch(function(){});
+            _root.className = '';
         }
         var taskEl = document.getElementById('ui-task-panel');
         if (taskEl) taskEl.style.display = inBattle ? 'none' : '';
@@ -1810,6 +1823,7 @@ window.UISystem = (function () {
 
     function _showIntro(gs) {
         _introActive = true;
+        _bgVideo.style.display = 'none';
         _root.className = 'bg-title';
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
@@ -1854,7 +1868,9 @@ window.UISystem = (function () {
         var gs = GS(); if (gs) { gs.player.introSeen = true; GameState.save(); }
         _modalOverlay.style.display = 'none';
         _wakingUp = true;
-        _root.className = 'bg-explore';
+        _bgVideo.style.display = 'block';
+        _bgVideo.play().catch(function(){});
+        _root.className = '';
         // 在用户点击手势上下文内激活音频，解除浏览器自动播放限制
         if (window.Sound) { window.Sound.playExploreBGM(); window.Sound.click(); }
         // [修复] 不再手动设置 _isFirstLoad = false，让 render() 统一处理启动序列
