@@ -318,7 +318,7 @@ window.GameState = (function () {
                 bossFailCount: 0 // 连败计数
             },
             inventory: { components: {}, potions: [], organs: [], organSyncLevels: {} },
-            bestiary: { scanned: [], killCount: {} },
+            bestiary: { scanned: [], killCount: {}, researchLevels: {} },
             meta: { version: '3.0.0', createdAt: Date.now(), lastSavedAt: null, gameTime: 0 }
         };
         gs.mapState.floorNodePool = _genFloorNodePool(1, gs);
@@ -367,12 +367,20 @@ window.GameState = (function () {
         if (p.masteryPoints) {
             var mData = data.MASTERIES;
             if (mData) {
+                // 检测同系叠加 (A+A+B)，触发 150% 增幅
+                var dupBonus = {};
+                if (p.masteries) {
+                    var raceCount = {};
+                    p.masteries.forEach(function(r) { if (r) raceCount[r] = (raceCount[r] || 0) + 1; });
+                    Object.keys(raceCount).forEach(function(r) { if (raceCount[r] >= 2) dupBonus[r] = true; });
+                }
                 Object.keys(p.masteryPoints).forEach(function (race) {
                 var pts = p.masteryPoints[race] || 0; if (pts <= 0 || !mData[race]) return;
+                var mult = dupBonus[race] ? 1.5 : 1.0;
                 var sp = mData[race].statsPerPoint;
-                p.hp_max += (sp.hp_max || 0) * pts; p.atk += (sp.atk || 0) * pts; p.def += (sp.def || 0) * pts;
-                p.process_max = Math.min(15, p.process_max + (sp.process_max || 0) * pts);
-                if (race === 'ember') { p.process_recovery += pts * 0.5; } // 机械专精每点+0.5恢复
+                p.hp_max += (sp.hp_max || 0) * pts * mult; p.atk += (sp.atk || 0) * pts * mult; p.def += (sp.def || 0) * pts * mult;
+                p.process_max = Math.min(15, p.process_max + (sp.process_max || 0) * pts * mult);
+                if (race === 'ember') { p.process_recovery += pts * mult * 0.5; }
             });
             }
         }
@@ -467,10 +475,15 @@ window.GameState = (function () {
     function upgradeOrganTier(slot) {
         var gs = getState(); if (!gs || !gs.player[slot]) return { success: false, error: '无效' };
         var cost = Math.ceil(5 * Math.pow(1.6, gs.player[slot].tier));
-        var inv = gs.inventory.components; var total = 0; Object.keys(inv).forEach(function (k) { total += (inv[k] || 0); });
-        if (total < cost) return { success: false, error: '材料不足，需' + cost + '碎片' };
+        var inv = gs.inventory.components;
+        var getWeight = function(cid) { if (cid.endsWith('Ⅲ')) return 4; if (cid.endsWith('Ⅱ')) return 3; if (cid.endsWith('Ⅰ')) return 2; return 1; };
+        var total = 0; Object.keys(inv).forEach(function (k) { total += (inv[k] || 0) * getWeight(k); });
+        if (total < cost) return { success: false, error: '材料不足，需' + cost + '碎片（当前加权合计' + total + '）' };
         var remaining = cost;
-        Object.keys(inv).forEach(function (k) { if (remaining <= 0) return; var take = Math.min(inv[k] || 0, remaining); inv[k] -= take; remaining -= take; });
+        Object.keys(inv).sort(function(a,b){ return getWeight(b) - getWeight(a); }).forEach(function (k) {
+            if (remaining <= 0) return;
+            while (inv[k] > 0 && remaining > 0) { inv[k] -= 1; remaining -= getWeight(k); }
+        });
         gs.player[slot].tier += 1; recalcPlayerStats(); save();
         return { success: true, slot: slot, newTier: gs.player[slot].tier, cost: cost };
     }
@@ -686,11 +699,16 @@ window.GameState = (function () {
     function upgradeOrganTierWithBP(slot) {
         var gs = getState(); if (!gs || !gs.player[slot]) return { success: false, error: '无效' };
         var cost = Math.ceil(5 * Math.pow(1.6, gs.player[slot].tier));
-        var inv = gs.inventory.components; var totalFrags = 0;
-        Object.keys(inv).forEach(function (k) { totalFrags += (inv[k] || 0); });
+        var inv = gs.inventory.components;
+        var getWeight = function(cid) { if (cid.endsWith('Ⅲ')) return 4; if (cid.endsWith('Ⅱ')) return 3; if (cid.endsWith('Ⅰ')) return 2; return 1; };
+        var totalFrags = 0;
+        Object.keys(inv).forEach(function (k) { totalFrags += (inv[k] || 0) * getWeight(k); });
         if (totalFrags + gs.player.bp < cost) return { success: false, error: '资源不足，需' + cost + '(碎片+' + totalFrags + ' BP' + gs.player.bp + ')' };
         var remaining = cost;
-        Object.keys(inv).forEach(function (k) { if (remaining <= 0) return; var take = Math.min(inv[k] || 0, remaining); inv[k] -= take; remaining -= take; });
+        Object.keys(inv).sort(function(a,b){ return getWeight(b) - getWeight(a); }).forEach(function (k) {
+            if (remaining <= 0) return;
+            while (inv[k] > 0 && remaining > 0) { inv[k] -= 1; remaining -= getWeight(k); }
+        });
         if (remaining > 0) { gs.player.bp -= remaining; }
         gs.player[slot].tier += 1; recalcPlayerStats(); save();
         return { success: true, slot: slot, newTier: gs.player[slot].tier, bpCost: Math.max(0, cost - totalFrags) };

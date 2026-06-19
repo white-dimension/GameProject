@@ -220,7 +220,7 @@ window.UISystem = (function () {
             // 弹窗打开时阻止战斗键盘操作
             if (_modalOverlay.style.display !== 'none' || (_msgOverlay && _msgOverlay.style.display !== 'none')) return;
             if (CS() && CS().isInBattle()) {
-                var gameKeys = ['1','2','3','4','5','6','0',' ','e','E'];
+                var gameKeys = ['1','2','3','4','5','6','0',' ','e','E','q','Q'];
                 if (gameKeys.indexOf(e.key) !== -1) {
                     e.preventDefault();
                     var btns = document.querySelectorAll('.btn-battle-card');
@@ -228,12 +228,16 @@ window.UISystem = (function () {
 
                     // 地下城 0 键特殊映射
                     if (e.key === '0' && bs4 && bs4.isDungeon && bs4.phase === 'victory' && (bs4._dungeonFloor || 0) < 3) {
-                        // 寻找“深入地下城”按钮
+                        // 寻找”深入地下城”按钮
                         var deepBtn = Array.from(btns).find(function(b) { return b.textContent.indexOf('深入地下城') !== -1; });
                         if (deepBtn) {
                             deepBtn.style.transform = 'translateY(2px)'; deepBtn.style.filter = 'brightness(0.8)';
                             setTimeout(function() { deepBtn.style.transform = ''; deepBtn.style.filter = ''; }, 100);
                         }
+                    } else if ((e.key === 'q' || e.key === 'Q') && bs4 && bs4._isTraining) {
+                        // 训练模式：Q 键退出
+                        var quitBtn2 = Array.from(btns).find(function(b) { return b.textContent.indexOf('退出训练') !== -1; });
+                        if (quitBtn2) { quitBtn2.click(); }
                     } else {
                         var endIdx = bs4 && bs4.phase === 'victory' ? btns.length - 1 : btns.length - 2;
                         var btnIdx = { '1': 0, '2': 1, '3': 2, '4': 3, '5': 4, '6': 5, ' ': Math.max(0, endIdx), 'e': Math.max(0, btns.length - 1), 'E': Math.max(0, btns.length - 1) }[e.key];
@@ -1009,11 +1013,20 @@ window.UISystem = (function () {
                 end.innerHTML = '<span class="txt-sm txt-bold">[空格] 结束回合</span><span class="txt-xs">回复 3 进程</span>';
                 end.onclick = function() { this.style.transform = 'translateY(2px)'; this.style.filter = 'brightness(0.8)'; setTimeout(function() { CS().endTurn(); }, 80); };
                 bar.appendChild(end);
-                // 逃跑按钮
-                var fleeBtn = _ce('button', 'btn btn-red btn-battle-card');
-                fleeBtn.innerHTML = '<span class="txt-sm txt-bold">[E] 紧急切断</span><span class="txt-xs">消耗 4 进程</span>';
-                fleeBtn.onclick = function() { this.style.transform = 'translateY(2px)'; this.style.filter = 'brightness(0.8)'; setTimeout(function() { CS().flee(); }, 80); };
-                bar.appendChild(fleeBtn);
+                // 逃跑按钮（训练模式不显示）
+                if (!bs._isTraining) {
+                    var fleeBtn = _ce('button', 'btn btn-red btn-battle-card');
+                    fleeBtn.innerHTML = '<span class="txt-sm txt-bold">[E] 紧急切断</span><span class="txt-xs">消耗 4 进程</span>';
+                    fleeBtn.onclick = function() { this.style.transform = 'translateY(2px)'; this.style.filter = 'brightness(0.8)'; setTimeout(function() { CS().flee(); }, 80); };
+                    bar.appendChild(fleeBtn);
+                }
+                // 训练模式：退出按钮
+                if (bs._isTraining) {
+                    var quitBtn = _ce('button', 'btn btn-blue btn-battle-card');
+                    quitBtn.innerHTML = '<span class="txt-sm txt-bold">[Q] 退出训练</span><span class="txt-xs">返回实验室</span>';
+                    quitBtn.onclick = function() { this.style.transform = 'translateY(2px)'; setTimeout(function() { CS().exitBattle(); }, 80); };
+                    bar.appendChild(quitBtn);
+                }
             }
         } else {
             var skillInfo = document.getElementById('ui-skill-info');
@@ -1921,7 +1934,7 @@ window.UISystem = (function () {
             chip.onclick = function() {
                 if (selectCount >= 3 && !selected[k]) return;
                 var cur = selected[k] || 0;
-                if (cur < count) { selected[k] = cur + 1; selectCount++; }
+                if (cur < count && selectCount < 3) { selected[k] = cur + 1; selectCount++; }
                 else { selectCount -= cur; delete selected[k]; }
                 chip.style.background = selected[k] ? 'rgba(255,213,79,0.15)' : 'var(--bg-card)';
                 chip.style.borderColor = selected[k] ? '#f57f17' : 'var(--border-dim)';
@@ -2092,6 +2105,7 @@ window.UISystem = (function () {
         head.style.cssText = 'padding:20px 30px;background:rgba(0,255,136,0.05);border-bottom:1px solid var(--accent-green);display:flex;justify-content:space-between;align-items:center;';
         head.innerHTML = '<div class="txt-md txt-green txt-bold">[ 基因重组实验室 ]</div>' +
                          '<div style="display:flex;align-items:center;gap:10px;"><span class="txt-xs txt-gold" style="margin-right:20px;line-height:1;">基因点数: ' + p.bp + '</span>' +
+                         '<button class="btn btn-red btn-sm" onclick="UISystem.closeModal();CombatSystem.startTraining();">训练场</button>' +
                          '<button class="btn btn-blue btn-sm" onclick="UISystem.closeModal()">关闭</button></div>';
         box.appendChild(head);
         // 左侧固定说明栏
@@ -2121,7 +2135,8 @@ window.UISystem = (function () {
         ['predatory_organ', 'chitin_epidermis', 'gland_core'].forEach(function(s) {
             var d = p[s];
             var cost = Math.ceil(5 * Math.pow(1.6, d.tier));
-            var canUpgrade = Object.values(inv).reduce(function(a,b){return a+b;},0) >= cost;
+            var getWeight2 = function(cid) { if (cid.endsWith('Ⅲ')) return 4; if (cid.endsWith('Ⅱ')) return 3; if (cid.endsWith('Ⅰ')) return 2; return 1; };
+            var canUpgrade = Object.keys(inv).reduce(function(a,k){ return a + (inv[k] * getWeight2(k)); }, 0) >= cost;
             var row = _ce('div');
             row.style.cssText = 'padding:14px;background:rgba(0,255,136,0.03);border:1px solid rgba(0,255,136,0.1);border-radius:6px;display:flex;flex-direction:column;gap:10px;';
             var slots = d.component_slots || [null, null];
@@ -2168,7 +2183,7 @@ window.UISystem = (function () {
                     var tipText = "<b style='color:var(--accent-green)'>器官进阶：第 " + d.tier + " 阶 → " + nextTier + " 阶</b>&#10;";
                     tipText += "<b>预估收益：</b><span style='color:var(--accent-green)'>" + bonusDesc + "</span>&#10;";
                     tipText += "<b>进阶消耗：</b>任意组件 ×" + cost + "&#10;";
-                    tipText += "<b>当前库存：</b>共 " + Object.values(inv).reduce(function(a,b){return a+b;},0) + " 个";
+                    tipText += "<b>当前库存：</b>共 " + Object.keys(inv).reduce(function(a,k){ return a + (inv[k] * getWeight2(k)); }, 0) + " (加权)";
                     if (!canUpgrade) tipText += "&#10;<b style='color:var(--accent-red)'>材料不足，无法进阶</b>";
 
                     return '<button class="btn btn-green btn-sm help-tip" ' + (canUpgrade ? '' : 'disabled') + ' data-tip="' + tipText + '" onclick="GameState.upgradeOrganTier(\'' + s + '\'); UISystem.showReorganizeModal();">进阶</button>';
@@ -2194,7 +2209,7 @@ window.UISystem = (function () {
         potSection.style.cssText = 'padding:15px 20px;background:rgba(156,39,176,0.03);border:1px solid rgba(156,39,176,0.15);border-radius:6px;';
         var potHTML = '<div class="txt-xs txt-bold" style="color:var(--accent-purple);margin-bottom:10px;">> 生物炼金釜 — 魔药炼制（最多携带3瓶）</div>';
         potHTML += '<div style="display:flex;flex-wrap:wrap;gap:8px;">';
-        var potIds = ['POT_BERSERK', 'POT_ANTIDOTE', 'POT_SHIELD_CORE'];
+        var potIds = ['POT_BERSERK', 'POT_ANTIDOTE', 'POT_SHIELD_CORE', 'POT_HEAL', 'POT_DEFENSE', 'POT_RAM'];
         var hasCrafted = false;
         potIds.forEach(function(pid) {
             var pt = potData[pid]; if (!pt) return;
@@ -2271,9 +2286,9 @@ window.UISystem = (function () {
         var mutationHTML = '<div class="txt-xs txt-blue txt-bold" style="margin-bottom:10px;">> 高阶基因突变（消耗基因点数永久提升基础序列）</div>';
         mutationHTML += '<div style="display:flex;flex-wrap:wrap;gap:8px;">';
         var muts = [
-            { type: 'atk', name: '攻击突变', cost: 500, val: '+1', icon: 'icon-atk' },
-            { type: 'def', name: '防御突变', cost: 400, val: '+1', icon: 'icon-def' },
-            { type: 'hp', name: '生命突变', cost: 300, val: '+5', icon: 'icon-health' }
+            { type: 'atk', name: '攻击突变', cost: 1500, val: '+5', icon: 'icon-atk' },
+            { type: 'def', name: '防御突变', cost: 1200, val: '+5', icon: 'icon-def' },
+            { type: 'hp', name: '生命突变', cost: 1000, val: '+25', icon: 'icon-health' }
         ];
         muts.forEach(function(m) {
             var canMut = p.bp >= m.cost;

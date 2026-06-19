@@ -194,7 +194,7 @@ window.CombatSystem = (function () {
                 }
                 _battleState._noProcessRecovery = true;
             }
-            else if (pot.id === 'POT_SHIELD_CORE') { _battleState.shieldAmount = (_battleState.shieldAmount || 0) + Math.ceil(p.hp_max * 0.4 * decayFactor); }
+            else if (pot.id === 'POT_SHIELD_CORE') { _battleState.shieldAmount = (_battleState.shieldAmount || 0) + Math.ceil(p.hp_max * 0.4 * decayFactor); _battleState._toxResistDebuff = true; }
             else if (pot.id === 'POT_HEAL') { p.hp = Math.min(p.hp_max, p.hp + Math.ceil(p.hp_max * 0.4 * decayFactor)); _battleState.playerStatus['defDebuff'] = 3; _log('<span style="color:var(--accent-green)">凝血再生！防御暂时下降。</span>'); window.UISystem.showDamageFloat('+' + Math.ceil(p.hp_max * 0.4), 'var(--accent-green)', 'player'); }
             else if (pot.id === 'POT_DEFENSE') { _battleState.playerStatus['defBoost'] = 3; _battleState.playerStatus['atkDebuff'] = 3; _log('<span style="color:var(--accent-blue)">表皮硬化！防御提升，攻击下降。</span>'); }
             else if (pot.id === 'POT_RAM') { _battleState.playerProcess = Math.min(GS().player.process_max, _battleState.playerProcess + 5); GS().player.process = _battleState.playerProcess; p.toxicity += 10; _log('<span style="color:var(--accent-green)">进程回复 5 点，毒性 +10。</span>'); }
@@ -510,6 +510,8 @@ window.CombatSystem = (function () {
 
     function _monsterAction() {
         if (!_battleState || _battleState.phase !== 'monster_turn') return;
+        // 训练模式：人偶不行动，直接切回玩家回合
+        if (_battleState._isTraining) { _log('<span class="txt-dim">训练人偶待命中...</span>'); _finishMonsterTurn(); return; }
         var p = GS().player;
 
         var alive = _getAliveMonsters();
@@ -518,9 +520,9 @@ window.CombatSystem = (function () {
         // 处理毒性（跳过第1回合，World.js 已扣过步进伤害）
         // 跳过第1回合：World.js 已扣过步进伤害（_battleState.turn 已增至2，故 > 1 才扣）
         if (p.toxicity > 50 && _battleState.turn > 1) {
-            var od = Math.ceil(p.hp_max * 0.02);
+            var od = Math.ceil(p.hp_max * 0.02 * (_battleState._toxResistDebuff ? 1.2 : 1.0));
             p.hp = Math.max(0, p.hp - od);
-            _log('<span style="color:var(--accent-purple)">[基因自溶] 体内毒素爆发，损失 ' + od + ' HP。</span>');
+            _log('<span style="color:var(--accent-purple)">[基因自溶] 体内毒素爆发，损失 ' + od + ' HP。' + (_battleState._toxResistDebuff ? '（毒素抗性削弱）' : '') + '</span>');
         }
 
         _log('<span style="color:var(--accent-orange)">>>> 第 ' + _battleState.turn + ' 回合开始。</span>');
@@ -782,6 +784,14 @@ window.CombatSystem = (function () {
         if (_battleState.dualKey === 'ember+ember') {
             if (window.Sound) window.Sound.electric();
             var alive2 = _getAliveMonsters();
+            // 清除所有怪物闪避状态
+            for (var i2 = 0; i2 < alive2.length; i2++) {
+                if (alive2[i2].status && alive2[i2].status['dodging']) {
+                    delete alive2[i2].status['dodging'];
+                    _log('<span style="color:var(--accent-blue)">【格式化电弧】清除' + alive2[i2].name + '闪避防御。</span>');
+                }
+            }
+            // 连锁闪电（最多2个目标）
             for (var i2 = 0; i2 < alive2.length && i2 < 2; i2++) {
                 var lDmg = Math.ceil(GS().player.def * 1.2);
                 alive2[i2].hp = Math.max(0, alive2[i2].hp - lDmg);
@@ -993,7 +1003,14 @@ window.CombatSystem = (function () {
     }
 
     function _applyGlobalPassives(p) {
-        var mk = (p.masteries[0] && p.masteries[1]) ? [p.masteries[0], p.masteries[1]].sort().join('+') : '';
+        var mk = '';
+        var activeRaces = (p.masteries || []).filter(function(r){return r;});
+        if (activeRaces.length >= 2) {
+            // 多槽时选取优先级最高的双专精组合：异变 > 寄生 > 机械
+            var racePriority = { mutant: 1, swarm: 2, ember: 3 };
+            activeRaces.sort(function(a,b){ return (racePriority[a]||99) - (racePriority[b]||99); });
+            mk = [activeRaces[0], activeRaces[1]].sort().join('+');
+        }
         if (!mk) return;
         _battleState.dualKey = mk;
         var dc = GD().DUAL_CLASSES[mk];
@@ -1038,11 +1055,22 @@ window.CombatSystem = (function () {
             gs.mapState.bossDefeated = true;
             gs.mapState.portalUnlocked = true;
         }
+        var wasTraining = _battleState && _battleState._isTraining;
         _log('<span style="color:var(--accent-green)">神经链路重新校准，脱离战斗模式。</span>'); window.UISystem.render();
         _battleState = null;
-        window.WorldSystem.generateNextPaths(); window.UISystem.render();
-        if (window.Sound) window.Sound.playExploreBGM();
-        window.GameState.save();
+        if (!wasTraining) {
+            window.WorldSystem.generateNextPaths(); window.UISystem.render();
+            if (window.Sound) window.Sound.playExploreBGM();
+            window.GameState.save();
+        } else {
+            window.UISystem.render();
+        }
+    }
+
+    function startTraining() {
+        if (_battleState) return;
+        startBattle(['TRAINING_DUMMY_MUTANT', 'TRAINING_DUMMY_SWARM', 'TRAINING_DUMMY_EMBER'], {});
+        if (_battleState) _battleState._isTraining = true;
     }
 
     function dungeonDeep() {
@@ -1155,7 +1183,7 @@ window.CombatSystem = (function () {
         startBattle: startBattle,
         playCard: playCard,
         endTurn: endTurn,
-        isInBattle: isInBattle, exitBattle: exitBattle,
+        isInBattle: isInBattle, exitBattle: exitBattle, startTraining: startTraining,
         getBattleState: getBattleState,
         flee: flee, selectTarget: selectTarget, dungeonDeep: dungeonDeep,
         openBossChest: openBossChest

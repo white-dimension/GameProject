@@ -332,6 +332,27 @@ window.GameData = (function () {
             weakness: '机械终极体。护盾未破时一切物理和反伤对其无效。战前装配双专精【电子真菌】触发电荷偏转免进程，囤积上限进程后连续打出腺体脉冲爆破撕裂护盾，方可融毁核心。',
             drop: { type: 'organ', id: '高能电泳核', chance: 1.0 },
             bpReward: [100, 100]
+        },
+        TRAINING_DUMMY_MUTANT: {
+            id: 'TRAINING_DUMMY_MUTANT',
+            name: '训练人偶·异变',
+            hp: 9999, atk: 0, def: 1,
+            race: 'mutant', tier: 'common',
+            intents: [{ type: 'dummy', label: '待命中...' }]
+        },
+        TRAINING_DUMMY_SWARM: {
+            id: 'TRAINING_DUMMY_SWARM',
+            name: '训练人偶·寄生',
+            hp: 9999, atk: 0, def: 1,
+            race: 'swarm', tier: 'common',
+            intents: [{ type: 'dummy', label: '待命中...' }]
+        },
+        TRAINING_DUMMY_EMBER: {
+            id: 'TRAINING_DUMMY_EMBER',
+            name: '训练人偶·机械',
+            hp: 9999, atk: 0, def: 1,
+            race: 'ember', tier: 'common',
+            intents: [{ type: 'dummy', label: '待命中...' }]
         }
     };
 
@@ -447,7 +468,7 @@ window.GameData = (function () {
             name: '离子过载充能液',
             toxicity: 20,
             effect: { type: 'shield', value: 0.40, desc: '获得相当于最大生命值 40% 的科技护盾' },
-            sideEffect: { type: 'none', desc: '无副作用' }
+            sideEffect: { type: 'toxResistDebuff', desc: '护盾存在期间，毒素抗性降低 20%' }
         },
         POT_HEAL: {
             id: 'POT_HEAL',
@@ -654,7 +675,7 @@ window.GameData = (function () {
                     label: '暴力抢劫',
                     desc: '不消耗基因点数，获得 1 瓶强效魔药，但毒性会大幅增加 (+30)。',
                     action: function(gs) {
-                        var pots = ['POT_BERSERK', 'POT_ANTIDOTE', 'POT_SHIELD_CORE'];
+                        var pots = ['POT_BERSERK', 'POT_ANTIDOTE', 'POT_SHIELD_CORE', 'POT_HEAL', 'POT_DEFENSE', 'POT_RAM'];
                         var pid = pots[Math.floor(Math.random() * pots.length)];
                         gs.inventory.potions.push(pid);
                         gs.player.toxicity += 30;
