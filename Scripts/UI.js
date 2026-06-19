@@ -1431,7 +1431,7 @@ window.UISystem = (function () {
         var organHTML = '<div style="padding:15px 20px;background:rgba(0,255,136,0.03);border:1px solid rgba(0,255,136,0.15);border-radius:6px;display:flex;flex-direction:column;gap:10px;">' +
             '<div class="txt-sm txt-green txt-bold">> 已挂载器官状态</div>';
         var organNames = _ORGAN_NAMES;
-        var organClrs2 = { '暴君核心': { hex: '#ff6b4a', bg: 'rgba(255,107,74,0.08)', bd: 'rgba(255,107,74,0.2)' }, '蜂后髓核': { hex: '#9acd32', bg: 'rgba(154,205,50,0.08)', bd: 'rgba(154,205,50,0.2)' }, '高能电泳核': { hex: '#4ab8ff', bg: 'rgba(74,184,255,0.08)', bd: 'rgba(74,184,255,0.2)' } };
+        var organClrs2 = _BOSS_ORGAN_COLORS;
         ['predatory_organ', 'chitin_epidermis', 'gland_core'].forEach(function(s) {
             var d = p[s];
             var ocl = organClrs2[d.equipped] || { hex: 'var(--accent-green)', bg: 'rgba(0,255,136,0.08)', bd: 'rgba(0,255,136,0.2)' };
@@ -2331,7 +2331,7 @@ window.UISystem = (function () {
             body.innerHTML = '<div class="txt-xs txt-dim txt-center">暂无可用器官</div>';
         } else {
             var bos = GD().BOSS_ORGANS || {};
-            var oClrs = { '暴君核心': { hex: '#ff6b4a', bg: 'rgba(255,107,74,0.1)', bd: 'rgba(255,107,74,0.2)' }, '蜂后髓核': { hex: '#9acd32', bg: 'rgba(154,205,50,0.1)', bd: 'rgba(154,205,50,0.2)' }, '高能电泳核': { hex: '#4ab8ff', bg: 'rgba(74,184,255,0.1)', bd: 'rgba(74,184,255,0.2)' } };
+            var oClrs = _BOSS_ORGAN_COLORS;
             var filtered = organs.filter(function(oid) { var bo = bos[oid]; return bo && bo.slotType === slot; });
             if (filtered.length === 0) {
                 body.innerHTML = '<div class="txt-xs txt-dim txt-center">没有适配该插槽的器官</div>';
@@ -2590,7 +2590,7 @@ window.UISystem = (function () {
         var body = _ce('div');
         body.style.cssText = 'padding:30px;display:flex;flex-direction:column;gap:20px;overflow-y:auto;flex:1;';
         var organNames = _ORGAN_NAMES;
-        var _organColors = { '暴君核心': { hex: '#ff6b4a', bg: 'rgba(255,107,74,0.12)', bd: 'rgba(255,107,74,0.25)' }, '蜂后髓核': { hex: '#9acd32', bg: 'rgba(154,205,50,0.12)', bd: 'rgba(154,205,50,0.25)' }, '高能电泳核': { hex: '#4ab8ff', bg: 'rgba(74,184,255,0.12)', bd: 'rgba(74,184,255,0.25)' }, _default: { hex: 'var(--accent-green)', bg: 'rgba(0,255,136,0.08)', bd: 'rgba(0,255,136,0.2)' } };
+        var _organColors = _BOSS_ORGAN_COLORS;
         var inv = gs.inventory.components;
         var comps = GD().COMPONENTS || {};
         var organBlock = _ce('div');
@@ -2800,14 +2800,14 @@ window.UISystem = (function () {
 
         // 器官背包
         var bos3 = GD().BOSS_ORGANS || {};
-        var organColors3 = { '暴君核心': { hex:'#ff6b4a', bg:'rgba(255,107,74,0.08)', bd:'rgba(255,107,74,0.2)' }, '蜂后髓核': { hex:'#9acd32', bg:'rgba(154,205,50,0.08)', bd:'rgba(154,205,50,0.2)' }, '高能电泳核': { hex:'#4ab8ff', bg:'rgba(74,184,255,0.08)', bd:'rgba(74,184,255,0.2)' } };
+        var organColors3 = _BOSS_ORGAN_COLORS;
         if (gs.inventory.organs.length > 0) {
             var organInvRow = _ce('div');
             organInvRow.style.cssText = 'padding:12px 16px;background:rgba(0,255,136,0.02);border:1px solid rgba(0,255,136,0.1);border-radius:6px;margin-bottom:4px;';
             var orgHTML = '<div class="txt-xs txt-green txt-bold" style="margin-bottom:6px;">> 突变器官（' + gs.inventory.organs.length + '个）</div><div style="display:flex;flex-wrap:wrap;gap:8px;">';
             gs.inventory.organs.forEach(function(oid) {
-                var oc3 = organColors3[oid] || { hex:'var(--accent-green)', bg:'rgba(0,255,136,0.06)', bd:'rgba(0,255,136,0.15)' };
-                var bo3 = bos3[oid]; var slotName3 = bo3 ? (bo3.slotType==='predatory_organ'?'捕食器官':bo3.slotType==='gland_core'?'腺体核心':'生物表皮') : '未知';
+                var oc3 = _getOrganColor(oid);
+                var bo3 = bos3[oid]; var slotName3 = bo3 ? (_ORGAN_NAMES[bo3.slotType] || '未知') : '未知';
                 var oTip = '<b style=color:' + (organColors3[oid]||{}).hex + '>' + oid + '</b>&#10;<b>' + (bo3 ? bo3.skillName : '') + '</b>&#10;<span style=color:var(--accent-green)>消耗 ' + (bo3?bo3.skillCost:'') + ' 进程</span>' + (bo3 && bo3.skillEffect ? '&#10;<span style=color:var(--accent-red)>伤害 ×' + (bo3.skillEffect.baseMultiplier || '?') + '</span>' + (bo3.skillEffect.armorPenetration ? ' | <span style=color:var(--accent-blue)>破甲' + Math.round(bo3.skillEffect.armorPenetration*100) + '%</span>' : '') + (bo3.skillEffect.chainTargets ? ' | <span style=color:var(--accent-blue)>链' + bo3.skillEffect.chainTargets + '目标</span>' : '') + (bo3.skillEffect.summonCount ? ' | <span style=color:var(--accent-yellow)>召唤' + bo3.skillEffect.summonCount + '只</span>' : '') : '') + '&#10;可装备于：' + slotName3;
                 orgHTML += '<span class="help-tip" style="padding:4px 10px;font-size:13px;background:' + oc3.bg + ';border:1px solid ' + oc3.bd + ';border-radius:4px;color:' + oc3.hex + ';" data-tip="' + oTip + '">' + oid + '</span>';
             });
