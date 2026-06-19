@@ -76,7 +76,7 @@ window.UISystem = (function () {
         _root.appendChild(topBar);
 
         _viewport = _ce('div', 'main-viewport');
-        _viewport.style.cssText = 'flex:1;position:relative;display:flex;overflow:hidden;background:radial-gradient(circle at center, #0d1117, #050508);';
+        _viewport.style.cssText = 'flex:1;position:relative;display:flex;overflow:hidden;background:radial-gradient(circle at center, rgba(13,17,23,0.5), rgba(5,5,8,0.25));';
         _root.appendChild(_viewport);
 
         // 左侧面板（任务 + 日志）— 必须排在 _mainView 前面
