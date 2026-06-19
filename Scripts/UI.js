@@ -410,8 +410,8 @@ window.UISystem = (function () {
             '</div>' +
             '</div>' +
             '<div class="hud-col hud-col-r" style="display:flex;gap:6px;align-items:center;">' +
-            '<button class="btn btn-sm" id="btn-sound" onclick="UISystem.toggleSound()" style="width:32px;padding:0;">' +
-            (window.Sound && window.Sound.isMuted() ? '<span style="text-decoration:line-through;opacity:0.4;">♪</span>' : '♪') +
+            '<button class="btn btn-blue btn-sm" id="btn-sound" onclick="UISystem.toggleSound()">' +
+            (window.Sound && window.Sound.isMuted() ? 'M' : '♪') +
             '</button>' +
             '<button class="btn btn-blue btn-sm" onclick="UISystem.showHelpPanel()">?</button>' +
             '</div>';
@@ -1914,7 +1914,7 @@ window.UISystem = (function () {
         var muted = window.Sound && window.Sound.toggleMute();
         var btn = document.getElementById('btn-sound');
         if (btn) {
-            btn.innerHTML = muted ? '<span style="text-decoration:line-through;opacity:0.4;">♪</span>' : '♪';
+            btn.innerHTML = muted ? 'M' : '♪';
         }
         if (_bgVideo) {
             _bgVideo.muted = muted;
