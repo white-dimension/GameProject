@@ -38,12 +38,12 @@ window.Sound = (function () {
     function electric()  { _playRand(['PM_SD_UI_MAGIC_CONFIRM_2.wav','PM_SD_UI_MAGIC_CONFIRM_4.wav','PM_SD_UI_MAGIC_CONFIRM_6.wav','PM_SD_UI_MAGIC_CONFIRM_8.wav','PM_SD_UI_MAGIC_CONFIRM_12.wav'], 1.0); }
     function victory() {
         if (!_enabled) return;
-        var a = _load('victory.mp3'); a.volume = 0.5; a.currentTime = 0;
+        var a = _load('victory.mp3'); a.volume = 0.25; a.currentTime = 0;
         a.play().catch(function(){});
         if (a._fadeInterval) { clearInterval(a._fadeInterval); }
         var fade = setInterval(function() {
             if (a.volume > 0.02) a.volume = Math.max(0, a.volume - 0.02);
-            else { clearInterval(fade); a.pause(); a.volume = 0.5; a._fadeInterval = null; }
+            else { clearInterval(fade); a.pause(); a.volume = 0.25; a._fadeInterval = null; }
         }, 180);
         a._fadeInterval = fade;
     }
