@@ -64,6 +64,29 @@
 - 切换怪物目标触发种族专属音效
 - 胜利音效 0.25，怪物音效 0.5，按键音效 0.5
 
+### 涂层+魔药+器官自选组件
+- 实验室新增基因涂层涂抹区：3种涂层一键涂抹，显示效果/种族/消耗
+- _showComponentSelectModal 通用组件选择弹窗（魔药炼制/涂层涂抹共用）
+- 炼制/涂抹改为自选消耗哪些碎片，可保留ⅠⅡⅢ高阶组件
+- craftPotionWithSelection / applyCoatingWithSelection 精确消耗
+- 器官进阶 _showOrganUpgradePicker 自选加权组件
+
+### 通用模板重构
+- _RACE_COLORS/_RACE_NAMES/_RACE_ICONS/_ORGAN_NAMES 全局共享，消除12处重复
+- _buildPotionDetail / _buildMasteryDetail / _buildDualClassDetail 模板函数
+- 专精切换按钮统一尺寸，档案空槽改"空槽·未嵌入"
+- 合成/进阶确认按钮统一方形圆角右对齐，按钮间距统一8px
+
+### 罗马数字字体修复
+- _fmtRoman() 包裹ⅠⅡⅢ为sans-serif span
+- tooltip/操作手册弹窗全局 sans-serif
+- 去掉不可靠的 CSS @font-face unicode-range 方案
+
+### UI细节
+- Boss卡片立绘做背景 + linear-gradient遮罩
+- 怪物伤害数字定位到对应卡牌上方(data-monster-idx)
+- 路径卡片hover微调：同色底0.8→0.7，绿色仅边框
+
 ---
 
 ## V2.0 — 2026-06-19 🎮 正式版本
