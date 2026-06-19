@@ -239,7 +239,7 @@ window.UISystem = (function () {
             if (t._tip) return;
             var tip = document.createElement('div');
             tip.className = 'help-popup';
-            tip.innerHTML = '<div style="background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;padding:10px 14px;line-height:1.7;max-width:280px;font-size:13px;color:var(--text-dim);word-wrap:break-word;white-space:normal;">' + (t.getAttribute('data-tip') || '').replace(/\n/g, '<br>') + '</div>';
+            tip.innerHTML = '<div style="background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;padding:10px 14px;line-height:1.7;max-width:280px;font-size:13px;color:var(--text-dim);word-wrap:break-word;white-space:normal;font-family:sans-serif;">' + (t.getAttribute('data-tip') || '').replace(/\n/g, '<br>') + '</div>';
             tip.style.cssText = 'position:fixed;z-index:5000;pointer-events:none;white-space:normal;visibility:hidden;';
             document.body.appendChild(tip);
             t._tip = tip;
