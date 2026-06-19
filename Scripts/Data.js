@@ -353,6 +353,125 @@ window.GameData = (function () {
             hp: 9999, atk: 0, def: 1,
             race: 'ember', tier: 'common',
             intents: [{ type: 'dummy', label: '待命中...' }]
+        },
+        // —— v2.1 新怪 ——
+        MON_CH2_WORM: {
+            id: 'MON_CH2_WORM', name: '腐肉蠕虫',
+            race: RACE.SWARM, tier: 'common', level: 2,
+            hp: 35, atk: 6, def: 1,
+            intents: [
+                { type: 'physical', label: '<span class="icon icon-leeching-worm"></span> 酸液喷射', value: 6, desc: '酸液腐蚀，造成 6 点伤害并附带 2 回合中毒', poison: { duration: 2, damage: 3 } }
+            ],
+            weakness: '攻低血薄，中毒可被 POT_ANTIDOTE 解除。',
+            drop: { type: 'component', id: '毒囊材料', chance: 0.6 },
+            bpReward: [2, 5]
+        },
+        MON_CH2_CAMERA: {
+            id: 'MON_CH2_CAMERA', name: '监控摄像头',
+            race: RACE.EMBER, tier: 'common', level: 2,
+            hp: 28, atk: 7, def: 3,
+            intents: [
+                { type: 'scan', label: '<span class="icon icon-radar-sweep"></span> 扫描标记', value: 0, desc: '扫描玩家弱点，下回合敌人伤害 +30%', ramPenalty: 1 }
+            ],
+            weakness: '优先秒掉，避免它给其他怪物增益。涂电磁短路涂层克机械。',
+            drop: { type: 'component', id: '纳米破片', chance: 0.5 },
+            bpReward: [2, 5]
+        },
+        MON_CH2_GROWTH: {
+            id: 'MON_CH2_GROWTH', name: '骨骼增生体',
+            race: RACE.MUTANT, tier: 'common', level: 3,
+            hp: 60, atk: 10, def: 8,
+            intents: [
+                { type: 'shield', label: '<span class="icon icon-magic-shield"></span> 骨甲再生', value: 8, desc: '增生骨板，获得 8 点额外防御' }
+            ],
+            weakness: '高防低攻，腺体脉冲连招可无视其护甲。',
+            drop: { type: 'component', id: '变异组织', chance: 0.5 },
+            bpReward: [3, 6]
+        },
+        MON_CH2_PARASITE: {
+            id: 'MON_CH2_PARASITE', name: '神经寄生虫',
+            race: RACE.SWARM, tier: 'common', level: 3,
+            hp: 40, atk: 9, def: 2,
+            intents: [
+                { type: 'physical', label: '<span class="icon icon-leeching-worm"></span> 神经穿刺', value: 9, desc: '精准穿刺神经节点，造成 9 点伤害', bleed: { duration: 3, damage: 3 } },
+                { type: 'stun', label: '<span class="icon icon-time-trap"></span> 神经麻痹', value: 0, desc: '注入神经毒素，玩家下回合技能消耗 +2' }
+            ],
+            weakness: '攻速快但血薄，生物表皮护盾可有效格挡。',
+            drop: { type: 'component', id: '毒囊材料', chance: 0.5 },
+            bpReward: [3, 8]
+        },
+        MON_CH2_VULTURE: {
+            id: 'MON_CH2_VULTURE', name: '数据秃鹫',
+            race: RACE.EMBER, tier: 'common', level: 4,
+            hp: 45, atk: 11, def: 4,
+            intents: [
+                { type: 'physical', label: '<span class="icon icon-targeting"></span> 精确狙击', value: 11, desc: '高精度电磁脉冲，造成 11 点穿甲伤害', armorPen: 0.3 }
+            ],
+            weakness: '穿甲攻击无视部分防御，需堆高生命上限硬接。',
+            drop: { type: 'component', id: '高压电缆碎片', chance: 0.4 },
+            bpReward: [5, 10]
+        },
+        MON_CH2_GHOST: {
+            id: 'MON_CH2_GHOST', name: '数据幽灵',
+            race: RACE.EMBER, tier: 'elite', level: 6,
+            hp: 110, atk: 18, def: 6,
+            dodgeChance: 0.3,
+            intents: [
+                { type: 'electric', label: '<span class="icon icon-lightning-arc"></span> 电弧冲击', value: 18, desc: '化成电弧穿透防御，造成 18 点电离伤害', ignoreDef: true },
+                { type: 'stun', label: '<span class="icon icon-time-trap"></span> 相位干扰', value: 0, desc: '短暂进入亚空间，完全闪避下次攻击', dodge: true }
+            ],
+            weakness: '闪避高但血少，终焉母核被动可清除闪避。腺体脉冲崩解连招对其极其有效。',
+            drop: { type: 'component', id: '高压电缆碎片', chance: 0.5 },
+            bpReward: [20, 30]
+        },
+        MON_CH2_BEAST: {
+            id: 'MON_CH2_BEAST', name: '毒雾巨兽',
+            race: RACE.MUTANT, tier: 'elite', level: 7,
+            hp: 180, atk: 22, def: 12,
+            intents: [
+                { type: 'physical', label: '<span class="icon icon-fanged-skull"></span> 剧毒撕咬', value: 22, desc: '注入高浓度毒液，造成 22 点伤害 + 3 回合猛毒', poison: { duration: 3, damage: 6 } },
+                { type: 'physical', label: '<span class="icon icon-hazard-sign"></span> 毒雾喷吐', value: 14, desc: '全场 AOE，对所有目标造成 14 点毒素伤害', aoe: true }
+            ],
+            weakness: '体型巨大但出招极慢，可在蓄力期间用神经阻断打断。涂细胞壁溶解酶涂层收益极高。',
+            drop: { type: 'component', id: '异变肌肉束', chance: 0.5 },
+            bpReward: [25, 35]
+        },
+        MON_CH2_BROODMOTHER: {
+            id: 'MON_CH2_BROODMOTHER', name: '腐化母体',
+            race: RACE.SWARM, tier: 'elite', level: 7,
+            hp: 150, atk: 16, def: 10,
+            intents: [
+                { type: 'physical', label: '<span class="icon icon-egg-clutch"></span> 孵化突袭', value: 20, desc: '释放体内寄生幼虫，造成 20 点伤害', spawn: { count: 1, id: 'MON_CH1_LARVA' } },
+                { type: 'shield', label: '<span class="icon icon-magic-shield"></span> 茧壳防御', value: 15, desc: '分泌生物质获得 15 点护盾' }
+            ],
+            weakness: '会召唤幼虫群，优先使用腺体脉冲 AOE 清理。涂生物自溶催化剂免疫毒素反噬。',
+            drop: { type: 'component', id: '活性孢子', chance: 0.5 },
+            bpReward: [25, 40]
+        },
+        MON_CH2_CANNON: {
+            id: 'MON_CH2_CANNON', name: '脉冲炮台',
+            race: RACE.EMBER, tier: 'elite', level: 8,
+            hp: 130, atk: 26, def: 15,
+            intents: [
+                { type: 'charge', label: '<span class="icon icon-targeting"></span> 充能锁定', value: 35, desc: '蓄力充能 1 回合后释放高能脉冲，造成 35 点真实伤害', chargeTurns: 1 }
+            ],
+            weakness: '蓄力期间静止不动，防御力翻倍但可用腺体脉冲崩解连招破甲。逃命吧。',
+            drop: { type: 'component', id: '纳米破片', chance: 0.6 },
+            bpReward: [30, 45]
+        },
+        MON_CH2_ABOMINATION: {
+            id: 'MON_CH2_ABOMINATION', name: '变异憎恶',
+            race: RACE.MUTANT, tier: 'elite', level: 8,
+            hp: 240, atk: 30, def: 18,
+            thornsPercent: 0.15,
+            bleedImmune: true,
+            intents: [
+                { type: 'physical', label: '<span class="icon icon-spiked-mace"></span> 毁灭重击', value: 30, desc: '造成 30 点物理伤害，附带 15% 反伤' },
+                { type: 'enrage', label: '<span class="icon icon-enrage"></span> 基因狂暴', value: 30, desc: 'HP 低于 50% 时触发狂怒，攻击力翻倍' }
+            ],
+            weakness: '反伤极高，建议挂毒后用腺体脉冲远程引爆吸血对抗。忌用捕食打击正面硬刚。',
+            drop: { type: 'component', id: '变异组织', chance: 0.7 },
+            bpReward: [35, 50]
         }
     };
 
@@ -406,6 +525,46 @@ window.GameData = (function () {
             affixes: {
                 thornsPercent: 0.20,
                 thornsType: 'electric'
+            }
+        },
+        // —— v2.1 新词条组件 ——
+        '肾上腺素晶体': {
+            id: '肾上腺素晶体',
+            allowedSlots: ['predatory_organ'],
+            affixes: {
+                atkBonus: 3,
+                killHeal: 8
+            }
+        },
+        '不死细胞核': {
+            id: '不死细胞核',
+            allowedSlots: ['chitin_epidermis'],
+            affixes: {
+                shieldBonus: 10,
+                deathDefy: true
+            }
+        },
+        '神经突触结': {
+            id: '神经突触结',
+            allowedSlots: ['gland_core'],
+            affixes: {
+                processOnHit: 2
+            }
+        },
+        '电磁催化剂': {
+            id: '电磁催化剂',
+            allowedSlots: ['predatory_organ', 'gland_core'],
+            affixes: {
+                critChance: 0.15,
+                critMultiplier: 1.5
+            }
+        },
+        '解毒酶结晶': {
+            id: '解毒酶结晶',
+            allowedSlots: ['chitin_epidermis'],
+            affixes: {
+                defBonus: 2,
+                poisonImmune: true
             }
         }
     };
@@ -794,6 +953,102 @@ window.GameData = (function () {
                         return { msg: '你将补给箱推到了易于防守的位置。你已经占据了地理优势。', type: 'info' };
                     }
                 }
+            ]
+        },
+        // —— v2.1 新事件 ——
+        'EVT_STORM': {
+            id: 'EVT_STORM',
+            title: '基因突变风暴',
+            desc: '一股高浓度的生化雾气从通风管道涌入。暴露其中会让你的基因序列发生不可逆的突变——可能是祝福，也可能是诅咒。',
+            options: [
+                { label: '走进风暴中心', desc: '随机获得 +3 攻击 或 -5 最大生命（永久）。', action: function(gs) {
+                    if (Math.random() < 0.5) { gs.player.atk += 3; gs.player.atk_base += 3; return { msg: '狂野的能量涌入原体！攻击力永久 +3。', type: 'reward' }; }
+                    else { gs.player.hp_max = Math.max(50, gs.player.hp_max - 5); gs.player.hp = Math.min(gs.player.hp, gs.player.hp_max); return { msg: '基因序列崩溃了一小段。最大生命永久 -5。', type: 'hazard' }; }
+                }},
+                { label: '远离这片区域', desc: '放弃风险，获得 50 基因点数。', action: function(gs) {
+                    gs.player.bp += 50; return { msg: '你选择了保守路线，绕开了那片诡异的风暴。', type: 'reward' };
+                }}
+            ]
+        },
+        'EVT_LAB': {
+            id: 'EVT_LAB',
+            title: '废弃实验室',
+            desc: '一个被遗弃的小型实验站。设备已经停转，但控制台上还残留着一些未完成的同调实验数据。或许可以在这里尝试一次便宜的同调。',
+            options: [
+                { label: '注入实验数据', desc: '消耗 300 BP，随机一个已装备 Boss 器官同调等级 +1（最高 Lv.3）。', action: function(gs) {
+                    var p = gs.player; var slots = ['predatory_organ','chitin_epidermis','gland_core'];
+                    var equipped = slots.filter(function(s){
+                        var eq = p[s].equipped;
+                        return eq && BOSS_ORGANS[eq] && (gs.inventory.organSyncLevels[eq] || 1) < 3;
+                    });
+                    if (equipped.length === 0) { gs.player.bp += 300; return { msg: '没有可同调的器官。300 BP 已退还。', type: 'info' }; }
+                    if (gs.player.bp < 300) { return { msg: '基因点数不足 300，无法激活设备。', type: 'info' }; }
+                    var slot = equipped[Math.floor(Math.random() * equipped.length)];
+                    var oid = p[slot].equipped;
+                    gs.player.bp -= 300;
+                    var prev = gs.inventory.organSyncLevels[oid] || 1;
+                    gs.inventory.organSyncLevels[oid] = prev + 1;
+                    return { msg: '实验数据注入成功！' + oid + ' 同调等级提升至 Lv.' + (prev+1) + '。', type: 'reward' };
+                }},
+                { label: '无视离开', desc: '不消耗任何资源，直接离开。', action: function(gs) {
+                    return { msg: '你对这些过时的设备不感兴趣。', type: 'info' };
+                }}
+            ]
+        },
+        'EVT_RIFT': {
+            id: 'EVT_RIFT',
+            title: '时空裂隙',
+            desc: '一道扭曲的蓝色裂隙悬浮在半空中。透过它，你隐约看到了下一层楼的景象。某种引力正在拉扯周围的一切。',
+            options: [
+                { label: '穿越裂隙', desc: '立即跳过当前楼层，直接进入下一层（传送门）。不可在 B10 使用。', action: function(gs) {
+                    if (gs.mapState.currentFloor >= 10) return { msg: '裂隙的能量在这里变得极不稳定，无法穿越。', type: 'info' };
+                    gs.mapState.bossDefeated = true; gs.mapState.portalUnlocked = true;
+                    return { msg: '世界在眼前折叠又展开。你发现自己已站在了下一层的边缘。', type: 'reward' };
+                }},
+                { label: '封印裂隙', desc: '获得 200 基因点数，但下一场战斗怪物伤害 +30%。', action: function(gs) {
+                    gs.player.bp += 200; gs.player._riftPenalty = true;
+                    return { msg: '裂隙在你面前缓缓坍缩，释放出大量可提炼的基因残片。', type: 'reward' };
+                }}
+            ]
+        },
+        'EVT_INFECTION': {
+            id: 'EVT_INFECTION',
+            title: '寄生感染',
+            desc: '一条细小的寄生蠕虫不知何时钻入了你左臂的组织。它正在啃噬你的生命，但它的生物质纯度极高——如果你能撑住的话。',
+            options: [
+                { label: '强行剥离', desc: '扣除 30% 最大生命，获得 400 基因点数。', action: function(gs) {
+                    var loss = Math.ceil(gs.player.hp_max * 0.3);
+                    gs.player.hp = Math.max(1, gs.player.hp - loss);
+                    gs.player.bp += 400;
+                    return { msg: '你咬紧牙关把蠕虫扯了出来。伤口很深，但收获颇丰。获得 400 BP，损失 ' + loss + ' HP。', type: 'hazard' };
+                }},
+                { label: '共生共存', desc: '最大生命永久 +15，但毒性永久 +20。', action: function(gs) {
+                    gs.player.hp_max += 15; gs.player.hp += 15;
+                    gs.player.toxicity += 20;
+                    return { msg: '你选择与寄生虫达成共生协议。生命上限 +15，但体内永远残留了它的毒素。', type: 'reward' };
+                }}
+            ]
+        },
+        'EVT_CLONE': {
+            id: 'EVT_CLONE',
+            title: '原体克隆',
+            desc: '一台标有"黑地平线 Alpha-7"的原体复制仪正嗡嗡作响。它似乎可以制造一个你的战术分身——但启动它需要付出代价。',
+            options: [
+                { label: '激活分身', desc: '消耗 10 点进程上限（永久），下一场战斗获得一个辅助分身。', action: function(gs) {
+                    if (gs.player.process_max <= 5) return { msg: '进程上限已过低，设备拒绝启动。', type: 'info' };
+                    gs.player.process_max -= 1;
+                    gs.player._cloneActive = true;
+                    return { msg: '机器发出刺眼的光芒，一个和你一模一样的身影从舱室中走出。下一场战斗将获得分身支援。', type: 'reward' };
+                }},
+                { label: '拆解设备', desc: '获得 250 基因点数 + 3 个随机组件。', action: function(gs) {
+                    gs.player.bp += 250;
+                    var comps = Object.keys(COMPONENTS);
+                    for(var i=0; i<3; i++) {
+                        var cid = comps[Math.floor(Math.random() * comps.length)];
+                        gs.inventory.components[cid] = (gs.inventory.components[cid] || 0) + 1;
+                    }
+                    return { msg: '你把设备拆成了最原始的零件。虽然失去了分身，但材料足够值钱。', type: 'reward' };
+                }}
             ]
         }
     };

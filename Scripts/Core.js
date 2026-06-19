@@ -23,8 +23,8 @@ window.GameState = (function () {
         10: { monster: 5, elite: 3, camp: 1, relic: 2, dungeon: 3, bossId: null, depth: 10 }
     };
 
-    var _allMonsters = ['MON_CH1_ZOMBIE','MON_CH1_RIOT','MON_CH1_RAT','MON_CH1_LARVA','MON_CH1_CLEANER_ROBOT','MON_CH1_WATCHER','MON_CH1_AMALGAM','MON_CH1_MOTH','MON_CH1_DRONE'];
-    var _eliteMonsters = ['MON_CH1_CLEANER','MON_CH1_GUARD','MON_CH1_SPORE','MON_CH1_HIVE','MON_CH1_BEE','MON_CH1_SENTINEL'];
+    var _allMonsters = ['MON_CH1_ZOMBIE','MON_CH1_RIOT','MON_CH1_RAT','MON_CH1_LARVA','MON_CH1_CLEANER_ROBOT','MON_CH1_WATCHER','MON_CH1_AMALGAM','MON_CH1_MOTH','MON_CH1_DRONE','MON_CH2_WORM','MON_CH2_CAMERA','MON_CH2_GROWTH','MON_CH2_PARASITE','MON_CH2_VULTURE'];
+    var _eliteMonsters = ['MON_CH1_CLEANER','MON_CH1_GUARD','MON_CH1_SPORE','MON_CH1_HIVE','MON_CH1_BEE','MON_CH1_SENTINEL','MON_CH2_GHOST','MON_CH2_BEAST','MON_CH2_BROODMOTHER','MON_CH2_CANNON','MON_CH2_ABOMINATION'];
     var _bossMonsters = ['MON_CH1_TYRANT', 'MON_CH1_QUEEN', 'MON_CH1_CORE'];
 
     var _raceColors = { mutant: 'var(--race-mutant)', swarm: 'var(--race-swarm)', ember: 'var(--race-ember)', _default: 'var(--text-main)' };

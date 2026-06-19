@@ -227,7 +227,7 @@ window.CombatSystem = (function () {
     function _getComponentEffects() {
         var p = GS().player; if (!p) return {};
         var comps = GD().COMPONENTS || {};
-        var effects = { armorPen: 0, bonusVsSwarm: 0, toxinConv: 0, lifeDrainChance: 0, lifeDrainAmt: 0, dotBonus: 0, thornsPct: 0 };
+        var effects = { armorPen: 0, bonusVsSwarm: 0, toxinConv: 0, lifeDrainChance: 0, lifeDrainAmt: 0, dotBonus: 0, thornsPct: 0, killHeal: 0, deathDefy: false, processOnHit: 0, critChance: 0, critMultiplier: 1.5, poisonImmune: false };
         ['predatory_organ', 'chitin_epidermis', 'gland_core'].forEach(function(sn) {
             var slot = p[sn]; if (!slot || !slot.component_slots) return;
             slot.component_slots.forEach(function(cid) {
@@ -240,6 +240,12 @@ window.CombatSystem = (function () {
                 if (a.lifeDrainAmount) effects.lifeDrainAmt += a.lifeDrainAmount;
                 if (a.dotBonus) effects.dotBonus += a.dotBonus;
                 if (a.thornsPercent) effects.thornsPct += a.thornsPercent;
+                if (a.killHeal) effects.killHeal += a.killHeal;
+                if (a.deathDefy) effects.deathDefy = true;
+                if (a.processOnHit) effects.processOnHit += a.processOnHit;
+                if (a.critChance) { effects.critChance = Math.max(effects.critChance, a.critChance); }
+                if (a.critMultiplier) effects.critMultiplier = Math.max(effects.critMultiplier, a.critMultiplier);
+                if (a.poisonImmune) effects.poisonImmune = true;
             });
         });
         return effects;
@@ -473,6 +479,12 @@ window.CombatSystem = (function () {
             breakdown = ' (' + (damage + redVal) + '原始 - ' + redVal + '防御)';
         }
 
+        // 暴击判定
+        if (compFx.critChance > 0 && Math.random() < compFx.critChance) {
+            damage = Math.ceil(damage * compFx.critMultiplier);
+            _log('<span style="color:var(--accent-yellow)">暴击！伤害 ×' + compFx.critMultiplier.toFixed(1) + '！</span>');
+        }
+
         curMon.hp = Math.max(0, curMon.hp - damage);
 
         // [新增] 维度词缀：反馈 (Thorns)
@@ -494,6 +506,12 @@ window.CombatSystem = (function () {
         if (curMon.hp <= 0) {
             selectTarget(0);
             _log('<span style="color:var(--accent-red)">' + curMon.name + ' 已融毁。</span>');
+            if (compFx.killHeal > 0) {
+                var healAmt = compFx.killHeal;
+                p.hp = Math.min(p.hp_max, p.hp + healAmt);
+                _log('<span style="color:var(--accent-green)">肾上腺素晶体：击杀回复 ' + healAmt + ' HP。</span>');
+                window.UISystem.showDamageFloat('+' + healAmt, 'var(--accent-green)', 'player');
+            }
         }
         if (_allMonstersDead()) { _winBattle(); return; }
     }
@@ -612,10 +630,11 @@ window.CombatSystem = (function () {
                 var breakdown = '';
 
                 if (intent.type === 'toxin') {
-                    // 涂层抗毒免疫
-                    if (p.activeCoating === 'COAT_ANTI_SWARM' && md && md.race === 'swarm') {
+                    // 解毒酶结晶 / 涂层抗毒免疫
+                    var poisonImmuneFlag = _getComponentEffects().poisonImmune;
+                    if ((p.activeCoating === 'COAT_ANTI_SWARM' && md && md.race === 'swarm') || poisonImmuneFlag) {
                         finalDmg = 0;
-                        _log('<span style="color:var(--accent-green);">' + mon.name + ' 毒素被涂层中和。</span>');
+                        _log('<span style="color:var(--accent-green);">毒素被' + (poisonImmuneFlag ? '解毒酶结晶' : '涂层') + '中和。</span>');
                     } else {
                         // 毒素无视护盾
                         finalDmg = afterDef;
@@ -652,6 +671,13 @@ window.CombatSystem = (function () {
                 window.UISystem.triggerShake('app');
                 if (window.Sound) window.Sound.hit();
                 if (finalDmg > 0) window.UISystem.showDamageFloat('-' + finalDmg, 'var(--accent-red)', 'player');
+                // 神经突触结：受击回复进程
+                var cfx3 = _getComponentEffects();
+                if (cfx3.processOnHit > 0 && finalDmg > 0) {
+                    _battleState.playerProcess = Math.min(GS().player.process_max, _battleState.playerProcess + cfx3.processOnHit);
+                    GS().player.process = _battleState.playerProcess;
+                    _log('<span style="color:var(--accent-green)">神经突触激活，受击回复 ' + cfx3.processOnHit + ' 进程。</span>');
+                }
                 // 组件反伤
                 var cfx2 = _getComponentEffects();
                 if (cfx2.thornsPct > 0 && rawDmg > 0) {
@@ -804,6 +830,17 @@ window.CombatSystem = (function () {
     }
 
     function _doDefeat() {
+        // 不死细胞核：致命伤害免死一次
+        var compFx = _getComponentEffects();
+        if (compFx.deathDefy && !_battleState._deathDefyUsed) {
+            _battleState._deathDefyUsed = true;
+            var p = GS().player;
+            p.hp = 1;
+            _log('<span style="color:var(--accent-yellow); font-weight:bold;">不死细胞核激活！从死亡边缘归来，HP 剩余 1。</span>');
+            window.UISystem.showDamageFloat('免死!', 'var(--accent-yellow)', 'player');
+            if (window.Sound) window.Sound.click();
+            return;
+        }
         _battleState.phase = 'defeat';
         if (window.Sound) window.Sound.defeat();
         _log('<span style="color:var(--accent-red); font-weight:bold;">>> 警告：原体序列彻底崩解... 神经链路断开。</span>');

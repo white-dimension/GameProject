@@ -1728,7 +1728,14 @@ window.UISystem = (function () {
     function _showVictoryOverlay() {
         var gs = GS();
         var p = gs.player;
-        var stats = '原体等级 ' + p.level + '  |  击杀 ' + Object.values(gs.bestiary.killCount || {}).reduce(function(a,b){return a+b;},0) + '  |  遗物 ' + (p.relicsFound || 0) + '  |  地下城 ' + (p.dungeonsEntered || 0);
+        var totalKills = Object.values(gs.bestiary.killCount || {}).reduce(function(a,b){return a+b;},0);
+        var totalBp = p._totalBpEarned || (gs.mapState._totalBpEarned || 0);
+        var organsHeld = (gs.inventory.organs || []).length;
+        var stats = '<div style="display:flex;flex-direction:column;gap:6px;">' +
+            '<span>原体等级 ' + p.level + '  |  总步数 ' + gs.mapState.stepsTaken + '</span>' +
+            '<span>总击杀 ' + totalKills + '  |  总获得 BP ' + totalBp + '</span>' +
+            '<span>遗物发现 ' + (p.relicsFound || 0) + '  |  地下城 ' + (p.dungeonsEntered || 0) + '  |  持有器官 ' + organsHeld + '</span>' +
+            '<span>当前轮回 Loop ' + (gs.mapState.loop || 1) + '</span></div>';
         var ov = document.createElement('div');
         ov.id = 'victory-overlay';
         ov.style.cssText = 'position:fixed;inset:0;z-index:4000;display:flex;align-items:center;justify-content:center;background:rgba(5,8,12,0.95);';
