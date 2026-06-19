@@ -208,7 +208,7 @@ window.GameData = (function () {
             intents: [
                 { type: 'physical', label: '<span class="icon icon-cog"></span> 物理+防御', value: 6, desc: '造成 6 点物理伤害，且自身防御力+6', selfDefBuff: 6 }
             ],
-            weakness: '物理装甲极厚，捕食打击几乎刮痧。先用捕食打击挂毒，再用腺体脉冲触发毒素自溶，无视防御。',
+            weakness: '物理装甲极厚，捕食打击几乎刮痧。先用捕食打击挂毒，再用腺体脉冲触发毒素发作，无视防御。',
             drop: { type: 'component', id: '纳米破片', chance: 0.6 },
             bpReward: [2, 5]
         },
@@ -313,7 +313,7 @@ window.GameData = (function () {
             intents: [
                 { type: 'charge', label: '<span class="icon icon-targeting"></span> 锁定发射', value: 32, desc: '锁定发射：下回合造成 32 点巨额能量冲击', chargeTurns: 1, immuneToPhysicalCC: true }
             ],
-            weakness: '蓄力期间免疫一切物理控制。唯一的解法是使用寄生群落的毒素挂毒，利用毒素自溶在蓄力期强行削减其血线。',
+            weakness: '蓄力期间免疫一切物理控制。唯一的解法是使用寄生群落的毒素挂毒，利用毒素发作在蓄力期强行削减其血线。',
             drop: { type: 'component', id: '电磁催化剂', chance: 0.4 },
             bpReward: [15, 20]
         },
@@ -743,7 +743,7 @@ window.GameData = (function () {
         'swarm+swarm': {
             name: '瘟疫主宰',
             passive: '无限蚀骨',
-            passiveDesc: '毒素自溶每回合 5%→10%，无视护盾',
+            passiveDesc: '毒素发作每回合 5%→10%，无视护盾',
             color: 'var(--accent-purple)'
         },
         'ember+swarm': {

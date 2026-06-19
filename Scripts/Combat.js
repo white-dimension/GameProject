@@ -1025,7 +1025,7 @@ window.CombatSystem = (function () {
                 var dot = Math.ceil(mon.hpMax * dotPct) + (cfx.dotBonus || 0);
                 mon.hp = Math.max(0, mon.hp - dot);
                 window.UISystem.showDamageFloat(dot, 'var(--accent-purple)', 'monster');
-                _log('<span style="color:var(--accent-purple)">' + mon.name + ' 毒素自溶 -' + dot + ' HP。（剩余' + (mon.status['poison'] - 1) + '回合）</span>');
+                _log('<span style="color:var(--accent-purple)">' + mon.name + ' 毒素发作 -' + dot + ' HP。（剩余' + (mon.status['poison'] - 1) + '回合）</span>');
                 mon.status['poison']--;
                 if (mon.status['poison'] <= 0) { delete mon.status['poison']; _log('<span style="color:var(--text-dim);">' + mon.name + ' 毒素已清除。</span>'); }
                 // 组件生命吸取
