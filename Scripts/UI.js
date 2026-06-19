@@ -75,7 +75,8 @@ window.UISystem = (function () {
         _bgVideo = _ce('video');
         _bgVideo.src = '../Assets/Backgrounds/explore.mp4';
         _bgVideo.loop = false;
-        _bgVideo.muted = true;
+        _bgVideo.muted = false;
+        _bgVideo.volume = 1.0;
         _bgVideo.autoplay = true;
         _bgVideo.playsInline = true;
         _bgVideo.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;display:none;pointer-events:none;transition:opacity 0.5s ease;';
@@ -386,7 +387,6 @@ window.UISystem = (function () {
             }
             _mainView.style.display = 'flex'; _mainView.style.visibility = 'visible';
             _renderDiscovery(gs);
-            if (window.Sound) window.Sound.playExploreBGM();
         }
         _renderActions(gs, inBattle); _updateLog();
     }
@@ -1886,8 +1886,8 @@ window.UISystem = (function () {
         _bgVideo.style.display = 'block';
         _bgVideo.play().catch(function(){});
         _root.className = '';
-        // 在用户点击手势上下文内激活音频，解除浏览器自动播放限制
-        if (window.Sound) { window.Sound.playExploreBGM(); window.Sound.click(); }
+        // 在用户点击手势上下文内激活音频（探索场景音轨由视频提供，这里只解锁click）
+        if (window.Sound) { window.Sound.click(); }
         // [修复] 不再手动设置 _isFirstLoad = false，让 render() 统一处理启动序列
         UISystem.render();
     }

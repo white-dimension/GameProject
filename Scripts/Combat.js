@@ -898,7 +898,6 @@ window.CombatSystem = (function () {
             }
             window.UISystem.render();
         };
-        if (window.Sound) window.Sound.playExploreBGM();
         setTimeout(function() {
             var gs = GS();
             if (gs && gs.player) {
@@ -1097,7 +1096,6 @@ window.CombatSystem = (function () {
         _battleState = null;
         if (!wasTraining) {
             window.WorldSystem.generateNextPaths(); window.UISystem.render();
-            if (window.Sound) window.Sound.playExploreBGM();
             window.GameState.save();
         } else {
             window.UISystem.render();
@@ -1198,7 +1196,6 @@ window.CombatSystem = (function () {
                 _battleState = null;
                 window.WorldSystem.generateNextPaths();
                 window.UISystem.render();
-                if (window.Sound) window.Sound.playExploreBGM();
                 window.GameState.save();
             }, 400);
         } else {
