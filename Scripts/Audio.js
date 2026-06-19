@@ -73,15 +73,22 @@ window.Sound = (function () {
         if (_bgmType === type && _bgm && !_bgm.paused) return; // 已在播放同类型
 
         var old = _bgm;
-        _bgm = new Audio(base + src);
-        _bgm.loop = true;
+        var cacheKey = '__bgm_' + type;
+        if (_cache[cacheKey]) {
+            _bgm = _cache[cacheKey];
+            _bgm.currentTime = 0;
+        } else {
+            _bgm = new Audio(base + src);
+            _bgm.loop = true;
+            _cache[cacheKey] = _bgm;
+        }
         _bgm.volume = 0;
         _bgmType = type;
-        _cache['__bgm_' + type] = _bgm;
 
         if (old && !old.paused) {
+            var nextBgm = _bgm;
             _fadeOut(old, function() {
-                _fadeIn(_bgm, vol);
+                _fadeIn(nextBgm, vol);
             });
         } else {
             _fadeIn(_bgm, vol);
