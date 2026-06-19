@@ -71,47 +71,37 @@ window.UISystem = (function () {
         _root.innerHTML = '';
         _root.style.cssText = 'width:100vw;height:100vh;display:flex;flex-direction:column;position:relative;background:var(--bg-deep);';
 
-        // 视频循环淡入淡出辅助
-        var _setupVideoLoop = function(video) {
-            video.loop = false;
-            video.style.transition = 'opacity 0.4s ease';
-            video.addEventListener('timeupdate', function() {
-                if (video._fading || !video.duration) return;
-                if (video.currentTime > video.duration - 0.5) {
-                    video._fading = true;
-                    video.style.opacity = '0';
-                    clearTimeout(video._fadeTimer);
-                    video._fadeTimer = setTimeout(function() {
-                        video.currentTime = 0;
-                        video.style.opacity = '1';
-                        video.play().catch(function(){});
-                        video._fading = false;
+        // 通用背景视频工厂
+        var _createBgVideo = function(src) {
+            var v = _ce('video');
+            v.src = src;
+            v.loop = false;
+            v.muted = true;
+            v.volume = 1.0;
+            v.autoplay = false;
+            v.playsInline = true;
+            v.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;display:none;pointer-events:none;filter:brightness(0.5);transition:opacity 0.4s ease;';
+            v.addEventListener('timeupdate', function() {
+                if (v._fading || !v.duration) return;
+                if (v.currentTime > v.duration - 0.5) {
+                    v._fading = true;
+                    v.style.opacity = '0';
+                    clearTimeout(v._fadeTimer);
+                    v._fadeTimer = setTimeout(function() {
+                        v.currentTime = 0;
+                        v.style.opacity = '1';
+                        v.play().catch(function(){});
+                        v._fading = false;
                     }, 450);
                 }
             });
+            _root.appendChild(v);
+            return v;
         };
 
-        // 全屏背景视频 — 探索
-        _bgVideo = _ce('video');
-        _bgVideo.src = '../Assets/Backgrounds/explore.mp4';
-        _bgVideo.muted = true;
-        _bgVideo.volume = 1.0;
-        _bgVideo.autoplay = false;
-        _bgVideo.playsInline = true;
-        _bgVideo.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;display:none;pointer-events:none;filter:brightness(0.5);';
-        _setupVideoLoop(_bgVideo);
-        _root.appendChild(_bgVideo);
-
-        // 全屏背景视频 — 战斗
-        _bgBattleVideo = _ce('video');
-        _bgBattleVideo.src = '../Assets/Backgrounds/battle.mp4';
-        _bgBattleVideo.muted = true;
-        _bgBattleVideo.volume = 1.0;
-        _bgBattleVideo.autoplay = false;
-        _bgBattleVideo.playsInline = true;
-        _bgBattleVideo.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;display:none;pointer-events:none;filter:brightness(0.5);';
-        _setupVideoLoop(_bgBattleVideo);
-        _root.appendChild(_bgBattleVideo);
+        _bgVideo = _createBgVideo('../Assets/Backgrounds/explore.mp4');
+        _bgBattleVideo = _createBgVideo('../Assets/Backgrounds/battle.mp4');
+        var _bgVideos = [_bgVideo, _bgBattleVideo];
 
         var topBar = _ce('div', 'hud-top');
         topBar.style.cssText = 'position:relative;display:flex;flex-direction:row;justify-content:center;padding:8px 25px 4px 25px;min-height:60px;background:rgba(10,14,20,0.65);border-bottom:1px solid var(--border-dim);box-shadow: 0 4px 20px rgba(0,0,0,0.5);z-index:500;';
@@ -1949,10 +1939,11 @@ window.UISystem = (function () {
             btn.innerHTML = muted ? 'M' : '♪';
             btn.className = muted ? 'btn btn-gray btn-sm' : 'btn btn-blue btn-sm';
         }
-        [_bgVideo, _bgBattleVideo].forEach(function(v) {
+        (_bgVideos || [_bgVideo, _bgBattleVideo]).forEach(function(v) {
             if (v) {
                 v.muted = muted;
                 if (!muted && v.style.display !== 'none') {
+                    v.style.opacity = '1';
                     v.play().catch(function(){});
                 }
             }
