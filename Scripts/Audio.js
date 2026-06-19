@@ -39,7 +39,7 @@ window.Sound = (function () {
         a._fadeInterval = fade;
     }
     function defeat()    { var a = _load('Wrong Error.wav'); a.volume=0.5; a.currentTime=0; a.play().catch(function(){}); }
-    function click()     { var a = _load('hover.mp3'); a.volume=0.15; a.currentTime=0; a.play().catch(function(){}); }
+    function click()     { var a = _load('hover.mp3'); a.volume=0.25; a.currentTime=0; a.play().catch(function(){}); }
 
     // ======== 背景音乐 ========
     var _bgm = null;
@@ -95,8 +95,8 @@ window.Sound = (function () {
         }
     }
 
-    function playExploreBGM() { _switchBGM('airy.mp3', 0.15, 'explore'); }
-    function playBattleBGM()  { _switchBGM('urgent.mp3', 0.18, 'battle'); }
+    function playExploreBGM() { _switchBGM('airy.mp3', 0.22, 'explore'); }
+    function playBattleBGM()  { _switchBGM('urgent.mp3', 0.25, 'battle'); }
 
     function stopBGM() {
         _stopFade();
