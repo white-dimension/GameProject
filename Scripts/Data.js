@@ -87,7 +87,7 @@ window.GameData = (function () {
                 { type: 'shield', label: '<span class="icon icon-energy-shield"></span> 生物硬壳护盾', value: 20, desc: '自身获得 20 点生物硬壳护盾' }
             ],
             weakness: '高防御低攻击。涂抹【细胞壁溶解酶涂层】或使用毒素攻击可迅速击破。',
-            drop: { type: 'component', id: '异变肌肉束', chance: 0.4 },
+            drop: { type: 'component', id: '不死细胞核', chance: 0.4 },
             bpReward: [15, 20]
         },
         MON_CH1_TYRANT: {
@@ -173,7 +173,7 @@ window.GameData = (function () {
                 { type: 'summon', label: '<span class="icon icon-alien-bug"></span> 召唤工蜂', value: 3, desc: '召唤 3 只工蜂协助攻击，每只提供 5 点连击伤害', summonCount: 3, summonDamage: 5 }
             ],
             weakness: '外壳薄弱，极度惧怕异变者的捕食打击。建议装配【源初毁灭者】进行碾压。',
-            drop: { type: 'component', id: '活性孢子', chance: 0.4 },
+            drop: { type: 'component', id: '几丁质装甲', chance: 0.4 },
             bpReward: [15, 20]
         },
         MON_CH1_QUEEN: {
@@ -260,7 +260,7 @@ window.GameData = (function () {
                 { type: 'toxin', label: '<span class="icon icon-poison-gas"></span> 毒粉播撒', value: 12, desc: '播撒毒粉，造成 12 点毒素伤害' }
             ],
             weakness: '极度脆弱，物理攻击一击即可粉碎。',
-            drop: { type: 'component', id: '毒囊材料', chance: 0.6 },
+            drop: { type: 'component', id: '解毒酶结晶', chance: 0.6 },
             bpReward: [3, 6]
         },
         MON_CH1_DRONE: {
@@ -314,7 +314,7 @@ window.GameData = (function () {
                 { type: 'charge', label: '<span class="icon icon-targeting"></span> 锁定发射', value: 32, desc: '锁定发射：下回合造成 32 点巨额能量冲击', chargeTurns: 1, immuneToPhysicalCC: true }
             ],
             weakness: '蓄力期间免疫一切物理控制。唯一的解法是使用寄生群落的毒素挂毒，利用毒素自溶在蓄力期强行削减其血线。',
-            drop: { type: 'component', id: '高压电缆碎片', chance: 0.4 },
+            drop: { type: 'component', id: '电磁催化剂', chance: 0.4 },
             bpReward: [15, 20]
         },
         MON_CH1_CORE: {
@@ -427,7 +427,7 @@ window.GameData = (function () {
                 { type: 'stun', label: '<span class="icon icon-time-trap"></span> 相位干扰', value: 0, desc: '短暂进入亚空间，完全闪避下次攻击', dodge: true }
             ],
             weakness: '闪避高但血少，终焉母核被动可清除闪避。腺体脉冲崩解连招对其极其有效。',
-            drop: { type: 'component', id: '高压电缆碎片', chance: 0.5 },
+            drop: { type: 'component', id: '神经突触结', chance: 0.5 },
             bpReward: [20, 30]
         },
         MON_CH2_BEAST: {
