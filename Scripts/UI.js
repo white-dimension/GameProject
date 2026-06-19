@@ -2073,8 +2073,8 @@ window.UISystem = (function () {
         preview.innerHTML = dots + ' <span class="txt-xs txt-dim">0/3</span>';
         body.appendChild(preview);
         var btnRow = _ce('div');
-        btnRow.style.cssText = 'display:flex;gap:10px;justify-content:center;';
-        var confirmBtn = _ce('button', 'btn btn-gold btn-capsule');
+        btnRow.style.cssText = 'padding:12px 20px;display:flex;gap:10px;justify-content:flex-end;';
+        var confirmBtn = _ce('button', 'btn btn-gold');
         confirmBtn.textContent = '确认合成';
         confirmBtn.onclick = function() {
             if (selectCount !== 3) return;
