@@ -633,9 +633,9 @@ window.GameData = (function () {
         stats: {
             title: '核心系统说明',
             sections: [
-                { key: 'MAX', label: '巅峰等级', desc: '等阶上限提升至 20 级。满级后将以 MAX 状态展示在状态栏。', color: 'var(--accent-blue)' },
+                { key: 'MAX', label: '巅峰等级', desc: '等阶上限提升至 30 级。满级后将以 MAX 状态展示在状态栏。10级后每级额外获得 1 专精点。', color: 'var(--accent-blue)' },
                 { key: 'Rank', label: '深度研究', desc: '在图鉴中消耗 BP 提升研究等级。Lv.1 解锁战斗数值透明，Lv.2 增伤，Lv.3 掉落加成。', color: 'var(--accent-yellow)' },
-                { key: 'Loop', label: '超越进化', desc: '通关 B10F 后开启无限循环。保留所有属性和物资，但每轮怪物属性提升 50%。', color: 'var(--accent-orange)' },
+                { key: 'Loop', label: '超越进化', desc: '通关 B10F 后开启无限循环。保留所有属性和物资，每轮怪物属性 ×1.5，BP 收益同步上扬。无硬上限，直到你无法战胜翻倍的敌人。Loop 2 解锁第三专精槽 + 精英词缀。', color: 'var(--accent-orange)' },
                 { key: 'Event', label: '感官异常', desc: '路径跳转间 10% 概率触发随机事件，抉择可能改变你的进化路线或即时状态。', color: 'var(--accent-purple)' }
             ],
             tip: '当您进入 Loop 2 后，原体将自动解锁「第三专精插槽」，支持三系毒株融合。'

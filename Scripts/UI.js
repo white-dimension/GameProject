@@ -357,21 +357,23 @@ window.UISystem = (function () {
         var top = document.querySelector('.hud-top');
         top.innerHTML =
             '<div class="hud-col hud-col-l">' +
-            '<div class="txt-md txt-green txt-bold"><span class="icon icon-dna icon-pulse"></span>原体-II</div>' +
-            '<div class="txt-xs txt-dim" style="margin-top:4px;">路径: ' + gs.mapState.stepsTaken + ' | <span class="txt-gold">基因: ' + p.bp + '</span></div>' +
+            '<div class="txt-md txt-green txt-bold"><div style="display:flex;justify-content:space-between;align-items:center;width:100%;">' +
+            '<span><span class="icon icon-dna icon-pulse"></span>原体-II</span>' +
+            (gs.mapState.loop >= 2 ? '<span class="txt-xs txt-bold" style="color:var(--accent-orange);animation:mastery-pulse 2s infinite;padding:2px 8px;border:1px solid var(--accent-orange);border-radius:3px;">超越进化 · 第' + gs.mapState.loop + '轮</span>' : '') +
+            '</div></div>' +
             '</div>' +
             '<div class="hud-col hud-col-c">' +
             '<div class="hud-labels txt-xs">' +
             _hudLabel('生命', p.hp, p.hp_max, 'icon-health') +
             _hudLabel('进程', p.process, p.process_max, 'icon-ram') +
             _hudLabel('毒性', p.toxicity, 50, 'icon-tox') +
-            _hudLabel('等阶 ' + p.level, (p.level >= 20 ? 'MAX' : p.xp), (p.level >= 20 ? 'MAX' : p.xpToNext), 'icon-upgrade') +
+            _hudLabel('等阶 ' + p.level, (p.level >= 30 ? 'MAX' : p.xp), (p.level >= 30 ? 'MAX' : p.xpToNext), 'icon-upgrade') +
             '</div>' +
             '<div class="hud-bars">' +
             _hudBarFill(p.hp, p.hp_max, (CS() && CS().getBattleState() && CS().getBattleState().playerStatus && CS().getBattleState().playerStatus['toxDebuff'] ? 'tox-fill' : 'hp-fill')) +
             _hudBarFill(p.process, p.process_max, 'ram-fill') +
             _hudBarFill(p.toxicity, 50, 'tox-fill') +
-            _hudBarFill((p.level >= 20 ? 1 : p.xp), (p.level >= 20 ? 1 : p.xpToNext), 'xp-fill') +
+            _hudBarFill((p.level >= 30 ? 1 : p.xp), (p.level >= 30 ? 1 : p.xpToNext), 'xp-fill') +
             '</div>' +
             '</div>' +
             '<div class="hud-col hud-col-r">' +
@@ -735,6 +737,12 @@ window.UISystem = (function () {
                 if (mon._defBuff > 0) {
                     monBuffRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(120,144,156,0.12);border:1px solid var(--text-dim);border-radius:3px;color:var(--text-dim);" data-tip="<b>防御强化</b>&#10;防御力 +' + mon._defBuff + '&#10;建议使用破甲组件或涂层"><span class="icon icon-energy-shield"></span>+ ' + mon._defBuff + '</span>';
                 }
+                if (mon.status['ionized']) {
+                    monBuffRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(0,212,255,0.12);border:1px solid var(--accent-blue);border-radius:3px;color:var(--accent-blue);" data-tip="<b>电离标记</b>&#10;已被电荷标记&#10;下次 [捕食打击] 将引爆：剥离全部护盾 + 全场 50% 溅射伤害"><span class="icon icon-lightning-arc"></span> 电离</span>';
+                }
+                if (mon.status['compromised']) {
+                    monBuffRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(255,213,79,0.12);border:1px solid var(--accent-yellow);border-radius:3px;color:var(--accent-yellow);" data-tip="<b>生物崩解</b>&#10;护甲结构已瓦解&#10;防御归零 + 受到伤害提升 100%&#10;使用 [腺体脉冲] 可引爆并清除闪避"><span class="icon icon-biohazard"></span> 崩解</span>';
+                }
 
                 // --- 怪物固定被动 (monPassiveRow) ---
                 var racePassives = {
@@ -924,11 +932,11 @@ window.UISystem = (function () {
                 skillInfo.innerHTML = '<div class="txt-xs txt-green txt-bold" style="margin-bottom:10px;">> 动态战术预测</div>' +
                     intentHTML +
                     '<div style="display:flex;flex-direction:column;gap:6px;">' +
-                    '<div data-key="1" class="help-tip" style="background:var(--bg-card);border:1px solid ' + (c1 && curMonIon ? 'rgba(0,212,255,0.8)' : 'var(--border-dim)') + ';border-radius:4px;padding:6px 14px;' + (c1 ? '' : 'opacity:0.5;') + (c1 && curMonIon ? 'box-shadow:0 0 10px rgba(0,212,255,0.4);' : '') + '" data-tip="预期造成的最终净伤害，已扣除防御和护盾。">' +
+                    '<div data-key="1" class="help-tip" style="background:var(--bg-card);border:1px solid ' + (c1 && curMonIon ? 'rgba(0,212,255,0.8)' : 'var(--border-dim)') + ';border-radius:4px;padding:6px 14px;' + (c1 ? '' : 'opacity:0.5;') + (c1 && curMonIon ? 'box-shadow:0 0 10px rgba(0,212,255,0.4);' : '') + '" data-tip="<b style=color:var(--accent-red)>捕食打击 · 物理伤害技能</b>&#10;&#10;<b>公式：</b>最终伤害 = (攻击力 + 器官加成) × 克制倍率 - 目标防御&#10;<b>特殊：</b>对机械族施加 [电离标记]，第二次命中引爆：剥离全部护盾 + 全场 50% 溅射&#10;<b>特殊：</b>对寄生族连续命中触发 [生物崩解] 标记&#10;<b>概率：</b>30% 挂毒 3 回合&#10;&#10;当前预估净伤害 = <b style=color:var(--accent-red)>' + f1.dmg + '</b>（已扣防御/护盾）">' +
                     '<span class="txt-xs txt-bold" style="color:' + gc(c1, 'var(--accent-red)') + ';">[1] 打击</span> <span class="txt-xs txt-dim">' + s1Cost + '进程 · <b style="color:var(--accent-red)">' + f1.dmg + '</b>伤害' + f1.tag + '</span></div>' +
-                    '<div data-key="2" class="help-tip" style="background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;padding:6px 14px;' + (c2 ? '' : 'opacity:0.5;') + '" data-tip="当前攻击力下可生成的防御层强度。">' +
+                    '<div data-key="2" class="help-tip" style="background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;padding:6px 14px;' + (c2 ? '' : 'opacity:0.5;') + '" data-tip="<b style=color:var(--accent-green)>生物防御 · 护盾技能</b>&#10;&#10;<b>公式：</b>护盾值 = 当前攻击力 × 0.6 = <b style=color:var(--accent-blue)>' + Math.ceil(atk * 0.6) + '</b>&#10;<b>效果：</b>护盾存在期间吸收物理伤害&#10;<b>策略：</b>开局套盾防猝死，或在怪物蓄力/狂怒前预判使用">' +
                     '<span class="txt-xs txt-bold" style="color:' + gc(c2, 'var(--accent-green)') + ';">[2] 防御</span> <span class="txt-xs txt-dim">' + s2Cost + '进程 · <b style="color:var(--accent-blue)">+' + Math.ceil(atk * 0.6) + '</b>护盾</span></div>' +
-                    '<div data-key="3" class="help-tip" style="background:var(--bg-card);border:1px solid ' + (c3 && (curMonStatus || curMonComp) ? 'rgba(255,213,79,0.8)' : 'var(--border-dim)') + ';border-radius:4px;padding:6px 14px;' + (c3 ? '' : 'opacity:0.5;') + (c3 && (curMonStatus || curMonComp) ? 'box-shadow:0 0 10px rgba(255,213,79,0.4);' : '') + '" data-tip="检测连招标记，触发基因融毁或生物崩解。">' +
+                    '<div data-key="3" class="help-tip" style="background:var(--bg-card);border:1px solid ' + (c3 && (curMonStatus || curMonComp) ? 'rgba(255,213,79,0.8)' : 'var(--border-dim)') + ';border-radius:4px;padding:6px 14px;' + (c3 ? '' : 'opacity:0.5;') + (c3 && (curMonStatus || curMonComp) ? 'box-shadow:0 0 10px rgba(255,213,79,0.4);' : '') + '" data-tip="<b style=color:var(--accent-yellow)>腺体脉冲 · 连招引爆技能</b>&#10;&#10;<b>中毒目标：</b>引爆造成 攻击力 × 3 伤害 + <b style=color:var(--accent-green)>全额吸血</b>&#10;<b>崩解目标：</b>引爆清除闪避 + 易伤 2 回合&#10;<b>无标记：</b>仅造成 50% 微弱酸蚀伤害&#10;&#10;<b>核心思路：</b>先用 [1] 打击 挂标记，再用 [3] 脉冲 引爆。单体高爆发 + 自回复。">' +
                     '<span class="txt-xs txt-bold" style="color:' + gc(c3, 'var(--accent-yellow)') + ';">[3] 脉冲</span> <span class="txt-xs txt-dim">' + s3Cost + '进程 · <b style="color:var(--accent-yellow)">' + f3.dmg + '</b>爆破' + (f3.heal > 0 ? ' <b style="color:var(--accent-green)">+' + f3.heal + '吸血</b>' : '') + f3.tag + '</span></div>' +
                     '<div data-key="Space" style="background:var(--bg-card);border:1px solid ' + (isVictory ? 'rgba(0,255,136,0.3)' : 'var(--border-dim)') + ';border-radius:4px;padding:6px 14px;">' +
                     '<span class="txt-xs txt-bold" style="color:' + 'var(--accent-orange)' + ';">[空格] ' + (isVictory ? '退出战斗' : '回合结束 · 回复 3 进程') + '</span></div>' +
@@ -1388,21 +1396,34 @@ window.UISystem = (function () {
         organHTML += '</div>';
         body.innerHTML += organHTML;
         // 专精流派
-        var mk = (p.masteries[0] && p.masteries[1]) ? [p.masteries[0], p.masteries[1]].sort().join('+') : '';
+        var activeRaces = (p.masteries || []).filter(function(r){return r;});
+        var racePriority = { mutant: 1, swarm: 2, ember: 3 };
+        activeRaces.sort(function(a,b){ return (racePriority[a]||99) - (racePriority[b]||99); });
+        var mk = activeRaces.length >= 2 ? [activeRaces[0], activeRaces[1]].sort().join('+') : '';
         var races = ['mutant', 'swarm', 'ember'];
         var raceNames = { mutant: '异变者', swarm: '寄生群落', ember: '机械余烬' };
         var raceClrs = { mutant: { hex: '#ff6b4a', bg: 'rgba(255,107,74,0.08)', bd: 'rgba(255,107,74,0.2)', txt: '#ff6b4a' }, swarm: { hex: '#9acd32', bg: 'rgba(154,205,50,0.08)', bd: 'rgba(154,205,50,0.2)', txt: '#9acd32' }, ember: { hex: '#4ab8ff', bg: 'rgba(74,184,255,0.08)', bd: 'rgba(74,184,255,0.2)', txt: '#4ab8ff' } };
         var dc = mk ? GD().DUAL_CLASSES[mk] : null;
-        var selRace = p.masteries[0] || p.masteries[1] || 'mutant';
+        var selRace = activeRaces[0] || 'mutant';
         var mc = raceClrs[selRace] || raceClrs.mutant;
+        // 三流派后缀
+        var threeSuffix = '';
+        var hasDup = false;
+        if (activeRaces.length >= 3) {
+            var thirdRace = activeRaces[2];
+            hasDup = (activeRaces[0] === activeRaces[1]) || (activeRaces[1] === activeRaces[2]);
+            var dupKeys = [activeRaces[0], activeRaces[1]].sort().join('+');
+            if (mk === dupKeys) { thirdRace = activeRaces[2]; }
+            threeSuffix = ' <span style="font-size:12px;opacity:0.7;">+ ' + raceNames[thirdRace] + '辅修</span>';
+        }
         var masteryHTML = '<div style="padding:15px 20px;background:' + mc.bg + ';border:1px solid ' + mc.bd + ';border-radius:6px;display:flex;flex-direction:column;gap:10px;">' +
             '<div class="txt-sm txt-bold" style="color:' + mc.txt + ';">' +
-            '> 专精流派（每点提升属性，双流派激活被动） <span class="txt-gold">可用:' + p.availableMasteryPoints + '</span></div>';
+            '> 专精流派（每点提升属性，双流派激活被动） <span class="txt-gold">可用:' + p.availableMasteryPoints + '</span>' + (hasDup ? ' <span class="txt-xs" style="color:var(--accent-yellow);">[同系强化150%]</span>' : '') + '</div>';
         masteryHTML += '<div>';
         if (dc) {
             var dcClr2 = dc.color || 'var(--accent-yellow)';
             masteryHTML += '<div style="padding:12px;background:rgba(255,213,79,0.05);border:1px solid ' + dcClr2 + ';border-radius:4px;margin-bottom:18px;box-shadow:0 0 10px ' + dcClr2 + '44;">' +
-                '<div class="txt-sm txt-bold help-tip" style="color:' + dcClr2 + ';" data-tip="<b style=color:' + dcClr2 + '>' + dc.name + '：</b>&#10;<b>' + dc.passive + '</b>&#10;' + dc.passiveDesc + '">' + dc.name + '</div>' +
+                '<div class="txt-sm txt-bold help-tip" style="color:' + dcClr2 + ';" data-tip="<b style=color:' + dcClr2 + '>' + dc.name + '：</b>&#10;<b>' + dc.passive + '</b>&#10;' + dc.passiveDesc + '">' + dc.name + threeSuffix + '</div>' +
                 '<div class="txt-xs" style="color:' + dcClr2 + '; opacity:0.9;">' + dc.passiveDesc + '</div></div>';
         }
         // 只选一个时，预览可选的双专精
