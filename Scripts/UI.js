@@ -1453,7 +1453,7 @@ window.UISystem = (function () {
                     var tipText = '<b>' + cid + '</b>' + (dtl.affixText ? '&#10;' + dtl.affixText : '') + (dtl.slotText ? '&#10;可装备：' + dtl.slotText : '');
                     organHTML += '<span class="txt-xs txt-dim"> 组件: </span><span class="help-tip" style="padding:6px 10px;font-size:13px;background:rgba(255,213,79,0.08);border:1px solid rgba(255,213,79,0.2);border-radius:4px;color:var(--accent-yellow);" data-tip="' + tipText + '">' + cid + '</span>';
                 } else if (!cid) {
-                    organHTML += '<span class="txt-xs txt-dim"> 组件: </span><span style="padding:6px 10px;font-size:13px;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.15);border-radius:4px;color:var(--text-dim);">空槽</span>';
+                    organHTML += '<span class="txt-xs txt-dim"> 组件: </span><span style="padding:6px 10px;font-size:13px;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.15);border-radius:4px;color:var(--text-dim);">空槽·未嵌入</span>';
                 }
             });
             organHTML += '</div>';
