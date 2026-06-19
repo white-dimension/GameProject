@@ -33,8 +33,20 @@
 
 ### Boss立绘
 - 三张Boss PNG添加到 Data.js image字段
-- _renderBattle渲染 .boss-portrait (呼吸光晕动画)
+- Boss卡片直接使用立绘做背景(linear-gradient遮罩)，去除独立肖像层
 - 桌面图片复制到 Assets/Backgrounds + Assets/Bosses
+
+### 组件属性全覆盖
+- 解毒酶结晶 defBonus + poisonImmune 补上UI显示和Core应用
+- UI补全 killHeal / deathDefy / processOnHit / critChance / critMultiplier 显示
+- 全19个affix key现在 UI + Core + Combat 三线覆盖
+
+### 其他修复
+- 战斗胜利奖励合并单条日志
+- Boss BGM退出/胜利时渐隐停止
+- 切换怪物目标触发种族专属音效
+- 胜利音效 0.25，怪物音效 0.5
+- 文档同步更新
 
 ---
 
