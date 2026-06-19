@@ -29,6 +29,7 @@ window.Sound = (function () {
     function hit()       { _playRand(['grunt_06.ogg','grunt_07.ogg','human_01.ogg','human_02.ogg'], 1.0); }
     function electric()  { _playRand(['PM_SD_UI_MAGIC_CONFIRM_2.wav','PM_SD_UI_MAGIC_CONFIRM_4.wav','PM_SD_UI_MAGIC_CONFIRM_6.wav','PM_SD_UI_MAGIC_CONFIRM_8.wav','PM_SD_UI_MAGIC_CONFIRM_12.wav'], 1.0); }
     function victory() {
+        if (!_enabled) return;
         var a = _load('victory.mp3'); a.volume = 0.5; a.currentTime = 0;
         a.play().catch(function(){});
         if (a._fadeInterval) { clearInterval(a._fadeInterval); }
@@ -38,8 +39,8 @@ window.Sound = (function () {
         }, 180);
         a._fadeInterval = fade;
     }
-    function defeat()    { var a = _load('Wrong Error.wav'); a.volume=1.0; a.currentTime=0; a.play().catch(function(){}); }
-    function click()     { var a = _load('back_style_2_003.wav'); a.volume=1.0; a.currentTime=0; a.play().catch(function(){}); }
+    function defeat()    { if (!_enabled) return; var a = _load('Wrong Error.wav'); a.volume=1.0; a.currentTime=0; a.play().catch(function(){}); }
+    function click()     { if (!_enabled) return; var a = _load('back_style_2_003.wav'); a.volume=1.0; a.currentTime=0; a.play().catch(function(){}); }
 
     // ======== 背景音乐 ========
     var _bgm = null;
