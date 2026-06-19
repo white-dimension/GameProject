@@ -748,7 +748,7 @@ window.UISystem = (function () {
 
             // 名称 + 目标标记
             var nameClr = dead ? 'var(--text-disabled)' : mclr;
-            var raceNames = { mutant: '异变者', swarm: '寄生群落', ember: '机械余烬' };
+            var raceNames = _RACE_NAMES;
             card.innerHTML += '<div class="txt-md txt-bold" style="margin-top:8px;color:' + nameClr + ';display:flex;align-items:center;justify-content:center;">' +
                 (isTarget && !dead && !isVictory ? '<span style="color:var(--accent-red);margin-right:4px;">▸</span> ' : '') + mon.name + affixIcons + '</div>' +
                 '<div class="txt-xs" style="margin-top:2px;color:' + (dead ? 'var(--text-disabled)' : mclr) + ';opacity:0.7;">' + (raceNames[md.race] || '') + '</div>';
@@ -1024,9 +1024,9 @@ window.UISystem = (function () {
                         var pkeys = ['4','5','6'];
                         var pid = gs.inventory.potions[idx];
                         if (pid && !isVictory) {
-                            var pt = GD().POTIONS[pid]; if (!pt) return '';
-                            return '<div data-key="' + pkeys[idx] + '" class="help-tip" style="background:var(--bg-card);border:1px solid rgba(156,39,176,0.3);border-radius:4px;padding:4px 14px;" data-tip="<b style=color:var(--accent-purple)>' + pt.name + '</b>&#10;<span style=color:var(--accent-green)>' + (pt.effect.desc || '') + '</span>&#10;<span style=color:var(--accent-purple)>毒性+' + pt.toxicity + '</span>&#10;<span style=color:var(--accent-red)>' + (pt.sideEffect && pt.sideEffect.desc ? pt.sideEffect.desc : '') + '</span>">' +
-                                '<span class="txt-xs txt-bold" style="color:var(--accent-purple);">[' + pkeys[idx] + '] ' + pt.name + '</span> <span class="txt-xs txt-dim">毒性+' + pt.toxicity + '</span></div>';
+                            var pd = _buildPotionDetail(pid); if (!pd) return '';
+                            return '<div data-key="' + pkeys[idx] + '" class="help-tip" style="background:var(--bg-card);border:1px solid rgba(156,39,176,0.3);border-radius:4px;padding:4px 14px;" data-tip="' + pd.tooltip + '">' +
+                                '<span class="txt-xs txt-bold" style="color:var(--accent-purple);">[' + pkeys[idx] + '] ' + pd.name + '</span> <span class="txt-xs txt-dim">毒性+' + pd.toxicity + '</span></div>';
                         } else {
                             return '<div style="background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;padding:4px 14px;opacity:0.4;">' +
                                 '<span class="txt-xs txt-dim">[' + pkeys[idx] + '] 未装备魔药</span></div>';
@@ -1067,12 +1067,11 @@ window.UISystem = (function () {
             // 魔药按钮
             if (!isVictory) {
                 var potions = gs.inventory.potions || [];
-                var potData = GD().POTIONS || {};
                 potions.forEach(function(pid, pidx) {
-                    var pt = potData[pid]; if (!pt) return;
+                    var pd = _buildPotionDetail(pid); if (!pd) return;
                     var pkeys = ['4','5','6'];
                     var pb = _ce('button', 'btn btn-purple btn-battle-card');
-                    pb.innerHTML = '<span class="txt-sm txt-bold">[' + pkeys[pidx] + '] ' + pt.name + '</span><span class="txt-xs">毒性+' + pt.toxicity + '</span>';
+                    pb.innerHTML = '<span class="txt-sm txt-bold">[' + pkeys[pidx] + '] ' + pd.name + '</span><span class="txt-xs">毒性+' + pd.toxicity + '</span>';
                     pb.onclick = function() { this.style.transform = 'translateY(2px)'; this.style.filter = 'brightness(0.8)'; setTimeout(function() { CS().playCard(null, pid); }, 80); };
                     bar.appendChild(pb);
                 });
@@ -1261,7 +1260,7 @@ window.UISystem = (function () {
         var killed = gs.bestiary.killCount || {};
         var research = gs.bestiary.researchLevels || {};
         var tierNames = { common: '普通', elite: '精英', world_boss: '世界首领' };
-        var raceNames = { mutant: '异变者', swarm: '寄生群落', ember: '机械余烬' };
+        var raceNames = _RACE_NAMES;
         var raceIcons = { mutant: 'icon-mutant', swarm: 'icon-swarm', ember: 'icon-ember' };
 
         ['mutant','swarm','ember'].forEach(function(race) {
@@ -1436,7 +1435,7 @@ window.UISystem = (function () {
         // 器官状态
         var organHTML = '<div style="padding:15px 20px;background:rgba(0,255,136,0.03);border:1px solid rgba(0,255,136,0.15);border-radius:6px;display:flex;flex-direction:column;gap:10px;">' +
             '<div class="txt-sm txt-green txt-bold">> 已挂载器官状态</div>';
-        var organNames = { predatory_organ: '捕食器官', chitin_epidermis: '生物表皮', gland_core: '腺体核心' };
+        var organNames = _ORGAN_NAMES;
         var organClrs2 = { '暴君核心': { hex: '#ff6b4a', bg: 'rgba(255,107,74,0.08)', bd: 'rgba(255,107,74,0.2)' }, '蜂后髓核': { hex: '#9acd32', bg: 'rgba(154,205,50,0.08)', bd: 'rgba(154,205,50,0.2)' }, '高能电泳核': { hex: '#4ab8ff', bg: 'rgba(74,184,255,0.08)', bd: 'rgba(74,184,255,0.2)' } };
         ['predatory_organ', 'chitin_epidermis', 'gland_core'].forEach(function(s) {
             var d = p[s];
@@ -1468,7 +1467,7 @@ window.UISystem = (function () {
         activeRaces.sort(function(a,b){ return (racePriority[a]||99) - (racePriority[b]||99); });
         var mk = activeRaces.length >= 2 ? [activeRaces[0], activeRaces[1]].sort().join('+') : '';
         var races = ['mutant', 'swarm', 'ember'];
-        var raceNames = { mutant: '异变者', swarm: '寄生群落', ember: '机械余烬' };
+        var raceNames = _RACE_NAMES;
         var raceClrs = { mutant: { hex: '#ff6b4a', bg: 'rgba(255,107,74,0.08)', bd: 'rgba(255,107,74,0.2)', txt: '#ff6b4a' }, swarm: { hex: '#9acd32', bg: 'rgba(154,205,50,0.08)', bd: 'rgba(154,205,50,0.2)', txt: '#9acd32' }, ember: { hex: '#4ab8ff', bg: 'rgba(74,184,255,0.08)', bd: 'rgba(74,184,255,0.2)', txt: '#4ab8ff' } };
         var dc = mk ? GD().DUAL_CLASSES[mk] : null;
         var selRace = activeRaces[0] || 'mutant';
@@ -2143,7 +2142,7 @@ window.UISystem = (function () {
         box.style.cssText = 'width:min(500px,90vw);background:var(--bg-modal);border:2px solid var(--accent-green);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
         var head = _ce('div');
         head.style.cssText = 'padding:14px 20px;background:rgba(0,255,136,0.05);border-bottom:1px solid var(--accent-green);display:flex;justify-content:space-between;align-items:center;';
-        var slotNames = { predatory_organ: '捕食器官', chitin_epidermis: '生物表皮', gland_core: '腺体核心' };
+        var slotNames = _ORGAN_NAMES;
         head.innerHTML = '<div class="txt-md txt-green txt-bold">[ 选择组件 ]</div><div class="txt-xs txt-dim">' + (slotNames[slot] || slot) + ' 槽' + (socketIndex+1) + '</div><button class="btn btn-blue btn-sm" onclick="UISystem.closeModal();UISystem.showReorganizeModal();">取消</button>';
         box.appendChild(head);
         var body = _ce('div');
@@ -2371,6 +2370,64 @@ window.UISystem = (function () {
         return detail;
     };
 
+    // --- 种族/专精通用的颜色和名称映射 ---
+    var _RACE_COLORS = {
+        mutant: { hex: '#ff6b4a', bg: 'rgba(255,107,74,0.08)', bd: 'rgba(255,107,74,0.2)' },
+        swarm:  { hex: '#9acd32', bg: 'rgba(154,205,50,0.08)', bd: 'rgba(154,205,50,0.2)' },
+        ember:  { hex: '#4ab8ff', bg: 'rgba(74,184,255,0.08)', bd: 'rgba(74,184,255,0.2)' }
+    };
+    var _RACE_NAMES = { mutant: '异变者', swarm: '寄生群落', ember: '机械余烬' };
+    var _RACE_ICONS = { mutant: 'icon-mutant', swarm: 'icon-swarm', ember: 'icon-ember' };
+    var _ORGAN_NAMES = { predatory_organ: '捕食器官', chitin_epidermis: '生物表皮', gland_core: '腺体核心' };
+
+    // 构建专精详情
+    var _buildMasteryDetail = function(race) {
+        var md = (GD().MASTERIES || {})[race];
+        if (!md) return null;
+        var rc = _RACE_COLORS[race] || _RACE_COLORS.mutant;
+        var parts = [];
+        if (md.statsPerPoint) {
+            if (md.statsPerPoint.hp_max) parts.push('生命+' + md.statsPerPoint.hp_max);
+            if (md.statsPerPoint.atk) parts.push('攻击+' + md.statsPerPoint.atk);
+            if (md.statsPerPoint.def) parts.push('防御+' + md.statsPerPoint.def);
+            if (md.statsPerPoint.process_max) parts.push('进程上限+' + md.statsPerPoint.process_max);
+        }
+        return {
+            race: race, name: md.name, color: rc.hex, bg: rc.bg, bd: rc.bd,
+            statText: parts.join(' · '),
+            traits: (md.traits || []).join('、'),
+            tooltip: '<b style="color:' + rc.hex + '">' + md.name + '</b>&#10;' + parts.join(' · ') + '&#10;特性：' + (md.traits || []).join('、')
+        };
+    };
+
+    // 构建双流派详情
+    var _buildDualClassDetail = function(race1, race2) {
+        if (!race1 || !race2) return null;
+        var key = [race1, race2].sort().join('+');
+        var dc = (GD().DUAL_CLASSES || {})[key];
+        if (!dc) return null;
+        return {
+            key: key, name: dc.name, passive: dc.passive, passiveDesc: dc.passiveDesc,
+            tooltip: '<b>' + dc.name + '：</b>&#10;<b>' + dc.passive + '</b>&#10;' + dc.passiveDesc
+        };
+    };
+
+    // --- 魔药通用模板 ---
+    var _buildPotionDetail = function(pid) {
+        var potData = GD().POTIONS || {};
+        var pt = potData[pid];
+        if (!pt) return null;
+        return {
+            id: pid,
+            name: pt.name,
+            toxicity: pt.toxicity,
+            effectDesc: pt.effect.desc || '',
+            sideDesc: pt.sideEffect.desc || '',
+            cost: pt.toxicity >= 35 ? 3 : 2,
+            tooltip: '<b style="font-size:14px;color:var(--accent-purple);">' + pt.name + '：</b>&#10;<span style="font-size:14px;">' + (pt.effect.desc || '') + '</span>&#10;<b>副作用：</b>' + (pt.sideEffect.desc || '') + '&#10;毒性+' + pt.toxicity + ' | 消耗组件 ×' + (pt.toxicity >= 35 ? 3 : 2)
+        };
+    };
+
     // 构建完整tooltip文本
     var _buildCompTooltip = function(cid) {
         var d = _buildCompDetail(cid);
@@ -2414,7 +2471,7 @@ window.UISystem = (function () {
         _modalOverlay.appendChild(wrapper);
         var body = _ce('div');
         body.style.cssText = 'padding:30px;display:flex;flex-direction:column;gap:20px;overflow-y:auto;flex:1;';
-        var organNames = { predatory_organ: '捕食器官', chitin_epidermis: '生物表皮', gland_core: '腺体核心' };
+        var organNames = _ORGAN_NAMES;
         var _organColors = { '暴君核心': { hex: '#ff6b4a', bg: 'rgba(255,107,74,0.12)', bd: 'rgba(255,107,74,0.25)' }, '蜂后髓核': { hex: '#9acd32', bg: 'rgba(154,205,50,0.12)', bd: 'rgba(154,205,50,0.25)' }, '高能电泳核': { hex: '#4ab8ff', bg: 'rgba(74,184,255,0.12)', bd: 'rgba(74,184,255,0.25)' }, _default: { hex: 'var(--accent-green)', bg: 'rgba(0,255,136,0.08)', bd: 'rgba(0,255,136,0.2)' } };
         var inv = gs.inventory.components;
         var comps = GD().COMPONENTS || {};
@@ -2501,14 +2558,13 @@ window.UISystem = (function () {
         var potIds = ['POT_BERSERK', 'POT_ANTIDOTE', 'POT_SHIELD_CORE', 'POT_HEAL', 'POT_DEFENSE', 'POT_RAM'];
         var hasCrafted = false;
         potIds.forEach(function(pid) {
-            var pt = potData[pid]; if (!pt) return;
+            var pd = _buildPotionDetail(pid); if (!pd) return;
             var totalMats = Object.values(inv).reduce(function(a,b){return a+b;},0);
-            var cost = pt.toxicity >= 35 ? 3 : 2;
-            var canCraft = totalMats >= cost && gs.inventory.potions.length < 3;
+            var canCraft = totalMats >= pd.cost && gs.inventory.potions.length < 3;
             hasCrafted = true;
-            potHTML += '<span class="help-tip" style="padding:6px 10px;background:rgba(206,147,216,0.1);border:1px solid rgba(206,147,216,0.2);border-radius:4px;" data-tip="<b style=\'font-size:14px;color:var(--accent-purple);\'>' + pt.name + '：</b>&#10;<span style=\'font-size:14px;\'>' + (pt.effect.desc || '') + '</span>&#10;<b>副作用：</b>' + (pt.sideEffect.desc || '') + '&#10;毒性+' + pt.toxicity + ' | 炼制消耗任意组件 ×' + cost + (canCraft ? '' : '（不足，库存' + totalMats + '）') + '">' +
-                '<span class="txt-xs txt-bold" style="color:var(--accent-purple);">' + pt.name + '</span>' +
-                '<span class="txt-xs txt-dim"> 毒性+' + pt.toxicity + '</span>' +
+            potHTML += '<span class="help-tip" style="padding:6px 10px;background:rgba(206,147,216,0.1);border:1px solid rgba(206,147,216,0.2);border-radius:4px;" data-tip="' + pd.tooltip + (canCraft ? '' : '（不足，库存' + totalMats + '）') + '">' +
+                '<span class="txt-xs txt-bold" style="color:var(--accent-purple);">' + pd.name + '</span>' +
+                '<span class="txt-xs txt-dim"> 毒性+' + pd.toxicity + '</span>' +
                 (canCraft ? ' <button class="btn btn-purple" style="padding:1px 8px;font-size:12px;" onclick="GameState.craftPotion(\'' + pid + '\');UISystem.showReorganizeModal();">炼制</button>' : '') +
                 '</span>';
         });
@@ -2525,6 +2581,39 @@ window.UISystem = (function () {
         }
         potSection.innerHTML = potHTML;
         body.appendChild(potSection);
+
+        // --- 基因涂层涂抹 ---
+        var coatSection = _ce('div');
+        coatSection.style.cssText = 'padding:15px 20px;background:rgba(255,213,79,0.03);border:1px solid rgba(255,213,79,0.15);border-radius:6px;';
+        var coatings = GD().COATINGS || {};
+        var raceNames2 = _RACE_NAMES;
+        var raceClrs2 = _RACE_COLORS;
+        var coatHTML = '<div class="txt-xs txt-gold txt-bold" style="margin-bottom:10px;">> 基因涂层涂抹（对特定种族造成融毁打击）</div>';
+        if (gs.player.activeCoating) {
+            var ac = coatings[gs.player.activeCoating];
+            coatHTML += '<div class="txt-xs" style="margin-bottom:8px;color:' + (ac ? (raceClrs2[ac.targetRace]||{}).hex || 'var(--accent-yellow)' : 'var(--text-dim)') + ';">已涂抹: ' + (ac ? ac.name : gs.player.activeCoating) + ' · 剩余 ' + gs.player.coatingTurnsLeft + ' 回合</div>';
+        }
+        coatHTML += '<div style="display:flex;flex-wrap:wrap;gap:8px;">';
+        var hasCoatings = false;
+        Object.keys(coatings).forEach(function(coatId) {
+            var ct = coatings[coatId];
+            var rc = raceClrs2[ct.targetRace] || { hex: 'var(--accent-yellow)', bg: 'rgba(255,213,79,0.08)', bd: 'rgba(255,213,79,0.2)' };
+            var costParts = []; Object.keys(ct.cost).forEach(function(m) { costParts.push(m + ' ×' + ct.cost[m]); });
+            var canAfford = true; Object.keys(ct.cost).forEach(function(m) { if (!inv[m] || inv[m] < ct.cost[m]) canAfford = false; });
+            var effectParts = [];
+            if (ct.effect.damageBonus) effectParts.push('伤害+' + Math.round(ct.effect.damageBonus*100) + '%');
+            if (ct.effect.ignoreDefense) effectParts.push('无视防御');
+            if (ct.effect.toxinBonus) effectParts.push('毒素+' + Math.round(ct.effect.toxinBonus*100) + '%');
+            if (ct.effect.toxinImmune) effectParts.push('免疫中毒');
+            if (ct.effect.shieldStrip) effectParts.push('剥离' + ct.effect.shieldStrip + '护盾');
+            var tip = '<b>' + ct.name + '</b>&#10;目标种族：' + (raceNames2[ct.targetRace]||ct.targetRace) + '&#10;效果：' + effectParts.join(' · ') + '&#10;持续 ' + ct.duration + ' 回合&#10;消耗：' + costParts.join(' + ');
+            coatHTML += '<button class="btn btn-sm help-tip" style="background:' + rc.bg + ';border:1px solid ' + rc.bd + ';color:' + rc.hex + ';' + (canAfford ? '' : 'opacity:0.4;') + '" data-tip="' + tip + '" ' + (canAfford ? 'onclick="GameState.applyCoating(\'' + coatId + '\');UISystem.render();UISystem.showReorganizeModal();"' : 'disabled') + '>' + ct.name + '</button>';
+            hasCoatings = true;
+        });
+        if (!hasCoatings) coatHTML += '<span class="txt-xs txt-dim">暂无可用涂层配方</span>';
+        coatHTML += '</div>';
+        coatSection.innerHTML = coatHTML;
+        body.appendChild(coatSection);
 
         // --- [新增] 器官深度同调 (消耗同名器官提升 Lv) ---
         var organSyncSection = _ce('div');
