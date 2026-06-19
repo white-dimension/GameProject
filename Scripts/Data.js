@@ -575,7 +575,12 @@ window.GameData = (function () {
         },
         '原始基因': {
             id: '原始基因',
-            description: '击杀区域领主获得。用于高阶器官同调升级。'
+            allowedSlots: ['predatory_organ', 'chitin_epidermis', 'gland_core'],
+            affixes: {
+                atkBonus: 5,
+                defBonus: 3,
+                shieldBonus: 20
+            }
         }
     };
 
