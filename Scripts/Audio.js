@@ -123,10 +123,21 @@ window.Sound = (function () {
         _bgmType = null;
     }
 
+    function toggleMute() {
+        _enabled = !_enabled;
+        if (!_enabled) {
+            stopBGM();
+        }
+        return _enabled;
+    }
+
+    function isMuted() { return !_enabled; }
+
     return {
         attack: attack, monster: monster, hit: hit, electric: electric,
         victory: victory, defeat: defeat, click: click,
         playExploreBGM: playExploreBGM, playBattleBGM: playBattleBGM,
-        stopBGM: stopBGM
+        stopBGM: stopBGM,
+        toggleMute: toggleMute, isMuted: isMuted
     };
 })();

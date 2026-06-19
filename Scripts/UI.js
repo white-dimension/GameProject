@@ -409,7 +409,10 @@ window.UISystem = (function () {
             _hudBarFill((p.level >= 30 ? 1 : p.xp), (p.level >= 30 ? 1 : p.xpToNext), 'xp-fill') +
             '</div>' +
             '</div>' +
-            '<div class="hud-col hud-col-r">' +
+            '<div class="hud-col hud-col-r" style="display:flex;gap:6px;align-items:center;">' +
+            '<button class="btn btn-sm" id="btn-sound" onclick="UISystem.toggleSound()" style="width:32px;padding:0;">' +
+            (window.Sound && window.Sound.isMuted() ? '<span style="text-decoration:line-through;opacity:0.4;">♪</span>' : '♪') +
+            '</button>' +
             '<button class="btn btn-blue btn-sm" onclick="UISystem.showHelpPanel()">?</button>' +
             '</div>';
     }
@@ -1906,6 +1909,20 @@ window.UISystem = (function () {
         setTimeout(function() { document.body.removeChild(el); }, 2100);
     }
     function closeModal() { _modalOverlay.style.display = 'none'; }
+
+    function toggleSound() {
+        var muted = window.Sound && window.Sound.toggleMute();
+        var btn = document.getElementById('btn-sound');
+        if (btn) {
+            btn.innerHTML = muted ? '<span style="text-decoration:line-through;opacity:0.4;">♪</span>' : '♪';
+        }
+        if (_bgVideo) {
+            _bgVideo.muted = muted;
+            if (!muted && _bgVideo.style.display !== 'none') {
+                _bgVideo.play().catch(function(){});
+            }
+        }
+    }
     function resetGame() {
         if (confirm('确认重置全部序列数据？\n\n此操作将清除所有存档、装备和探索进度，且不可撤销。')) {
             GameState.reset();
@@ -2500,6 +2517,6 @@ window.UISystem = (function () {
         }, 20);
     }
 
-    return { init: init, render: render, _foldSection: _foldSection, showStatusModal: showStatusModal, showReorganizeModal: showReorganizeModal, showBestiaryModal: showBestiaryModal, showDungeonWarning: showDungeonWarning, showSaveModal: showSaveModal, closeModal: closeModal, closeIntro: closeIntro, resetGame: resetGame, triggerShake: triggerShake, showDamageFloat: showDamageFloat, showNotification: showNotification, showHelpPanel: showHelpPanel, _claimReward: _claimReward, _claimAllTasks: _claimAllTasks, _showSynthesizeModal: _showSynthesizeModal, _showSocketPicker: _showSocketPicker, _showOrganPicker: _showOrganPicker, showEventModal: showEventModal };
+    return { init: init, render: render, _foldSection: _foldSection, showStatusModal: showStatusModal, showReorganizeModal: showReorganizeModal, showBestiaryModal: showBestiaryModal, showDungeonWarning: showDungeonWarning, showSaveModal: showSaveModal, closeModal: closeModal, closeIntro: closeIntro, resetGame: resetGame, triggerShake: triggerShake, showDamageFloat: showDamageFloat, showNotification: showNotification, showHelpPanel: showHelpPanel, toggleSound: toggleSound, _claimReward: _claimReward, _claimAllTasks: _claimAllTasks, _showSynthesizeModal: _showSynthesizeModal, _showSocketPicker: _showSocketPicker, _showOrganPicker: _showOrganPicker, showEventModal: showEventModal };
 }
 )();
