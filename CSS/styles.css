@@ -37,10 +37,14 @@ body, html {
     width: 100vw; height: 100vh;
     background: var(--bg-deep);
     overflow: hidden;
-    font-family: "Sarasa Mono SC", "Space Mono", sans-serif;
-    color: var(--text-main);
-    font-size: 15px; /* 基准字号提升至 15px */
+    font-size: 15px;
     line-height: 1.6;
+    font-family: "Sarasa Mono SC", "Space Mono", SystemSans, sans-serif;
+    color: var(--text-main);
+}
+
+/* 罗马数字强制走系统无衬线（unicode-range拦截web font自带字形） */
+@font-face { font-family: 'SystemSans'; src: local('system-ui'); unicode-range: U+2160-218B; }
 }
 
 /* 默认：绿色扫描准星 */
