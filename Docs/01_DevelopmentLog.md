@@ -1,6 +1,6 @@
 # 01 — 开发日志
 
-## V2.1 — 2026-06-19 🎬 视听升级
+## V2.1 — 2026-06-19 🎬 视听升级+组件重构 → [正式版]
 
 ### 多场景背景视频系统
 - 探索/战斗界面从静态PNG改为全屏循环MP4视频，Gemini生成
@@ -86,6 +86,15 @@
 - Boss卡片立绘做背景 + linear-gradient遮罩
 - 怪物伤害数字定位到对应卡牌上方(data-monster-idx)
 - 路径卡片hover微调：同色底0.8→0.7，绿色仅边框
+
+### 技能/意图统一模板
+- _INTENT_COLORS: 意图类型→颜色映射，消除2处重复
+- _DEFAULT_SKILLS: 默认技能定义数组，替代硬编码defs
+- _BOSS_ORGAN_COLORS / _getOrganColor(): boss器官色+按钮类，消除5处分散定义
+- _buildSkillTooltip / _getSkillDef: 技能详情模板函数
+
+### 术语优化
+- "毒素自溶" → "毒素发作"（更直观易懂）
 
 ---
 
