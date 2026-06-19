@@ -1,4 +1,4 @@
-# Docs/Dual_Mastery_&_Skills.md - 🔀 双毒株流派专精与卡牌化学连招规范 (v3.10)
+# 06 — 双毒株流派专精与卡牌化学连招规范
 
 ## 1. 原生毒株基底设计 (Base Mastery Foundation)
 
