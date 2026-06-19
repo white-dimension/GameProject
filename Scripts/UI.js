@@ -71,26 +71,46 @@ window.UISystem = (function () {
         _root.innerHTML = '';
         _root.style.cssText = 'width:100vw;height:100vh;display:flex;flex-direction:column;position:relative;background:var(--bg-deep);';
 
+        // 视频循环淡入淡出辅助
+        var _setupVideoLoop = function(video) {
+            video.loop = false;
+            video.style.transition = 'opacity 0.4s ease';
+            video.addEventListener('timeupdate', function() {
+                if (video._fading || !video.duration) return;
+                if (video.currentTime > video.duration - 0.5) {
+                    video._fading = true;
+                    video.style.opacity = '0';
+                    clearTimeout(video._fadeTimer);
+                    video._fadeTimer = setTimeout(function() {
+                        video.currentTime = 0;
+                        video.style.opacity = '1';
+                        video.play().catch(function(){});
+                        video._fading = false;
+                    }, 450);
+                }
+            });
+        };
+
         // 全屏背景视频 — 探索
         _bgVideo = _ce('video');
         _bgVideo.src = '../Assets/Backgrounds/explore.mp4';
-        _bgVideo.loop = true;
         _bgVideo.muted = true;
         _bgVideo.volume = 1.0;
         _bgVideo.autoplay = false;
         _bgVideo.playsInline = true;
         _bgVideo.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;display:none;pointer-events:none;filter:brightness(0.5);';
+        _setupVideoLoop(_bgVideo);
         _root.appendChild(_bgVideo);
 
         // 全屏背景视频 — 战斗
         _bgBattleVideo = _ce('video');
         _bgBattleVideo.src = '../Assets/Backgrounds/battle.mp4';
-        _bgBattleVideo.loop = true;
         _bgBattleVideo.muted = true;
         _bgBattleVideo.volume = 1.0;
         _bgBattleVideo.autoplay = false;
         _bgBattleVideo.playsInline = true;
         _bgBattleVideo.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;display:none;pointer-events:none;filter:brightness(0.5);';
+        _setupVideoLoop(_bgBattleVideo);
         _root.appendChild(_bgBattleVideo);
 
         var topBar = _ce('div', 'hud-top');
@@ -343,12 +363,14 @@ window.UISystem = (function () {
                 _root.className = 'bg-nest';
             } else {
                 _bgBattleVideo.style.display = 'block';
+                _bgBattleVideo.style.opacity = '1';
                 _bgBattleVideo.play().catch(function(){});
                 _root.className = '';
             }
         } else {
             _bgBattleVideo.style.display = 'none';
             _bgVideo.style.display = 'block';
+            _bgVideo.style.opacity = '1';
             _bgVideo.play().catch(function(){});
             _root.className = '';
         }
@@ -1892,6 +1914,7 @@ window.UISystem = (function () {
         _modalOverlay.style.display = 'none';
         _wakingUp = true;
         _bgVideo.style.display = 'block';
+        _bgVideo.style.opacity = '1';
         _bgVideo.muted = false;
         _bgVideo.play().catch(function(){});
         _root.className = '';
