@@ -1854,6 +1854,8 @@ window.UISystem = (function () {
         _modalOverlay.style.display = 'none';
         _wakingUp = true;
         _viewport.className = 'main-viewport bg-explore';
+        // 在用户点击手势上下文内激活音频，解除浏览器自动播放限制
+        if (window.Sound) { window.Sound.playExploreBGM(); window.Sound.click(); }
         // [修复] 不再手动设置 _isFirstLoad = false，让 render() 统一处理启动序列
         UISystem.render();
     }
