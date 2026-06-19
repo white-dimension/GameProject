@@ -103,6 +103,17 @@ window.UISystem = (function () {
         _bgBattleVideo = _createBgVideo('../Assets/Backgrounds/battle.mp4');
         var _bgVideos = [_bgVideo, _bgBattleVideo];
 
+        // 显示背景视频（尊重静音状态）
+        var _showBgVideo = function(v) {
+            v.style.display = 'block';
+            v.style.opacity = '1';
+            v.muted = window.Sound ? window.Sound.isMuted() : false;
+            v.play().catch(function(){});
+        };
+        var _hideBgVideo = function(v) {
+            v.style.display = 'none';
+        };
+
         var topBar = _ce('div', 'hud-top');
         topBar.style.cssText = 'position:relative;display:flex;flex-direction:row;justify-content:center;padding:8px 25px 4px 25px;min-height:60px;background:rgba(10,14,20,0.65);border-bottom:1px solid var(--border-dim);box-shadow: 0 4px 20px rgba(0,0,0,0.5);z-index:500;';
         _root.appendChild(topBar);
@@ -340,28 +351,24 @@ window.UISystem = (function () {
         }
 
         var inBattle = CS() && CS().isInBattle();
-        // 多场景背景切换：探索/战斗=视频，Boss=静态图
+        // 多场景背景切换
         if (inBattle) {
-            _bgVideo.style.display = 'none';
+            _hideBgVideo(_bgVideo);
             var bs = CS().getBattleState();
             var isBoss = bs && bs.monsters && bs.monsters.some(function(mon) {
                 var md = GD().MONSTERS[mon.id];
                 return md && md.tier === 'world_boss';
             });
             if (isBoss) {
-                _bgBattleVideo.style.display = 'none';
+                _hideBgVideo(_bgBattleVideo);
                 _root.className = 'bg-nest';
             } else {
-                _bgBattleVideo.style.display = 'block';
-                _bgBattleVideo.style.opacity = '1';
-                _bgBattleVideo.play().catch(function(){});
+                _showBgVideo(_bgBattleVideo);
                 _root.className = '';
             }
         } else {
-            _bgBattleVideo.style.display = 'none';
-            _bgVideo.style.display = 'block';
-            _bgVideo.style.opacity = '1';
-            _bgVideo.play().catch(function(){});
+            _hideBgVideo(_bgBattleVideo);
+            _showBgVideo(_bgVideo);
             _root.className = '';
         }
         var taskEl = document.getElementById('ui-task-panel');
@@ -1857,8 +1864,8 @@ window.UISystem = (function () {
 
     function _showIntro(gs) {
         _introActive = true;
-        _bgVideo.style.display = 'none';
-        _bgBattleVideo.style.display = 'none';
+        _hideBgVideo(_bgVideo);
+        _hideBgVideo(_bgBattleVideo);
         _root.className = 'bg-title';
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
@@ -1903,10 +1910,7 @@ window.UISystem = (function () {
         var gs = GS(); if (gs) { gs.player.introSeen = true; GameState.save(); }
         _modalOverlay.style.display = 'none';
         _wakingUp = true;
-        _bgVideo.style.display = 'block';
-        _bgVideo.style.opacity = '1';
-        _bgVideo.muted = false;
-        _bgVideo.play().catch(function(){});
+        _showBgVideo(_bgVideo);
         _root.className = '';
         // [修复] 不再手动设置 _isFirstLoad = false，让 render() 统一处理启动序列
         UISystem.render();
@@ -1939,13 +1943,9 @@ window.UISystem = (function () {
             btn.innerHTML = muted ? 'M' : '♪';
             btn.className = muted ? 'btn btn-gray btn-sm' : 'btn btn-blue btn-sm';
         }
-        (_bgVideos || [_bgVideo, _bgBattleVideo]).forEach(function(v) {
-            if (v) {
-                v.muted = muted;
-                if (!muted && v.style.display !== 'none') {
-                    v.style.opacity = '1';
-                    v.play().catch(function(){});
-                }
+        _bgVideos.forEach(function(v) {
+            if (v && v.style.display !== 'none') {
+                _showBgVideo(v);
             }
         });
     }
