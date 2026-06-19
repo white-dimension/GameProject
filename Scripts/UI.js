@@ -183,7 +183,7 @@ window.UISystem = (function () {
         _root.appendChild(_juiceContainer);
 
         document.addEventListener('click', function(e) {
-            var t = e.target.closest && (e.target.closest('button:not(:disabled)') || e.target.closest('.path-card') || e.target.closest('.monster-card'));
+            var t = e.target.closest && (e.target.closest('button, .btn, .path-card, .monster-card'));
             if (t && window.Sound) window.Sound.click();
         });
         document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
