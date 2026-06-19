@@ -81,6 +81,14 @@ window.UISystem = (function () {
         _bgVideo.playsInline = true;
         _bgVideo.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;display:none;pointer-events:none;filter:brightness(0.5);';
         _root.appendChild(_bgVideo);
+        // 首次用户点击解除视频静音（满足浏览器自动播放策略）
+        document.addEventListener('click', function unmuteVideo() {
+            if (_bgVideo.muted) {
+                _bgVideo.muted = false;
+                _bgVideo.volume = 1.0;
+            }
+            document.removeEventListener('click', unmuteVideo);
+        });
 
         var topBar = _ce('div', 'hud-top');
         topBar.style.cssText = 'position:relative;display:flex;flex-direction:row;justify-content:center;padding:8px 25px 4px 25px;min-height:60px;background:rgba(10,14,20,0.65);border-bottom:1px solid var(--border-dim);box-shadow: 0 4px 20px rgba(0,0,0,0.5);z-index:500;';
@@ -330,7 +338,6 @@ window.UISystem = (function () {
             _root.className = isBoss ? 'bg-nest' : 'bg-battle';
         } else {
             _bgVideo.style.display = 'block';
-            _bgVideo.muted = false;
             _bgVideo.play().catch(function(){});
             _root.className = '';
         }
