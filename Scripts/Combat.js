@@ -133,6 +133,7 @@ window.CombatSystem = (function () {
         if (!_battleState || !_battleState.monsters) return;
         var alive = _getAliveMonsters();
         if (alive.length === 0) return;
+        var prev = _battleState.currentTarget;
         if (index >= 0 && index < _battleState.monsters.length && _battleState.monsters[index].hp > 0) {
             _battleState.currentTarget = index;
         } else {
@@ -140,6 +141,7 @@ window.CombatSystem = (function () {
                 if (_battleState.monsters[i].hp > 0) { _battleState.currentTarget = i; break; }
             }
         }
+        if (_battleState.currentTarget !== prev && window.Sound) window.Sound.monster();
         window.UISystem.render();
     }
 
