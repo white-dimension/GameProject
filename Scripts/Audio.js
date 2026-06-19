@@ -61,11 +61,30 @@ window.Sound = (function () {
     function _fadeIn(a, targetVol) {
         _stopFade();
         a.volume = 0;
-        a.play().catch(function(){});
-        _bgmFade = setInterval(function() {
-            if (a.volume < targetVol - 0.02) { a.volume = Math.min(targetVol, a.volume + 0.02); }
-            else { a.volume = targetVol; clearInterval(_bgmFade); _bgmFade = null; }
-        }, 80);
+        var startFade = function() {
+            _stopFade();
+            _bgmFade = setInterval(function() {
+                if (a.volume < targetVol - 0.02) { a.volume = Math.min(targetVol, a.volume + 0.02); }
+                else { a.volume = targetVol; clearInterval(_bgmFade); _bgmFade = null; }
+            }, 80);
+        };
+        var p = a.play();
+        if (p && p.catch) {
+            p.then(function() {
+                startFade();
+            }).catch(function(err) {
+                // 浏览器自动播放拦截：等下一次用户点击后重试
+                var retry = function() {
+                    a.volume = 0;
+                    a.play().then(function() {
+                        startFade();
+                    }).catch(function(){});
+                };
+                document.addEventListener('click', retry, { once: true });
+            });
+        } else {
+            startFade();
+        }
     }
 
     function _switchBGM(src, vol, type) {
