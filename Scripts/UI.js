@@ -2396,7 +2396,7 @@ window.UISystem = (function () {
             race: race, name: md.name, color: rc.hex, bg: rc.bg, bd: rc.bd,
             statText: parts.join(' · '),
             traits: (md.traits || []).join('、'),
-            tooltip: '<b style="color:' + rc.hex + '">' + md.name + '</b>&#10;' + parts.join(' · ') + '&#10;特性：' + (md.traits || []).join('、')
+            tooltip: "<b style='color:" + rc.hex + "'>" + md.name + "</b>&#10;" + parts.join(' · ') + "&#10;特性：" + (md.traits || []).join('、')
         };
     };
 
@@ -2424,7 +2424,7 @@ window.UISystem = (function () {
             effectDesc: pt.effect.desc || '',
             sideDesc: pt.sideEffect.desc || '',
             cost: pt.toxicity >= 35 ? 3 : 2,
-            tooltip: '<b style="font-size:14px;color:var(--accent-purple);">' + pt.name + '：</b>&#10;<span style="font-size:14px;">' + (pt.effect.desc || '') + '</span>&#10;<b>副作用：</b>' + (pt.sideEffect.desc || '') + '&#10;毒性+' + pt.toxicity + ' | 消耗组件 ×' + (pt.toxicity >= 35 ? 3 : 2)
+            tooltip: "<b style='font-size:14px;color:var(--accent-purple);'>" + pt.name + "：</b>&#10;<span style='font-size:14px;'>" + (pt.effect.desc || '') + "</span>&#10;<b>副作用：</b>" + (pt.sideEffect.desc || '') + "&#10;毒性+" + pt.toxicity + " | 消耗组件 ×" + (pt.toxicity >= 35 ? 3 : 2)
         };
     };
 
