@@ -254,7 +254,7 @@ body::after {
     position: relative;
     text-align: left;
 }
-.path-card:hover { border-color: var(--accent-green); background: rgba(100, 200, 150, 0.06); }
+.path-card:hover { border-color: var(--accent-green); background: rgba(5, 5, 10, 0.7); }
 .path-card .txt-dim { opacity: 0.65; }
 
 /* --- HUD 左中右三列布局 --- */
