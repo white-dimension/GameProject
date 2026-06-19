@@ -682,7 +682,7 @@ window.UISystem = (function () {
             // 选中怪物的意图详情横条（absolute 在卡片上方，不影响卡片位置）
             var curIntent = mon.intent;
             if (isTarget && !dead && !isVictory && curIntent) {
-                var intentClrs = { physical: 'var(--accent-red)', shield: 'var(--accent-blue)', toxin: 'var(--accent-purple)', electric: 'var(--accent-blue)', drain: 'var(--accent-purple)', summon: 'var(--accent-yellow)', scan: 'var(--accent-blue)', charge: 'var(--accent-orange)', stun: 'var(--accent-purple)', enrage: 'var(--accent-red)' };
+                var intentClrs = _INTENT_COLORS;
                 var iclr = intentClrs[curIntent.type] || 'var(--accent-red)';
                 var intentBar = _ce('div');
                 intentBar.style.cssText = 'position:absolute;bottom:calc(100% + 16px);left:0;right:0;background:rgba(255,255,255,0.03);border:1px solid ' + iclr + ';border-radius:4px;padding:8px 14px;';
@@ -755,7 +755,7 @@ window.UISystem = (function () {
 
             // 所有怪物显示简版意图标签
             if (mon.intent && !dead) {
-                var intentClrs2 = { physical: 'var(--accent-red)', shield: 'var(--accent-blue)', toxin: 'var(--accent-purple)', electric: 'var(--accent-blue)', drain: 'var(--accent-purple)', summon: 'var(--accent-yellow)', scan: 'var(--accent-blue)', charge: 'var(--accent-orange)', stun: 'var(--accent-purple)', enrage: 'var(--accent-red)' };
+                var intentClrs2 = _INTENT_COLORS;
                 var iclr2 = intentClrs2[mon.intent.type] || 'var(--accent-red)';
                 var labelText = mon.intent.label.replace(/<[^>]*>/g, '').trim();
                 card.innerHTML += '<div class="txt-xs" style="margin-top:6px;color:' + iclr2 + ';">' + labelText + '</div>';
@@ -1036,19 +1036,14 @@ window.UISystem = (function () {
             }
 
             var bos = GD().BOSS_ORGANS || {};
-            var defs = [
-                { s: 'predatory_organ', l: '捕食打击', c: 2, cls: 'btn-red', k: '1', i: 'icon-atk' },
-                { s: 'chitin_epidermis', l: '生物防御', c: 3, cls: 'btn-green', k: '2', i: 'icon-def' },
-                { s: 'gland_core', l: '腺体脉冲', c: 3, cls: 'btn-gold', k: '3', i: 'icon-gland' }
-            ];
-            var organRaceCls = { '暴君核心': 'btn-red', '蜂后髓核': 'btn-green', '高能电泳核': 'btn-blue' };
+            var defs = _DEFAULT_SKILLS;
             defs.forEach(function (btn) {
                 var eq = gs.player[btn.s].equipped;
                 var baseCost = btn.c;
                 if (eq && bos[eq] && bos[eq].skillName) {
                     btn.l = bos[eq].skillName;
                     baseCost = bos[eq].skillCost || btn.c;
-                    btn.cls = organRaceCls[eq] || btn.cls;
+                    btn.cls = _getOrganColor(eq).btnCls;
                 }
 
                 // [修复] 技能卡牌按钮消耗数值同步 Debuff 状态
@@ -2435,6 +2430,62 @@ window.UISystem = (function () {
     // 罗马数字强制无衬线显示
     var _fmtRoman = function(str) {
         return str.replace(/[ⅠⅡⅢ]/g, function(m) { return "<span style=font-family:sans-serif>" + m + "</span>"; });
+    };
+
+    // --- Boss器官颜色/职业映射 ---
+    var _BOSS_ORGAN_COLORS = {
+        '暴君核心': { hex: '#ff6b4a', bg: 'rgba(255,107,74,0.1)', bd: 'rgba(255,107,74,0.2)', btnCls: 'btn-red' },
+        '蜂后髓核': { hex: '#9acd32', bg: 'rgba(154,205,50,0.1)', bd: 'rgba(154,205,50,0.2)', btnCls: 'btn-green' },
+        '高能电泳核': { hex: '#4ab8ff', bg: 'rgba(74,184,255,0.1)', bd: 'rgba(74,184,255,0.2)', btnCls: 'btn-blue' },
+        _default: { hex: 'var(--accent-green)', bg: 'rgba(0,255,136,0.08)', bd: 'rgba(0,255,136,0.2)', btnCls: 'btn-green' }
+    };
+    var _getOrganColor = function(oid) { return _BOSS_ORGAN_COLORS[oid] || _BOSS_ORGAN_COLORS._default; };
+
+    // --- 怪物意图颜色映射 ---
+    var _INTENT_COLORS = {
+        physical: 'var(--accent-red)', shield: 'var(--accent-blue)', toxin: 'var(--accent-purple)',
+        electric: 'var(--accent-blue)', drain: 'var(--accent-purple)', summon: 'var(--accent-yellow)',
+        scan: 'var(--accent-blue)', charge: 'var(--accent-orange)', stun: 'var(--accent-purple)',
+        enrage: 'var(--accent-red)', spawn: 'var(--accent-purple)'
+    };
+
+    // --- 默认器官技能定义 ---
+    var _DEFAULT_SKILLS = [
+        { s: 'predatory_organ', l: '捕食打击', c: 2, cls: 'btn-red', k: '1', i: 'icon-atk' },
+        { s: 'chitin_epidermis', l: '生物防御', c: 3, cls: 'btn-green', k: '2', i: 'icon-def' },
+        { s: 'gland_core',       l: '腺体脉冲', c: 3, cls: 'btn-gold', k: '3', i: 'icon-gland' }
+    ];
+    var _getSkillDef = function(slot, equipped) {
+        var sd = _DEFAULT_SKILLS.find(function(d){ return d.s === slot; });
+        var bo = equipped ? (GD().BOSS_ORGANS||{})[equipped] : null;
+        return {
+            slot: slot, label: bo ? bo.skillName : (sd ? sd.l : ''),
+            cost: bo ? bo.skillCost : (sd ? sd.c : 0),
+            cls: bo ? _getOrganColor(equipped).btnCls : (sd ? sd.cls : ''),
+            key: sd ? sd.k : '', icon: sd ? sd.i : ''
+        };
+    };
+
+    // 构建技能详情tooltip
+    var _buildSkillTooltip = function(slot, equipped, gs) {
+        var sd = _getSkillDef(slot, equipped);
+        var bo = equipped ? (GD().BOSS_ORGANS||{})[equipped] : null;
+        var tip = '<b>' + sd.label + '</b>';
+        tip += '&#10;消耗 ' + sd.cost + ' 进程';
+        if (bo && bo.skillEffect) {
+            var se = bo.skillEffect;
+            if (se.baseMultiplier) tip += '&#10;伤害 ×' + se.baseMultiplier;
+            if (se.armorPenetration) tip += '&#10;破甲 ' + Math.round(se.armorPenetration*100) + '%';
+            if (se.chainTargets) tip += '&#10;链式溅射 ' + se.chainTargets + ' 目标';
+            if (se.summonCount) tip += '&#10;召唤 ' + se.summonCount + ' 只寄生幼虫';
+        } else if (slot === 'predatory_organ') {
+            tip += '&#10;造成物理伤害，对异变者种族伤害 +50%';
+        } else if (slot === 'chitin_epidermis') {
+            tip += '&#10;获得护盾 = 防御 ×1.5，对寄生群落硬化护甲';
+        } else if (slot === 'gland_core') {
+            tip += '&#10;爆破中毒目标：引爆毒素造成连锁伤害并吸血';
+        }
+        return tip;
     };
 
     // --- 种族/专精通用的颜色和名称映射 ---
