@@ -126,6 +126,16 @@ window.Sound = (function () {
     function playExploreBGM() { _switchBGM('airy.mp3', 1.0, 'explore'); }
     function playBattleBGM()  { _switchBGM('urgent.mp3', 1.0, 'battle'); }
 
+    var _bossBGM = {
+        'MON_CH1_TYRANT': 'boss_tyrant.mp3',
+        'MON_CH1_QUEEN':  'boss_queen.mp3',
+        'MON_CH1_CORE':   'boss_core.mp3'
+    };
+    function playBossBGM(bossId) {
+        var src = _bossBGM[bossId];
+        if (src) _switchBGM(src, 0.5, 'boss_' + bossId);
+    }
+
     function stopBGM() {
         _stopFade();
         if (_bgm) { _bgm.pause(); _bgm.currentTime = 0; _bgm = null; }
@@ -146,7 +156,7 @@ window.Sound = (function () {
         attack: attack, monster: monsterRace, hit: hit, electric: electric,
         victory: victory, defeat: defeat, click: click,
         playExploreBGM: playExploreBGM, playBattleBGM: playBattleBGM,
-        stopBGM: stopBGM,
+        playBossBGM: playBossBGM, stopBGM: stopBGM,
         toggleMute: toggleMute, isMuted: isMuted
     };
 })();

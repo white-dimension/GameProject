@@ -104,6 +104,9 @@ window.CombatSystem = (function () {
         window.UISystem.render();
         if (window.Sound && _battleState.monsters.length > 0) {
             var md = window.GameData.MONSTERS[_battleState.monsters[0].id];
+            if (md && md.tier === 'world_boss') {
+                window.Sound.playBossBGM(md.id);
+            }
             window.Sound.monster(md ? md.race : null);
         }
     }
