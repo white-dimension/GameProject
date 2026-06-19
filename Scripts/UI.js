@@ -2571,7 +2571,7 @@ window.UISystem = (function () {
                 if (d.bonusVsSwarm) parts.push('对寄生+' + Math.round(d.bonusVsSwarm*100) + '%');
                 if (parts.length > 0) tip += '&#10;' + parts.join(' · ');
             } else if (c && c.description) {
-                tip += '&#10;<span style="color:var(--text-dim)">' + c.description + '</span>';
+                tip += '&#10;' + c.description;
             }
             // 可装备
             if (c && c.allowedSlots) {
