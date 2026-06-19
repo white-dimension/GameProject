@@ -8,7 +8,7 @@ window.UISystem = (function () {
     var CS = function () { return window.CombatSystem; };
     var GD = function () { return window.GameData; };
 
-    var _root, _mainView, _battleView, _viewport, _modalOverlay, _msgOverlay, _juiceContainer, _bgVideo, _bgBattleVideo;
+    var _root, _mainView, _battleView, _viewport, _modalOverlay, _msgOverlay, _juiceContainer, _bgVideo, _bgBattleVideo, _bgVideos, _showBgVideo, _hideBgVideo;
     var _wakingUp = true, _showScan = false, _tasksDone = false, _tasksAnimating = false, _discoveryDone = false, _discoveryAnimating = false;
     var _isFirstLoad = true;
     var _introActive = false;
@@ -101,16 +101,16 @@ window.UISystem = (function () {
 
         _bgVideo = _createBgVideo('../Assets/Backgrounds/explore.mp4');
         _bgBattleVideo = _createBgVideo('../Assets/Backgrounds/battle.mp4');
-        var _bgVideos = [_bgVideo, _bgBattleVideo];
+        _bgVideos = [_bgVideo, _bgBattleVideo];
 
-        // 显示背景视频（尊重静音状态）
-        var _showBgVideo = function(v) {
+        // 显示/隐藏背景视频（尊重静音状态）
+        _showBgVideo = function(v) {
             v.style.display = 'block';
             v.style.opacity = '1';
             v.muted = window.Sound ? window.Sound.isMuted() : false;
             v.play().catch(function(){});
         };
-        var _hideBgVideo = function(v) {
+        _hideBgVideo = function(v) {
             v.style.display = 'none';
         };
 
