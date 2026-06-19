@@ -71,14 +71,29 @@ window.UISystem = (function () {
         _root.innerHTML = '';
         _root.style.cssText = 'width:100vw;height:100vh;display:flex;flex-direction:column;position:relative;background:var(--bg-deep);';
 
-        // 全屏背景视频（探索场景）
+        // 全屏背景视频（探索场景，手控循环 + 淡入淡出消除接缝）
         _bgVideo = _ce('video');
         _bgVideo.src = '../Assets/Backgrounds/explore.mp4';
-        _bgVideo.loop = true;
+        _bgVideo.loop = false;
         _bgVideo.muted = true;
         _bgVideo.autoplay = true;
         _bgVideo.playsInline = true;
-        _bgVideo.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;display:none;pointer-events:none;';
+        _bgVideo.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;display:none;pointer-events:none;transition:opacity 0.5s ease;';
+        var _videoFading = false;
+        var _videoLoop = function() {
+            if (_videoFading) return;
+            if (_bgVideo.duration && _bgVideo.currentTime > _bgVideo.duration - 0.6) {
+                _videoFading = true;
+                _bgVideo.style.opacity = '0';
+                setTimeout(function() {
+                    _bgVideo.currentTime = 0;
+                    _bgVideo.style.opacity = '1';
+                    _bgVideo.play().catch(function(){});
+                    _videoFading = false;
+                }, 500);
+            }
+        };
+        _bgVideo.addEventListener('timeupdate', _videoLoop);
         _root.appendChild(_bgVideo);
 
         var topBar = _ce('div', 'hud-top');
