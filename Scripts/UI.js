@@ -308,6 +308,19 @@ window.UISystem = (function () {
         }
 
         var inBattle = CS() && CS().isInBattle();
+        // 多场景背景切换
+        if (_wakingUp) {
+            _viewport.className = 'main-viewport bg-title';
+        } else if (inBattle) {
+            var bs = CS().getBattleState();
+            var isBoss = bs && bs.monsters && bs.monsters.some(function(mon) {
+                var md = GD().MONSTERS[mon.id];
+                return md && md.tier === 'world_boss';
+            });
+            _viewport.className = isBoss ? 'main-viewport bg-nest' : 'main-viewport bg-battle';
+        } else {
+            _viewport.className = 'main-viewport bg-explore';
+        }
         var taskEl = document.getElementById('ui-task-panel');
         if (taskEl) taskEl.style.display = inBattle ? 'none' : '';
         var roomInfo = document.getElementById('ui-room-info');
@@ -622,6 +635,16 @@ window.UISystem = (function () {
                 intentBar.innerHTML = '<div class="txt-xs txt-bold" style="text-align:center;margin-bottom:2px;color:' + iclr + ';">' + labelText + '</div>' +
                     '<div class="txt-xs txt-dim" style="text-align:left;">' + (curIntent.desc || '') + '</div>';
                 wrap.appendChild(intentBar);
+            }
+
+            // Boss 立绘
+            var isBoss = md.tier === 'world_boss' && md.image;
+            if (isBoss && !dead) {
+                var portrait = _ce('img');
+                portrait.className = 'boss-portrait';
+                portrait.src = md.image;
+                portrait.alt = md.name;
+                wrap.appendChild(portrait);
             }
 
             // 怪物卡片
@@ -1787,6 +1810,7 @@ window.UISystem = (function () {
 
     function _showIntro(gs) {
         _introActive = true;
+        _viewport.className = 'main-viewport bg-title';
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
         var box = _ce('div');
