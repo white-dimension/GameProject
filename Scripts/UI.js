@@ -1451,14 +1451,21 @@ window.UISystem = (function () {
                 if (cid && comps[cid] && comps[cid].affixes) {
                     var sa = comps[cid].affixes; var sp2 = [];
                     if (sa.atkBonus) sp2.push('攻击+' + sa.atkBonus);
+                    if (sa.defBonus) sp2.push('防御+' + sa.defBonus);
                     if (sa.flatDefBonus) sp2.push('防御+' + sa.flatDefBonus);
                     if (sa.shieldBonus) sp2.push('生命+' + sa.shieldBonus);
                     if (sa.physMultiplier) sp2.push('物理×' + sa.physMultiplier);
                     if (sa.armorPenetration) sp2.push('破甲' + Math.round(sa.armorPenetration*100) + '%');
-                    if (sa.toxinConversion) sp2.push('毒素转化' + Math.round(sa.toxinConversion*100) + '%');
+                    if (sa.toxinConversion) sp2.push('毒转' + Math.round(sa.toxinConversion*100) + '%');
                     if (sa.lifeDrainChance) sp2.push('吸血' + Math.round(sa.lifeDrainChance*100) + '%' + (sa.lifeDrainAmount ? '·' + sa.lifeDrainAmount + 'HP' : ''));
                     if (sa.thornsPercent) sp2.push('反伤' + Math.round(sa.thornsPercent*100) + '%');
                     if (sa.dotBonus) sp2.push('毒伤+' + sa.dotBonus);
+                    if (sa.killHeal) sp2.push('击杀恢复+' + sa.killHeal + 'HP');
+                    if (sa.deathDefy) sp2.push('免死一次');
+                    if (sa.processOnHit) sp2.push('受击回能+' + sa.processOnHit);
+                    if (sa.critChance) sp2.push('暴击率+' + Math.round(sa.critChance*100) + '%');
+                    if (sa.critMultiplier) sp2.push('暴伤×' + sa.critMultiplier);
+                    if (sa.poisonImmune) sp2.push('免疫中毒');
                     if (sa.bonusVsSwarm) sp2.push('对寄生+' + Math.round(sa.bonusVsSwarm*100) + '%');
                     organHTML += '<span class="txt-xs txt-dim"> 组件: </span><span class="help-tip" style="padding:6px 10px;font-size:13px;background:rgba(255,213,79,0.08);border:1px solid rgba(255,213,79,0.2);border-radius:4px;color:var(--accent-yellow);" data-tip="<b>' + cid + '</b>&#10;' + sp2.join(' · ') + '">' + cid + '</span>';
                 } else if (!cid) {
@@ -2109,7 +2116,11 @@ window.UISystem = (function () {
                     comps[upgradedName] = { id: upgradedName, allowedSlots: (orig||{}).allowedSlots||[], affixes: {} };
                     if (orig && orig.affixes) {
                         Object.keys(orig.affixes).forEach(function(ak) {
-                            comps[upgradedName].affixes[ak] = orig.affixes[ak] * 2;
+                            var v = orig.affixes[ak];
+                            // 布尔值不翻倍，暴伤加0.5，其余数值翻倍
+                            if (typeof v === 'boolean') { comps[upgradedName].affixes[ak] = v; }
+                            else if (ak === 'critMultiplier') { comps[upgradedName].affixes[ak] = v + 0.5; }
+                            else { comps[upgradedName].affixes[ak] = v * 2; }
                         });
                     }
                 }
