@@ -2038,6 +2038,11 @@ window.UISystem = (function () {
                 if (affixes.lifeDrainChance) parts.push('吸血' + Math.round(affixes.lifeDrainChance*200) + '%' + (affixes.lifeDrainAmount ? '·' + (affixes.lifeDrainAmount*2) + 'HP' : ''));
                 if (affixes.thornsPercent) parts.push('反伤' + Math.round(affixes.thornsPercent*200) + '%');
                 if (affixes.dotBonus) parts.push('毒伤+' + (affixes.dotBonus*2));
+                if (affixes.killHeal) parts.push('击杀恢复+' + (affixes.killHeal*2) + 'HP');
+                if (affixes.deathDefy) parts.push('免死一次');
+                if (affixes.processOnHit) parts.push('受击回能+' + affixes.processOnHit);
+                if (affixes.critChance) parts.push('暴击率+' + Math.round(affixes.critChance*200) + '%');
+                if (affixes.critMultiplier) parts.push('暴伤×' + (affixes.critMultiplier*2).toFixed(1));
                 if (affixes.poisonImmune) parts.push('免疫中毒');
                 if (affixes.bonusVsSwarm) parts.push('对寄生+' + Math.round(affixes.bonusVsSwarm*200) + '%');
 
