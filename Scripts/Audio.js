@@ -40,7 +40,7 @@ window.Sound = (function () {
         a._fadeInterval = fade;
     }
     function defeat()    { if (!_enabled) return; var a = _load('Wrong Error.wav'); a.volume=1.0; a.currentTime=0; a.play().catch(function(){}); }
-    function click()     { if (!_enabled) return; var a = _load('back_style_2_003.wav'); a.volume=1.0; a.currentTime=0; a.play().catch(function(){}); }
+    function click()     { if (!_enabled) return; var a = _load('back_style_2_003.wav'); a.volume=0.5; a.currentTime=0; a.play().catch(function(){}); }
 
     // ======== 背景音乐 ========
     var _bgm = null;
