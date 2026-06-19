@@ -113,6 +113,7 @@ window.UISystem = (function () {
         };
         _hideBgVideo = function(v) {
             v.style.display = 'none';
+            v.pause();
         };
 
         var topBar = _ce('div', 'hud-top');
