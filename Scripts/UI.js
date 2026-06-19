@@ -1156,7 +1156,7 @@ window.UISystem = (function () {
         box.appendChild(head);
         var body = _ce('div');
         body.id = 'ui-help-body';
-        body.style.cssText = 'padding:25px 30px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;';
+        body.style.cssText = 'padding:25px 30px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;font-family:sans-serif;';
         box.appendChild(body);
         _modalOverlay.appendChild(box);
         tabBtns.stats = document.getElementById('help-tab-stats');
