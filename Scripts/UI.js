@@ -692,23 +692,21 @@ window.UISystem = (function () {
                 wrap.appendChild(intentBar);
             }
 
-            // Boss 立绘
+            // Boss立绘：直接替换卡片背景
             var isBoss = md.tier === 'world_boss' && md.image;
-            if (isBoss && !dead) {
-                var portrait = _ce('img');
-                portrait.className = 'boss-portrait';
-                portrait.src = md.image;
-                portrait.alt = md.name;
-                wrap.appendChild(portrait);
-            }
 
             // 怪物卡片
             var card = _ce('div');
             card.className = 'monster-card';
             var cardBorder = dead ? 'var(--border-dim)' : mclr;
             var cardGlow = (isTarget && !dead && !isVictory) ? 'box-shadow:0 0 20px ' + (raceCardClrs[md.race] || '#ff4455') + ';' : '';
-            card.style.cssText = 'position:relative;background:var(--bg-card);border:2px solid ' + cardBorder + ';border-radius:8px;padding:24px;text-align:center;min-width:260px;max-width:340px;' + cardGlow +
+            var cardBg = (isBoss && !dead)
+                ? 'url(' + md.image + ') center/cover no-repeat'
+                : 'var(--bg-card)';
+            card.style.cssText = 'position:relative;background:' + cardBg + ';border:2px solid ' + cardBorder + ';border-radius:8px;padding:24px;text-align:center;min-width:280px;max-width:380px;min-height:320px;display:flex;flex-direction:column;justify-content:flex-end;' + cardGlow +
                 (dead ? 'opacity:0.4;filter:grayscale(0.5);' : '') + 'cursor:' + (isVictory || dead ? 'default' : 'pointer') + ';';
+            // Boss卡片文字描边增强可读性
+            if (isBoss && !dead) card.style.textShadow = '0 0 8px #000, 0 0 16px #000';
 
             // [新增] 种族克制标记 (方案 A：右上角弱点锁定)
             var pRaces = gs.player.masteries.filter(function(r) { return r; });
