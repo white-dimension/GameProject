@@ -39,7 +39,7 @@ window.Sound = (function () {
         a._fadeInterval = fade;
     }
     function defeat()    { var a = _load('Wrong Error.wav'); a.volume=0.25; a.currentTime=0; a.play().catch(function(){}); }
-    function click()     { var a = _load('hover.mp3'); a.volume=0.25; a.currentTime=0; a.play().catch(function(){}); }
+    function click()     { var a = _load('hover.mp3'); a.volume=1.0; a.currentTime=0; a.play().catch(function(){}); }
 
     // ======== 背景音乐 ========
     var _bgm = null;
