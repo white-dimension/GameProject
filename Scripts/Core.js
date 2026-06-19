@@ -490,6 +490,23 @@ window.GameState = (function () {
         return { success: true, slot: slot, newTier: gs.player[slot].tier, cost: cost };
     }
 
+    function upgradeOrganTierWithSelection(slot, selectedComponents) {
+        var gs = getState(); if (!gs || !gs.player[slot]) return { success: false, error: '无效' };
+        var cost = Math.ceil(5 * Math.pow(1.6, gs.player[slot].tier));
+        var inv = gs.inventory.components;
+        var getWeight = function(cid) { if (cid.endsWith('Ⅲ')) return 4; if (cid.endsWith('Ⅱ')) return 3; if (cid.endsWith('Ⅰ')) return 2; return 1; };
+        var totalWeight = 0; selectedComponents.forEach(function(cid) { totalWeight += getWeight(cid); });
+        if (totalWeight < cost) return { success: false, error: '加权不足，需' + cost + '，当前' + totalWeight };
+        // 检查库存
+        var need = {}; selectedComponents.forEach(function(cid) { need[cid] = (need[cid]||0) + 1; });
+        var missing = []; Object.keys(need).forEach(function(cid) { if ((inv[cid]||0) < need[cid]) missing.push(cid); });
+        if (missing.length > 0) return { success: false, error: '库存不足: ' + missing.join(',') };
+        // 消耗
+        Object.keys(need).forEach(function(cid) { inv[cid] -= need[cid]; });
+        gs.player[slot].tier += 1; recalcPlayerStats(); save();
+        return { success: true, slot: slot, newTier: gs.player[slot].tier };
+    }
+
     function socketComponent(slot, socketIndex, componentId) {
         var gs = getState(); if (!gs) return { success: false, error: '未初始化' };
         if (socketIndex !== 0 && socketIndex !== 1) return { success: false, error: '无效孔' };
@@ -811,6 +828,7 @@ window.GameState = (function () {
         init: init, save: save, reset: reset, startNextLoop: startNextLoop,
         getState: getState, calcDamageReduction: calcDamageReduction,
         recalcPlayerStats: recalcPlayerStats, equipOrgan: equipOrgan, upgradeOrganTier: upgradeOrganTier,
+        upgradeOrganTierWithSelection: upgradeOrganTierWithSelection,
         socketComponent: socketComponent, unloadComponent: unloadComponent,
         gainXp: gainXp, learnMastery: learnMastery, resetMastery: resetMastery,
         craftPotion: craftPotion, applyCoating: applyCoating,

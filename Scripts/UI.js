@@ -2199,6 +2199,77 @@ window.UISystem = (function () {
         _modalOverlay.appendChild(box);
     }
 
+    function _showOrganUpgradePicker(slot) {
+        var gs = GS(); if (!gs || !gs.player[slot]) return;
+        var d = gs.player[slot];
+        var cost = Math.ceil(5 * Math.pow(1.6, d.tier));
+        var inv = gs.inventory.components;
+        var getWeight = function(cid) { if (cid.endsWith('Ⅲ')) return 4; if (cid.endsWith('Ⅱ')) return 3; if (cid.endsWith('Ⅰ')) return 2; return 1; };
+        // 收集可选组件及其库存
+        var items = []; Object.keys(inv).forEach(function(k) { if (inv[k] > 0) items.push({ id: k, count: inv[k], weight: getWeight(k) }); });
+        items.sort(function(a,b){ return b.weight - a.weight; });
+        // 总计
+        var totalWeight = items.reduce(function(a,i){ return a + i.weight * i.count; }, 0);
+        if (totalWeight < cost) { UISystem.showNotification('材料不足', '加权合计 ' + totalWeight + '，需要 ' + cost, 'var(--accent-red)'); return; }
+
+        _modalOverlay._returnToLab = true;
+        document.querySelectorAll('.help-popup').forEach(function(el){ el.remove(); });
+        _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
+        var box = _ce('div', 'modal-box');
+        box.style.cssText = 'width:min(500px,90vw);background:var(--bg-modal);border:2px solid var(--accent-green);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
+        var head = _ce('div');
+        head.style.cssText = 'padding:14px 20px;background:rgba(0,255,136,0.05);border-bottom:1px solid var(--accent-green);display:flex;justify-content:space-between;align-items:center;';
+        var slotNames = { predatory_organ: '捕食器官', chitin_epidermis: '几丁表皮', gland_core: '腺体核心' };
+        head.innerHTML = '<div class="txt-md txt-green txt-bold">[ ' + (slotNames[slot]||slot) + ' 进阶 ] 需加权 ' + cost + '</div><button class="btn btn-blue btn-sm" onclick="UISystem.closeModal();UISystem.showReorganizeModal();">取消</button>';
+        box.appendChild(head);
+        var body = _ce('div');
+        body.style.cssText = 'padding:16px 20px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;max-height:45vh;';
+        body.innerHTML = '<div class="txt-xs txt-dim">点击选择要消耗的碎片（高阶加权更高）</div>';
+
+        var selected = {}; var curWeight = 0;
+        var statusLine = _ce('div');
+        statusLine.className = 'txt-sm txt-bold';
+        var updateStatus = function() {
+            statusLine.innerHTML = '已选加权: <span style="color:' + (curWeight >= cost ? 'var(--accent-green)' : 'var(--accent-red)') + '">' + curWeight + ' / ' + cost + '</span>';
+        };
+        updateStatus();
+
+        var chipRow = _ce('div');
+        chipRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;';
+        items.forEach(function(item) {
+            var chip = _ce('div');
+            chip.style.cssText = 'padding:6px 12px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;cursor:pointer;font-size:13px;color:var(--text-main);';
+            chip.textContent = item.id + ' ×' + item.count + ' [' + item.weight + ']';
+            chip.onclick = function() {
+                var cur = selected[item.id] || 0;
+                if (cur < item.count) { selected[item.id] = cur + 1; curWeight += item.weight; }
+                else { selected[item.id] = 0; curWeight -= item.weight * cur; }
+                chip.style.background = selected[item.id] ? 'rgba(0,255,136,0.12)' : 'var(--bg-card)';
+                chip.style.borderColor = selected[item.id] ? 'var(--accent-green)' : 'var(--border-dim)';
+                updateStatus();
+            };
+            chipRow.appendChild(chip);
+        });
+        body.appendChild(chipRow);
+        body.appendChild(statusLine);
+        box.appendChild(body);
+
+        var btnRow = _ce('div');
+        btnRow.style.cssText = 'padding:12px 20px;display:flex;gap:10px;justify-content:flex-end;';
+        var confirmBtn = _ce('button', 'btn btn-green');
+        confirmBtn.textContent = '确认进阶';
+        confirmBtn.onclick = function() {
+            if (curWeight < cost) { UISystem.showNotification('材料不足', '还需 ' + (cost - curWeight) + ' 加权', 'var(--accent-red)'); return; }
+            var consumed = []; Object.keys(selected).forEach(function(k) { for (var i = 0; i < selected[k]; i++) consumed.push(k); });
+            GameState.upgradeOrganTierWithSelection(slot, consumed);
+            UISystem.closeModal();
+            UISystem.showReorganizeModal();
+        };
+        btnRow.appendChild(confirmBtn);
+        box.appendChild(btnRow);
+        _modalOverlay.appendChild(box);
+    }
+
     function _showOrganPicker(slot) {
         var gs = GS(); if (!gs) return;
         _modalOverlay._returnToLab = true;
@@ -2326,7 +2397,7 @@ window.UISystem = (function () {
                     tipText += "<b>当前库存：</b>共 " + Object.keys(inv).reduce(function(a,k){ return a + (inv[k] * getWeight2(k)); }, 0) + " (加权)";
                     if (!canUpgrade) tipText += "&#10;<b style='color:var(--accent-red)'>材料不足，无法进阶</b>";
 
-                    return '<button class="btn btn-green btn-sm help-tip" ' + (canUpgrade ? '' : 'disabled') + ' data-tip="' + tipText + '" onclick="GameState.upgradeOrganTier(\'' + s + '\'); UISystem.showReorganizeModal();">进阶</button>';
+                    return '<button class="btn btn-green btn-sm help-tip" ' + (canUpgrade ? '' : 'disabled') + ' data-tip="' + tipText + '" onclick="UISystem._showOrganUpgradePicker(\'' + s + '\')">进阶</button>';
                 })() +
                 '</div>' +
                 '</div>';
@@ -2559,6 +2630,6 @@ window.UISystem = (function () {
         }, 20);
     }
 
-    return { init: init, render: render, _foldSection: _foldSection, showStatusModal: showStatusModal, showReorganizeModal: showReorganizeModal, showBestiaryModal: showBestiaryModal, showDungeonWarning: showDungeonWarning, showSaveModal: showSaveModal, closeModal: closeModal, closeIntro: closeIntro, resetGame: resetGame, triggerShake: triggerShake, showDamageFloat: showDamageFloat, showNotification: showNotification, showHelpPanel: showHelpPanel, toggleSound: toggleSound, _claimReward: _claimReward, _claimAllTasks: _claimAllTasks, _showSynthesizeModal: _showSynthesizeModal, _showSocketPicker: _showSocketPicker, _showOrganPicker: _showOrganPicker, showEventModal: showEventModal };
+    return { init: init, render: render, _foldSection: _foldSection, showStatusModal: showStatusModal, showReorganizeModal: showReorganizeModal, showBestiaryModal: showBestiaryModal, showDungeonWarning: showDungeonWarning, showSaveModal: showSaveModal, closeModal: closeModal, closeIntro: closeIntro, resetGame: resetGame, triggerShake: triggerShake, showDamageFloat: showDamageFloat, showNotification: showNotification, showHelpPanel: showHelpPanel, toggleSound: toggleSound, _claimReward: _claimReward, _claimAllTasks: _claimAllTasks, _showSynthesizeModal: _showSynthesizeModal, _showSocketPicker: _showSocketPicker, _showOrganPicker: _showOrganPicker, _showOrganUpgradePicker: _showOrganUpgradePicker, showEventModal: showEventModal };
 }
 )();
