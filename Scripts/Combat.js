@@ -103,7 +103,6 @@ window.CombatSystem = (function () {
 
         window.UISystem.render();
         if (window.Sound) window.Sound.monster();
-        if (window.Sound) window.Sound.playBattleBGM();
     }
 
     // 获取当前目标怪物数据

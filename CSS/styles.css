@@ -300,8 +300,6 @@ body::after {
     pointer-events: none;
     transition: opacity 0.6s ease;
 }
-/* 战斗背景 */
-#app.bg-battle::before { background-image: url('../Assets/Backgrounds/battle.png'); }
 /* 标题画面背景 */
 #app.bg-title::before { background-image: url('../Assets/Backgrounds/title.png'); }
 /* 母巢/Boss战背景 */
