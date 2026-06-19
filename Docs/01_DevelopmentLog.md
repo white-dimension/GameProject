@@ -41,12 +41,28 @@
 - UI补全 killHeal / deathDefy / processOnHit / critChance / critMultiplier 显示
 - 全19个affix key现在 UI + Core + Combat 三线覆盖
 
+### 组件系统重构
+- 5个新组件分配掉落源（不死细胞核/几丁质装甲/解毒酶结晶/电磁催化剂/神经突触结）
+- 原始基因改为可装备组件：攻击+5 防御+3 生命+20 三槽通用
+- 组件详情统一模板：_AFFIX_FIELDS 统一定义17字段，_buildCompDetail/_buildCompTooltip 复用
+- 档案/socketPicker/合成预览/组件库存 4处全部使用统一模板
+- Ⅰ/Ⅱ/Ⅲ 组件回退基础版推算升级属性（DB不存在时）
+- 组件升级公式修复：bool不变、critMultiplier+0.5、其余×2
+- 解毒酶结晶defBonus+poisonImmune 补上UI显示和Core应用
+
+### 器官进阶自选
+- _showOrganUpgradePicker弹窗：点击组件添加/移除，实时显示加权值
+- upgradeOrganTierWithSelection 精准消耗选中组件
+
+### 战斗UI
+- 怪物伤害数字显示在对应卡片上方（data-monster-idx定位）
+- Boss卡直接用立绘做背景 + linear-gradient遮罩
+
 ### 其他修复
 - 战斗胜利奖励合并单条日志
 - Boss BGM退出/胜利时渐隐停止
 - 切换怪物目标触发种族专属音效
-- 胜利音效 0.25，怪物音效 0.5
-- 文档同步更新
+- 胜利音效 0.25，怪物音效 0.5，按键音效 0.5
 
 ---
 
