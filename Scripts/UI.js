@@ -2257,6 +2257,68 @@ window.UISystem = (function () {
         _modalOverlay.appendChild(box);
     }
 
+    // 通用组件选择弹窗（魔药炼制/涂层涂抹共用）
+    var _showComponentSelectModal = function(title, count, onConfirm) {
+        var gs = GS(); if (!gs) return;
+        var inv = gs.inventory.components;
+        document.querySelectorAll('.help-popup').forEach(function(el){ el.remove(); });
+        _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
+        _modalOverlay._returnToLab = true;
+        var box = _ce('div', 'modal-box');
+        box.style.cssText = 'width:min(500px,90vw);background:var(--bg-modal);border:2px solid var(--accent-purple);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
+        var head = _ce('div');
+        head.style.cssText = 'padding:14px 20px;background:rgba(156,39,176,0.05);border-bottom:1px solid var(--accent-purple);display:flex;justify-content:space-between;align-items:center;';
+        head.innerHTML = '<div class="txt-md txt-purple txt-bold">[ ' + title + ' ] 选择 ' + count + ' 个碎片</div><button class="btn btn-blue btn-sm" onclick="UISystem.closeModal();UISystem.showReorganizeModal();">取消</button>';
+        box.appendChild(head);
+        var body = _ce('div');
+        body.style.cssText = 'padding:16px 20px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;max-height:45vh;';
+        body.innerHTML = '<div class="txt-xs txt-dim">点击选择消耗的材料（可保留高阶碎片）</div>';
+
+        var selected = {}; var selCount = 0;
+        var statusLine = _ce('div');
+        statusLine.className = 'txt-sm txt-bold';
+        var updateStatus = function() {
+            statusLine.innerHTML = '已选: <span style="color:' + (selCount === count ? 'var(--accent-green)' : 'var(--accent-purple)') + '">' + selCount + ' / ' + count + '</span>';
+        };
+        updateStatus();
+
+        var chipRow = _ce('div');
+        chipRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;';
+        var items = []; Object.keys(inv).forEach(function(k) { if (inv[k] > 0) items.push({ id: k, count: inv[k] }); });
+        items.sort(function(a,b){ return a.id.localeCompare(b.id); });
+        items.forEach(function(item) {
+            var chip = _ce('div');
+            chip.style.cssText = 'padding:6px 12px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;cursor:pointer;font-size:13px;color:var(--text-main);';
+            chip.textContent = item.id + ' ×' + item.count;
+            chip.onclick = function() {
+                var cur = selected[item.id] || 0;
+                if (cur < item.count && selCount < count) { selected[item.id] = cur + 1; selCount++; }
+                else if (cur > 0) { selected[item.id] = cur - 1; selCount--; if (selected[item.id] === 0) delete selected[item.id]; }
+                chip.style.background = selected[item.id] ? 'rgba(156,39,176,0.15)' : 'var(--bg-card)';
+                chip.style.borderColor = selected[item.id] ? 'var(--accent-purple)' : 'var(--border-dim)';
+                updateStatus();
+            };
+            chipRow.appendChild(chip);
+        });
+        body.appendChild(chipRow);
+        body.appendChild(statusLine);
+        box.appendChild(body);
+
+        var btnRow = _ce('div');
+        btnRow.style.cssText = 'padding:12px 20px;display:flex;gap:10px;justify-content:flex-end;';
+        var confirmBtn = _ce('button', 'btn btn-purple');
+        confirmBtn.textContent = '确认';
+        confirmBtn.onclick = function() {
+            if (selCount < count) { UISystem.showNotification('还需选择 ' + (count - selCount) + ' 个', null, 'var(--accent-red)'); return; }
+            var consumed = []; Object.keys(selected).forEach(function(k) { for (var i = 0; i < selected[k]; i++) consumed.push(k); });
+            UISystem.closeModal();
+            onConfirm(consumed);
+        };
+        btnRow.appendChild(confirmBtn);
+        box.appendChild(btnRow);
+        _modalOverlay.appendChild(box);
+    };
+
     function _showOrganPicker(slot) {
         var gs = GS(); if (!gs) return;
         _modalOverlay._returnToLab = true;
@@ -2565,7 +2627,7 @@ window.UISystem = (function () {
             potHTML += '<span class="help-tip" style="padding:6px 10px;background:rgba(206,147,216,0.1);border:1px solid rgba(206,147,216,0.2);border-radius:4px;" data-tip="' + pd.tooltip + (canCraft ? '' : '（不足，库存' + totalMats + '）') + '">' +
                 '<span class="txt-xs txt-bold" style="color:var(--accent-purple);">' + pd.name + '</span>' +
                 '<span class="txt-xs txt-dim"> 毒性+' + pd.toxicity + '</span>' +
-                (canCraft ? ' <button class="btn btn-purple" style="padding:1px 8px;font-size:12px;" onclick="GameState.craftPotion(\'' + pid + '\');UISystem.showReorganizeModal();">炼制</button>' : '') +
+                (canCraft ? ' <button class="btn btn-purple" style="padding:1px 8px;font-size:12px;" onclick="UISystem._showComponentSelectModal(\'' + pd.name + '\',' + pd.cost + ',function(items){GameState.craftPotionWithSelection(\'' + pid + '\',items);UISystem.showReorganizeModal();});">炼制</button>' : '') +
                 '</span>';
         });
         if (!hasCrafted) potHTML += '<span class="txt-xs txt-dim">暂无可用配方</span>';
@@ -2607,7 +2669,8 @@ window.UISystem = (function () {
             if (ct.effect.toxinImmune) effectParts.push('免疫中毒');
             if (ct.effect.shieldStrip) effectParts.push('剥离' + ct.effect.shieldStrip + '护盾');
             var tip = '<b>' + ct.name + '</b>&#10;目标种族：' + (raceNames2[ct.targetRace]||ct.targetRace) + '&#10;效果：' + effectParts.join(' · ') + '&#10;持续 ' + ct.duration + ' 回合&#10;消耗：' + costParts.join(' + ');
-            coatHTML += '<button class="btn btn-sm help-tip" style="padding:6px 14px;font-size:13px;background:' + rc.bg + ';border:1px solid ' + rc.bd + ';color:' + rc.hex + ';' + (canAfford ? '' : 'opacity:0.4;') + '" data-tip="' + tip + '" ' + (canAfford ? 'onclick="GameState.applyCoating(\'' + coatId + '\');UISystem.render();UISystem.showReorganizeModal();"' : 'disabled') + '>' + ct.name + '</button>';
+            var totalCost = 0; Object.keys(ct.cost).forEach(function(m){ totalCost += ct.cost[m]; });
+            coatHTML += '<button class="btn btn-sm help-tip" style="padding:6px 14px;font-size:13px;background:' + rc.bg + ';border:1px solid ' + rc.bd + ';color:' + rc.hex + ';' + (canAfford ? '' : 'opacity:0.4;') + '" data-tip="' + tip + '" ' + (canAfford ? 'onclick="UISystem._showComponentSelectModal(\'' + ct.name + '\',' + totalCost + ',function(items){GameState.applyCoatingWithSelection(\'' + coatId + '\',items);UISystem.showReorganizeModal();});"' : 'disabled') + '>' + ct.name + '</button>';
             hasCoatings = true;
         });
         if (!hasCoatings) coatHTML += '<span class="txt-xs txt-dim">暂无可用涂层配方</span>';
@@ -2797,6 +2860,6 @@ window.UISystem = (function () {
         }, 20);
     }
 
-    return { init: init, render: render, _foldSection: _foldSection, showStatusModal: showStatusModal, showReorganizeModal: showReorganizeModal, showBestiaryModal: showBestiaryModal, showDungeonWarning: showDungeonWarning, showSaveModal: showSaveModal, closeModal: closeModal, closeIntro: closeIntro, resetGame: resetGame, triggerShake: triggerShake, showDamageFloat: showDamageFloat, showNotification: showNotification, showHelpPanel: showHelpPanel, toggleSound: toggleSound, _claimReward: _claimReward, _claimAllTasks: _claimAllTasks, _showSynthesizeModal: _showSynthesizeModal, _showSocketPicker: _showSocketPicker, _showOrganPicker: _showOrganPicker, _showOrganUpgradePicker: _showOrganUpgradePicker, showEventModal: showEventModal };
+    return { init: init, render: render, _foldSection: _foldSection, showStatusModal: showStatusModal, showReorganizeModal: showReorganizeModal, showBestiaryModal: showBestiaryModal, showDungeonWarning: showDungeonWarning, showSaveModal: showSaveModal, closeModal: closeModal, closeIntro: closeIntro, resetGame: resetGame, triggerShake: triggerShake, showDamageFloat: showDamageFloat, showNotification: showNotification, showHelpPanel: showHelpPanel, toggleSound: toggleSound, _claimReward: _claimReward, _claimAllTasks: _claimAllTasks, _showSynthesizeModal: _showSynthesizeModal, _showSocketPicker: _showSocketPicker, _showOrganPicker: _showOrganPicker, _showOrganUpgradePicker: _showOrganUpgradePicker, _showComponentSelectModal: _showComponentSelectModal, showEventModal: showEventModal };
 }
 )();

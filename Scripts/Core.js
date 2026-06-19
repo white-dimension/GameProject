@@ -532,6 +532,21 @@ window.GameState = (function () {
         return { success: true, potion: potionId, cost: cost };
     }
 
+    function craftPotionWithSelection(potionId, selectedComponents) {
+        var gs = getState(); if (!gs) return { success: false, error: '未初始化' };
+        var data = GD(); if (!data || !data.POTIONS || !data.POTIONS[potionId]) return { success: false, error: '未知魔药' };
+        if (gs.inventory.potions.length >= 3) return { success: false, error: '最多3瓶' };
+        var cost = data.POTIONS[potionId].toxicity >= 35 ? 3 : 2;
+        if (selectedComponents.length !== cost) return { success: false, error: '需选择 ' + cost + ' 个碎片' };
+        var inv = gs.inventory.components;
+        var need = {}; selectedComponents.forEach(function (cid) { need[cid] = (need[cid] || 0) + 1; });
+        var missing = []; Object.keys(need).forEach(function (cid) { if ((inv[cid] || 0) < need[cid]) missing.push(cid); });
+        if (missing.length > 0) return { success: false, error: '库存不足: ' + missing.join(',') };
+        Object.keys(need).forEach(function (cid) { inv[cid] -= need[cid]; });
+        gs.inventory.potions.push(potionId); save();
+        return { success: true, potion: potionId, cost: cost };
+    }
+
     function applyCoating(coatingId) {
         var gs = getState(); if (!gs) return { success: false, error: '未初始化' };
         var data = GD(); if (!data || !data.COATINGS || !data.COATINGS[coatingId]) return { success: false, error: '未知涂层' };
@@ -539,6 +554,23 @@ window.GameState = (function () {
         var missing = []; Object.keys(coat.cost).forEach(function (m) { if (!inv[m] || inv[m] < coat.cost[m]) missing.push(m); });
         if (missing.length > 0) return { success: false, error: '碎片不足: ' + missing.join(',') };
         Object.keys(coat.cost).forEach(function (m) { inv[m] -= coat.cost[m]; });
+        gs.player.activeCoating = coatingId; gs.player.coatingTurnsLeft = coat.duration; save();
+        return { success: true, coating: coatingId };
+    }
+
+    function applyCoatingWithSelection(coatingId, selectedComponents) {
+        var gs = getState(); if (!gs) return { success: false, error: '未初始化' };
+        var data = GD(); if (!data || !data.COATINGS || !data.COATINGS[coatingId]) return { success: false, error: '未知涂层' };
+        var coat = data.COATINGS[coatingId]; var inv = gs.inventory.components;
+        // 按基础名统计（ⅠⅡⅢ回退）
+        var getBase = function(cid) { return cid.replace(/[ⅠⅡⅢ]$/, ''); };
+        var need = {}; Object.keys(coat.cost).forEach(function (m) { need[m] = coat.cost[m]; });
+        var provided = {}; selectedComponents.forEach(function (cid) { var b = getBase(cid); provided[b] = (provided[b] || 0) + 1; });
+        var missing = []; Object.keys(need).forEach(function (m) { if ((provided[m] || 0) < need[m]) missing.push(m); });
+        if (missing.length > 0) return { success: false, error: '材料不匹配，缺少: ' + missing.join(',') };
+        // 消耗
+        var consume = {}; selectedComponents.forEach(function (cid) { consume[cid] = (consume[cid] || 0) + 1; });
+        Object.keys(consume).forEach(function (cid) { inv[cid] -= consume[cid]; });
         gs.player.activeCoating = coatingId; gs.player.coatingTurnsLeft = coat.duration; save();
         return { success: true, coating: coatingId };
     }
@@ -831,7 +863,8 @@ window.GameState = (function () {
         upgradeOrganTierWithSelection: upgradeOrganTierWithSelection,
         socketComponent: socketComponent, unloadComponent: unloadComponent,
         gainXp: gainXp, learnMastery: learnMastery, resetMastery: resetMastery,
-        craftPotion: craftPotion, applyCoating: applyCoating,
+        craftPotion: craftPotion, craftPotionWithSelection: craftPotionWithSelection,
+        applyCoating: applyCoating, applyCoatingWithSelection: applyCoatingWithSelection,
         exportSaveText: exportSaveText, importSaveText: importSaveText,
         saveToSlot: saveToSlot, loadFromSlot: loadFromSlot, deleteSlot: deleteSlot, listSlots: listSlots,
         getMapLevelScaling: getMapLevelScaling,
