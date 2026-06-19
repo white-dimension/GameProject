@@ -2207,7 +2207,7 @@ window.UISystem = (function () {
         var head = _ce('div');
         head.style.cssText = 'padding:14px 20px;background:rgba(0,255,136,0.05);border-bottom:1px solid var(--accent-green);display:flex;justify-content:space-between;align-items:center;';
         var slotNames = { predatory_organ: '捕食器官', chitin_epidermis: '几丁表皮', gland_core: '腺体核心' };
-        head.innerHTML = '<div class="txt-md txt-green txt-bold">[ ' + (slotNames[slot]||slot) + ' 进阶 ] 需加权 ' + cost + '</div><button class="btn btn-blue btn-sm" onclick="UISystem.closeModal();UISystem.showReorganizeModal();">取消</button>';
+        head.innerHTML = '<div class="txt-md txt-green txt-bold">[ ' + (slotNames[slot]||slot) + ' 进阶 ]</div><button class="btn btn-blue btn-sm" onclick="UISystem.closeModal();UISystem.showReorganizeModal();">取消</button>';
         box.appendChild(head);
         var body = _ce('div');
         body.style.cssText = 'padding:16px 20px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;max-height:45vh;';
