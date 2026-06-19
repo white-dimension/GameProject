@@ -12,26 +12,67 @@ window.UISystem = (function () {
     var _wakingUp = true, _showScan = false, _tasksDone = false, _tasksAnimating = false, _discoveryDone = false, _discoveryAnimating = false;
     var _isFirstLoad = true;
     var _introActive = false;
+    var _logQueue = [];
+    var _isLogging = false;
 
     // 模块级日志辅助（init / _renderTasks / _renderDiscovery 共用）
     function _pushLog(msg, cb) {
+        _logQueue.push({ msg: msg, cb: cb });
+        if (!_isLogging) _processLogQueue();
+    }
+
+    function _processLogQueue() {
+        if (_logQueue.length === 0) { _isLogging = false; return; }
+        _isLogging = true;
+        var item = _logQueue.shift();
         var el = document.getElementById('ui-log');
-        if (!el) { if (cb) cb(); return; }
+        if (!el) {
+            if (item.cb) { try { item.cb(); } catch(e) {} }
+            _isLogging = false;
+            _processLogQueue();
+            return;
+        }
         var div = document.createElement('div');
         div.className = 'txt-xs txt-dim';
         div.style.cssText = 'margin-bottom:5px;';
         div.innerHTML = '<span class="txt-green">></span> <span class="typewriter"></span>';
         el.insertBefore(div, el.firstChild);
-        _typeText(div.querySelector('.typewriter'), msg, cb || function(){});
+        _typeText(div.querySelector('.typewriter'), item.msg, function() {
+            if (item.cb) { try { item.cb(); } catch(e) {} }
+            _isLogging = false;
+            _processLogQueue();
+        });
+    }
+
+    function _foldSection(titleEl) {
+        var content = titleEl.nextElementSibling;
+        if (!content) return;
+        var isFolded = content.style.display === 'none';
+        content.style.display = isFolded ? 'block' : 'none';
+        var icon = titleEl.querySelector('.fold-icon');
+        if (icon) icon.innerHTML = isFolded ? '▼' : '▶';
     }
 
     function init() {
+        // [修复] 初始化时强制重置所有内部状态标记，确保重置游戏后动画能重新播放
+        _wakingUp = true;
+        _showScan = false;
+        _tasksDone = false;
+        _tasksAnimating = false;
+        _discoveryDone = false;
+        _discoveryAnimating = false;
+        _isFirstLoad = true;
+        _introActive = false;
+        _logQueue = [];
+        _isLogging = false;
+        _lastLogLen = 0;
+
         _root = document.getElementById('app'); if (!_root) return;
         _root.innerHTML = '';
         _root.style.cssText = 'width:100vw;height:100vh;display:flex;flex-direction:column;position:relative;background:var(--bg-deep);';
 
         var topBar = _ce('div', 'hud-top');
-        topBar.style.cssText = 'position:relative;display:flex;flex-direction:row;justify-content:center;padding:8px 25px 4px 25px;min-height:60px;background:rgba(10,14,20,0.95);border-bottom:1px solid var(--border-dim);z-index:500;';
+        topBar.style.cssText = 'position:relative;display:flex;flex-direction:row;justify-content:center;padding:8px 25px 4px 25px;min-height:60px;background:rgba(10,14,20,0.95);border-bottom:1px solid var(--border-dim);box-shadow: 0 4px 20px rgba(0,0,0,0.5);z-index:500;';
         _root.appendChild(topBar);
 
         _viewport = _ce('div', 'main-viewport');
@@ -51,8 +92,8 @@ window.UISystem = (function () {
         var logWrap = _ce('div', 'log-wrap');
         var logTitle = _ce('div');
         logTitle.className = 'txt-xs txt-green txt-bold';
-        logTitle.style.cssText = 'letter-spacing:2px;margin-bottom:10px;';
-        logTitle.textContent = '> 日志';
+        logTitle.style.cssText = 'letter-spacing:2px;margin-bottom:10px;text-shadow: 0 0 8px var(--accent-green);';
+        logTitle.textContent = '> 神经信号日志';
         logWrap.appendChild(logTitle);
         var logPanel = _ce('div', 'log-panel');
         logPanel.id = 'ui-log';
@@ -85,8 +126,8 @@ window.UISystem = (function () {
         var _animLog = function(msg, cb) { setTimeout(function() { _pushLog(msg, cb); }, 400); };
 
         var _bootSkip = false;
-        var _bootSkipFn = function() { _bootSkip = true; };
-        document.addEventListener('click', _bootSkipFn, { once: true });
+        var _bootSkipFn = function(e) { if (e.target && e.target.id === 'intro-btn') return; _bootSkip = true; };
+        document.addEventListener('click', _bootSkipFn);
         window._bootSequence = function() {
             var _animLogSkip = function(msg, cb) {
                 if (_bootSkip) { _pushLog(msg, function(){}); cb(); return; }
@@ -106,7 +147,9 @@ window.UISystem = (function () {
                                     document.removeEventListener('click', _bootSkipFn);
                                     _showScan = true;
                                     _wakingUp = false;
-                                    UISystem.render();
+                                    _tasksAnimating = false; // 确保任务动画标记重置
+                                    // setTimeout 防同步模式下递归调用 render()
+                                    setTimeout(function() { UISystem.render(); }, 0);
                                 });
                             });
                         });
@@ -117,12 +160,12 @@ window.UISystem = (function () {
 
         var skillInfo = _ce('div', 'skill-info-panel');
         skillInfo.id = 'ui-skill-info';
-        skillInfo.style.cssText = 'position:absolute;right:25px;bottom:25px;';
+        skillInfo.style.cssText = 'position:absolute;right:25px;bottom:25px;border:1px solid var(--border-dim);background:var(--bg-card);border-radius:8px;padding:15px;box-shadow:0 10px 30px rgba(0,0,0,0.8);';
         _viewport.appendChild(skillInfo);
 
         var actionBar = _ce('div', 'action-bar');
         actionBar.id = 'ui-action-bar';
-        actionBar.style.cssText = 'position:relative;height:130px;background:#0a0a14;border-top:1px solid var(--border-dim);display:flex;align-items:center;justify-content:center;gap:20px;z-index:500;';
+        actionBar.style.cssText = 'position:relative;height:130px;background:#050508;border-top:1px solid var(--border-dim);box-shadow: 0 -4px 20px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;gap:20px;z-index:500;';
         _root.appendChild(actionBar);
 
         _modalOverlay = _ce('div', 'modal-overlay');
@@ -177,18 +220,30 @@ window.UISystem = (function () {
             // 弹窗打开时阻止战斗键盘操作
             if (_modalOverlay.style.display !== 'none' || (_msgOverlay && _msgOverlay.style.display !== 'none')) return;
             if (CS() && CS().isInBattle()) {
-                var gameKeys = ['1','2','3','4','5','6',' ','e','E'];
+                var gameKeys = ['1','2','3','4','5','6','0',' ','e','E'];
                 if (gameKeys.indexOf(e.key) !== -1) {
                     e.preventDefault();
                     var btns = document.querySelectorAll('.btn-battle-card');
                     var bs4 = CS().getBattleState();
-                    var endIdx = bs4 && bs4.phase === 'victory' ? btns.length - 1 : btns.length - 2;
-                    var btnIdx = { '1': 0, '2': 1, '3': 2, '4': 3, '5': 4, '6': 5, ' ': Math.max(0, endIdx), 'e': Math.max(0, btns.length - 1), 'E': Math.max(0, btns.length - 1) }[e.key];
-                    if (btnIdx !== undefined && btns[btnIdx]) {
-                        var btn = btns[btnIdx];
-                        btn.style.transform = 'translateY(2px)'; btn.style.filter = 'brightness(0.8)';
-                        setTimeout(function() { btn.style.transform = ''; btn.style.filter = ''; }, 100);
+
+                    // 地下城 0 键特殊映射
+                    if (e.key === '0' && bs4 && bs4.isDungeon && bs4.phase === 'victory' && (bs4._dungeonFloor || 0) < 3) {
+                        // 寻找“深入地下城”按钮
+                        var deepBtn = Array.from(btns).find(function(b) { return b.textContent.indexOf('深入地下城') !== -1; });
+                        if (deepBtn) {
+                            deepBtn.style.transform = 'translateY(2px)'; deepBtn.style.filter = 'brightness(0.8)';
+                            setTimeout(function() { deepBtn.style.transform = ''; deepBtn.style.filter = ''; }, 100);
+                        }
+                    } else {
+                        var endIdx = bs4 && bs4.phase === 'victory' ? btns.length - 1 : btns.length - 2;
+                        var btnIdx = { '1': 0, '2': 1, '3': 2, '4': 3, '5': 4, '6': 5, ' ': Math.max(0, endIdx), 'e': Math.max(0, btns.length - 1), 'E': Math.max(0, btns.length - 1) }[e.key];
+                        if (btnIdx !== undefined && btns[btnIdx]) {
+                            var btn = btns[btnIdx];
+                            btn.style.transform = 'translateY(2px)'; btn.style.filter = 'brightness(0.8)';
+                            setTimeout(function() { btn.style.transform = ''; btn.style.filter = ''; }, 100);
+                        }
                     }
+
                     // 同步高亮战斗提示
                     var si = document.getElementById('ui-skill-info');
                     if (si) {
@@ -202,6 +257,12 @@ window.UISystem = (function () {
                 if (pIdx !== undefined) {
                     var potPid = GS().inventory.potions[pIdx];
                     if (potPid) { setTimeout(function() { CS().playCard(null, potPid); }, 100); }
+                }
+                if (e.key === '0') {
+                    var bsDeep = CS().getBattleState();
+                    if (bsDeep && bsDeep.isDungeon && bsDeep.phase === 'victory' && (bsDeep._dungeonFloor || 0) < 3) {
+                        setTimeout(function() { CS().dungeonDeep(); }, 100);
+                    }
                 }
                 if (e.key === ' ') { var bs2 = CS().getBattleState(); setTimeout(function() { if (bs2 && bs2.phase === 'victory') CS().exitBattle(); else CS().endTurn(); }, 100); }
                 if (e.key === 'e' || e.key === 'E') { setTimeout(function() { CS().flee(); }, 100); }
@@ -220,15 +281,28 @@ window.UISystem = (function () {
     function render() {
         if (!_root) init(); var gs = GS(); if (!gs) return;
         if (!gs.player.introSeen) { _showIntro(gs); return; }
-        // 已有进度的存档直接跳过加载动画
-        if (_isFirstLoad && gs.mapState.stepsTaken > 0) {
-            _wakingUp = false; _tasksDone = true; _discoveryDone = true; _showScan = true;
-            _pushLog('神经链路重新校准。步数 ' + gs.mapState.stepsTaken + ' | B' + (gs.mapState.currentFloor || 1) + 'F');
-        }
-        // 新游戏（intro已看过）自动启动加载序列
-        if (_isFirstLoad && gs.mapState.stepsTaken === 0 && window._bootSequence) { window._bootSequence(); }
-        _isFirstLoad = false;
+
+        // [修复] HUD 必须优先渲染，确保在启动动画期间也能看到血条/进程条
         _renderHUD(gs);
+
+        // [修复] 逻辑重构：处理首次加载/动画序列
+        if (_isFirstLoad) {
+            _isFirstLoad = false;
+            if (gs.mapState.stepsTaken > 0) {
+                // 已有进度的存档跳过加载动画
+                _wakingUp = false; _tasksDone = true; _discoveryDone = true; _showScan = true;
+                _pushLog('神经链路重新校准。步数 ' + gs.mapState.stepsTaken + ' | B' + (gs.mapState.currentFloor || 1) + 'F');
+                UISystem.render(); // 重新触发一次渲染以更新视图
+                return;
+            } else {
+                // 新游戏启动加载序列
+                if (window._bootSequence) {
+                    window._bootSequence();
+                    return;
+                }
+            }
+        }
+
         var inBattle = CS() && CS().isInBattle();
         var taskEl = document.getElementById('ui-task-panel');
         if (taskEl) taskEl.style.display = inBattle ? 'none' : '';
@@ -239,17 +313,34 @@ window.UISystem = (function () {
         if (!inBattle) _renderTasks(gs);
         if (inBattle) {
             _mainView.style.display = 'none';
+            // [修复] 强制清理残留的 Modal 和 Help 浮层
+            _modalOverlay.style.display = 'none';
+            document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
+
             // 左栏 pointer-events:none 让点击穿透到怪物卡片，但日志保持可滚动
             var leftCol = document.querySelector('.left-panel-col');
             if (leftCol) { leftCol.style.pointerEvents = 'none'; }
             var logEl = document.getElementById('ui-log');
-            if (logEl) { logEl.style.pointerEvents = 'auto'; }
-            if (_battleView) _battleView.style.cssText = 'position:absolute;inset:0;z-index:350;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;';
+            if (logEl) {
+                logEl.style.pointerEvents = 'auto';
+                // [修复] 战斗中将日志面板加高，与战斗提示齐平
+                logEl.style.maxHeight = '400px';
+            }
+            if (_battleView) {
+                _battleView.style.display = 'flex';
+                _battleView.style.cssText = 'position:absolute;inset:0;z-index:350;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;';
+            }
             _renderBattle(gs);
         } else {
             var leftCol2 = document.querySelector('.left-panel-col');
-            if (leftCol2) { leftCol2.style.pointerEvents = ''; }
-            if (_battleView) _battleView.style.cssText = 'display:none;';
+            if (leftCol2) { leftCol2.style.pointerEvents = 'auto'; }
+            // [修复] 切换回探索时彻底隐藏战斗视图并恢复日志高度
+            var logEl2 = document.getElementById('ui-log');
+            if (logEl2) { logEl2.style.maxHeight = '180px'; }
+            if (_battleView) {
+                _battleView.style.display = 'none';
+                _battleView.innerHTML = ''; // 清理 DOM 以防 ID 冲突
+            }
             _mainView.style.display = 'flex'; _mainView.style.visibility = 'visible';
             _renderDiscovery(gs);
         }
@@ -268,15 +359,15 @@ window.UISystem = (function () {
             '<div class="hud-col hud-col-c">' +
             '<div class="hud-labels txt-xs">' +
             _hudLabel('生命', p.hp, p.hp_max, 'icon-health') +
-            _hudLabel('进程', p.ram, 10, 'icon-ram') +
+            _hudLabel('进程', p.process, p.process_max, 'icon-ram') +
             _hudLabel('毒性', p.toxicity, 50, 'icon-tox') +
-            _hudLabel('等阶 ' + p.level, p.xp, p.xpToNext, 'icon-upgrade') +
+            _hudLabel('等阶 ' + p.level, (p.level >= 20 ? 'MAX' : p.xp), (p.level >= 20 ? 'MAX' : p.xpToNext), 'icon-upgrade') +
             '</div>' +
             '<div class="hud-bars">' +
             _hudBarFill(p.hp, p.hp_max, (CS() && CS().getBattleState() && CS().getBattleState().playerStatus && CS().getBattleState().playerStatus['toxDebuff'] ? 'tox-fill' : 'hp-fill')) +
-            _hudBarFill(p.ram, 10, 'ram-fill') +
+            _hudBarFill(p.process, p.process_max, 'ram-fill') +
             _hudBarFill(p.toxicity, 50, 'tox-fill') +
-            _hudBarFill(p.xp, p.xpToNext, 'xp-fill') +
+            _hudBarFill((p.level >= 20 ? 1 : p.xp), (p.level >= 20 ? 1 : p.xpToNext), 'xp-fill') +
             '</div>' +
             '</div>' +
             '<div class="hud-col hud-col-r">' +
@@ -294,17 +385,74 @@ window.UISystem = (function () {
         return '<div style="width:130px;"><div class="progress-container hp-bar"><div class="progress-fill ' + fillClass + '" style="width:' + startPct + '%;transition:width 1.2s ease-out;"></div></div></div>';
     }
 
+    function _handleDiscoveryResult(res, pathIndex, cardEl) {
+        var gs = GS();
+        if (res.isEvent) return; // 已经在 World.js 中调用了 showEventModal
+
+        if (res.success) {
+            if (res.events && res.events.length > 0) {
+                res.events.forEach(function(ev) { if (ev.msg) UISystem.showNotification(ev.msg, null, 'var(--accent-yellow)'); });
+            }
+
+            var p = gs.mapState.discoveryPaths[pathIndex];
+            if (res.room.type === 'boss') { CS().startBattle(res.room.monsterId, { wandering: !!res.room.wandering }); }
+            else if (res.room.type === 'dungeon') { UISystem.showDungeonWarning(pathIndex); }
+            else if (res.room.type === 'elite') {
+                var baseMon = GD().MONSTERS[p.monsterId];
+                var targetRace = baseMon ? baseMon.race : 'mutant';
+                var ePool = Object.keys(GD().MONSTERS).filter(function(k) {
+                    var m = GD().MONSTERS[k]; return m.tier === 'elite' && m.race === targetRace;
+                });
+                if (ePool.length === 0) ePool = ['MON_CH1_CLEANER','MON_CH1_GUARD','MON_CH1_SPORE','MON_CH1_HIVE','MON_CH1_BEE','MON_CH1_SENTINEL'];
+                var eid = ePool[Math.floor(Math.random() * ePool.length)];
+                var commonPool = Object.keys(GD().MONSTERS).filter(function(k) {
+                    var m = GD().MONSTERS[k]; return m.tier === 'common' && m.race === targetRace;
+                });
+                if (commonPool.length === 0) commonPool = ['MON_CH1_ZOMBIE','MON_CH1_RIOT','MON_CH1_RAT','MON_CH1_LARVA','MON_CH1_CLEANER_ROBOT','MON_CH1_WATCHER'];
+                CS().startBattle([eid, commonPool[Math.floor(Math.random() * commonPool.length)]], {});
+            }
+            else if (res.room.type === 'monster') {
+                var baseMon3 = GD().MONSTERS[p.monsterId];
+                var targetRace3 = baseMon3 ? baseMon3.race : 'mutant';
+                var commons = Object.keys(GD().MONSTERS).filter(function(k) {
+                    var m = GD().MONSTERS[k]; return m.tier === 'common' && m.race === targetRace3;
+                });
+                if (commons.length === 0) commons = ['MON_CH1_ZOMBIE','MON_CH1_RIOT','MON_CH1_RAT','MON_CH1_LARVA','MON_CH1_CLEANER_ROBOT','MON_CH1_WATCHER'];
+                var cnt = 1 + Math.floor(Math.random() * 3);
+                var mids = []; for (var mi = 0; mi < cnt; mi++) mids.push(commons[Math.floor(Math.random() * commons.length)]);
+                CS().startBattle(mids);
+            }
+            else if (res.room.type === 'portal') { render(); }
+            else if (res.room.type === 'victory') { _showVictoryOverlay(); }
+            else {
+                // 营地/遗物：消耗卡片
+                p._used = true;
+                if (cardEl) {
+                    cardEl.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                    cardEl.style.opacity = '0'; cardEl.style.transform = 'scale(0.85)';
+                    cardEl.style.pointerEvents = 'none';
+                    setTimeout(function() {
+                        if (cardEl.parentNode) cardEl.remove();
+                        var remaining = gs.mapState.discoveryPaths.filter(function(pp) { return !pp._used; });
+                        if (remaining.length === 0) { WS().generateNextPaths(); render(); }
+                    }, 300);
+                }
+                render();
+            }
+        }
+    }
+
     function _renderDiscovery(gs) {
-        _mainView.innerHTML = '';
         var room = gs.mapState.currentRoom;
         var paths = gs.mapState.discoveryPaths || [];
-        // 母巢新手区：只显示普通怪物和遗物
-        var _campHide = room.type === 'camp' ? { camp: true, elite: true, dungeon: true, portal: true } : null;
+        // [修复] 同步 Core.js 逻辑：仅在 B1F 新手引导区隐藏高级路径，其余普通营地正常显示
+        var isTutorial = room.type === 'camp' && gs.mapState.currentFloor === 1 && gs.mapState.stepsTaken <= 1;
+        var _campHide = isTutorial ? { camp: true, elite: true, dungeon: true, portal: true } : null;
 
         // 初始化完成后直接静态渲染，不再做动画
         if (_discoveryDone) {
-            _mainView.style.cssText = 'flex:0 0 460px;display:flex;justify-content:center;padding:30px 0;gap:20px;margin-right:30px;';
             _mainView.innerHTML = '';
+            _mainView.style.cssText = 'flex:0 0 460px;display:flex;justify-content:center;padding:30px 0;gap:20px;margin-right:30px;';
             var left = _ce('div');
             left.style.cssText = 'display:flex;flex-direction:column;gap:20px;padding:0 20px 0 0;';
             var roomRaceClr = ''; if (room.monsterId) { var rm = GD().MONSTERS[room.monsterId]; if (rm) { var rcMap = { mutant:'#ff6b4a', swarm:'#9acd32', ember:'#4ab8ff' }; roomRaceClr = rcMap[rm.race] || ''; } }
@@ -320,58 +468,32 @@ window.UISystem = (function () {
             } else {
                 paths.forEach(function(p, i) {
                     if (_campHide && _campHide[p.type]) return;
+                    if (p._used) return;
                     var card = _ce('div', 'path-card');
                     var clrStyle = p.raceClr ? 'color:' + p.raceClr + ';' : '';
-                    card.innerHTML = '<div class="txt-xs txt-green">[ 路径 0' + (i+1) + ' ]</div>' +
+
+                    // [新增] 路径词缀视觉呈现
+                    var affixHTML = "";
+                    if (p.synapseAffix) {
+                        card.style.border = '1px solid ' + p.synapseAffix.color;
+                        card.style.boxShadow = 'inset 0 0 10px ' + p.synapseAffix.color + '33';
+                        affixHTML = '<div class="help-tip" style="position:absolute;top:-10px;right:10px;background:var(--bg-deep);border:1px solid ' + p.synapseAffix.color + ';padding:2px 8px;border-radius:4px;font-size:11px;color:' + p.synapseAffix.color + ';" data-tip="<b style=color:' + p.synapseAffix.color + '>【环境感官共鸣：' + p.synapseAffix.name + '】</b>&#10;' + p.synapseAffix.desc + '">' + p.synapseAffix.name + '</div>';
+                    }
+
+                    card.innerHTML = affixHTML + '<div class="txt-xs txt-green">[ 路径 0' + (i+1) + ' ]</div>' +
                         '<div class="txt-sm txt-bold" style="display:flex;align-items:center;gap:6px;margin:8px 0;' + clrStyle + '">' + p.label + '</div>' +
                         '<div class="txt-xs txt-dim">' + p.desc + '</div>';
                     card.onclick = function() {
                         var isCombat = ['monster','elite','boss','dungeon'].indexOf(p.type) !== -1;
                         if (isCombat) {
+                            if (p.type === 'dungeon') { UISystem.showDungeonWarning(i); return; }
                             _fadeOutCards(function() {
                                 var res = WS().discover(i);
-                                if (res.success && res.events && res.events.length > 0) {
-                                    res.events.forEach(function(ev) { if (ev.msg) UISystem.showNotification(ev.msg, null, 'var(--accent-yellow)'); });
-                                }
-                                if (res.success && res.room.type === 'boss') { CS().startBattle(res.room.monsterId); }
-                                else if (res.success && res.room.type === 'dungeon') {
-                                    var dPool = ['MON_CH1_CLEANER','MON_CH1_GUARD','MON_CH1_SPORE','MON_CH1_HIVE','MON_CH1_BEE','MON_CH1_SENTINEL'];
-                                    var dIds = [dPool[Math.floor(Math.random() * dPool.length)], dPool[Math.floor(Math.random() * dPool.length)]];
-                                    CS().startBattle(dIds, { isDungeon: true });
-                                }
-                                else if (res.success && res.room.type === 'elite') {
-                                    var ePool = ['MON_CH1_CLEANER','MON_CH1_GUARD','MON_CH1_SPORE','MON_CH1_HIVE','MON_CH1_BEE','MON_CH1_SENTINEL'];
-                                    var eid = ePool[Math.floor(Math.random() * ePool.length)];
-                                    var extras = ['MON_CH1_ZOMBIE','MON_CH1_RIOT','MON_CH1_RAT','MON_CH1_LARVA','MON_CH1_CLEANER_ROBOT','MON_CH1_WATCHER'];
-                                    CS().startBattle([eid, extras[Math.floor(Math.random() * extras.length)]], {});
-                                }
-                                else if (res.success && res.room.type === 'monster') {
-                                    var commons = ['MON_CH1_ZOMBIE','MON_CH1_RIOT','MON_CH1_RAT','MON_CH1_LARVA','MON_CH1_CLEANER_ROBOT','MON_CH1_WATCHER'];
-                                    var cnt = 1 + Math.floor(Math.random() * 3);
-                                    var mids = []; for (var mi = 0; mi < cnt; mi++) mids.push(commons[Math.floor(Math.random() * commons.length)]);
-                                    CS().startBattle(mids);
-                                }
-                                else { render(); }
+                                _handleDiscoveryResult(res, i, card);
                             });
-                        } else if (p.type === 'portal') {
-                            _fadeOutCards(function() { var res = WS().discover(i); render(); });
-                        } else if (p.type === 'victory') {
-                            _fadeOutCards(function() { var res = WS().discover(i); _showVictoryOverlay(); });
                         } else {
-                            // 营地/遗物：只消耗当前卡片，保留其余手牌
                             var res = WS().discover(i);
-                            if (res.success && res.events && res.events.length > 0) {
-                                res.events.forEach(function(ev) { if (ev.msg) UISystem.showNotification(ev.msg, null, 'var(--accent-yellow)'); });
-                            }
-                            p._used = true;
-                            card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-                            card.style.opacity = '0'; card.style.transform = 'scale(0.85)';
-                            card.style.pointerEvents = 'none';
-                            setTimeout(function() {
-                                if (card.parentNode) card.remove();
-                                var remaining = gs.mapState.discoveryPaths.filter(function(pp) { return !pp._used; });
-                                if (remaining.length === 0) { WS().generateNextPaths(); render(); }
-                            }, 300);
+                            _handleDiscoveryResult(res, i, card);
                         }
                     };
                     right.appendChild(card);
@@ -385,8 +507,8 @@ window.UISystem = (function () {
         if (_discoveryAnimating) return;
         if (!_tasksDone) return;
         _discoveryAnimating = true;
-        _mainView.style.cssText = 'flex:0 0 460px;display:flex;justify-content:center;padding:30px 0;gap:20px;margin-right:30px;';
         _mainView.innerHTML = '';
+        _mainView.style.cssText = 'flex:0 0 460px;display:flex;justify-content:center;padding:30px 0;gap:20px;margin-right:30px;';
 
         var left = _ce('div');
         left.style.cssText = 'display:flex;flex-direction:column;gap:20px;padding:0 20px 0 0;';
@@ -428,28 +550,17 @@ window.UISystem = (function () {
                     '<div class="txt-sm txt-bold" style="display:flex;align-items:center;gap:6px;margin:8px 0;' + aClrStyle2 + '">' + p.label + '</div>' +
                     '<div class="txt-xs txt-dim">' + p.desc + '</div>';
                 card.onclick = function() {
-                    var res = WS().discover(idx);
-                    if (res.success && res.events && res.events.length > 0) {
-                        res.events.forEach(function(ev) { if (ev.msg) UISystem.showNotification(ev.msg, null, 'var(--accent-yellow)'); });
+                    var isCombat = ['monster','elite','boss','dungeon'].indexOf(p.type) !== -1;
+                    if (isCombat) {
+                        if (p.type === 'dungeon') { UISystem.showDungeonWarning(idx); return; }
+                        _fadeOutCards(function() {
+                            var res = WS().discover(idx);
+                            _handleDiscoveryResult(res, idx, card);
+                        });
+                    } else {
+                        var res = WS().discover(idx);
+                        _handleDiscoveryResult(res, idx, card);
                     }
-                    if (res.success && res.room.type === 'boss') { CS().startBattle(res.room.monsterId); }
-                    else if (res.success && res.room.type === 'dungeon') {
-                        var dpool = ['MON_CH1_CLEANER','MON_CH1_GUARD','MON_CH1_SPORE','MON_CH1_HIVE','MON_CH1_BEE','MON_CH1_SENTINEL'];
-                        CS().startBattle([dpool[Math.floor(Math.random()*dpool.length)], dpool[Math.floor(Math.random()*dpool.length)]], { isDungeon: true });
-                    }
-                    else if (res.success && res.room.type === 'elite') {
-                        var epool = ['MON_CH1_CLEANER','MON_CH1_GUARD','MON_CH1_SPORE','MON_CH1_HIVE','MON_CH1_BEE','MON_CH1_SENTINEL'];
-                        var ee = epool[Math.floor(Math.random()*epool.length)];
-                        var xp = ['MON_CH1_ZOMBIE','MON_CH1_RIOT','MON_CH1_RAT','MON_CH1_LARVA','MON_CH1_CLEANER_ROBOT','MON_CH1_WATCHER'];
-                        CS().startBattle([ee, xp[Math.floor(Math.random()*xp.length)]], {});
-                    }
-                    else if (res.success && res.room.type === 'monster') {
-                        var commons2 = ['MON_CH1_ZOMBIE','MON_CH1_RIOT','MON_CH1_RAT','MON_CH1_LARVA','MON_CH1_CLEANER_ROBOT','MON_CH1_WATCHER'];
-                        var cnt2 = 1 + Math.floor(Math.random() * 3);
-                        var mids2 = []; for (var mj = 0; mj < cnt2; mj++) mids2.push(commons2[Math.floor(Math.random() * commons2.length)]);
-                        CS().startBattle(mids2);
-                    }
-                    else { render(); }
                 };
                 right.appendChild(card);
                 getComputedStyle(card).opacity; // 强制提交初始状态
@@ -512,8 +623,27 @@ window.UISystem = (function () {
             card.className = 'monster-card';
             var cardBorder = dead ? 'var(--border-dim)' : mclr;
             var cardGlow = (isTarget && !dead && !isVictory) ? 'box-shadow:0 0 20px ' + (raceCardClrs[md.race] || '#ff4455') + ';' : '';
-            card.style.cssText = 'background:var(--bg-card);border:2px solid ' + cardBorder + ';border-radius:8px;padding:24px;text-align:center;min-width:260px;max-width:340px;' + cardGlow +
+            card.style.cssText = 'position:relative;background:var(--bg-card);border:2px solid ' + cardBorder + ';border-radius:8px;padding:24px;text-align:center;min-width:260px;max-width:340px;' + cardGlow +
                 (dead ? 'opacity:0.4;filter:grayscale(0.5);' : '') + 'cursor:' + (isVictory || dead ? 'default' : 'pointer') + ';';
+
+            // [新增] 种族克制标记 (方案 A：右上角弱点锁定)
+            var pRaces = gs.player.masteries.filter(function(r) { return r; });
+            var isCountered = false;
+            for (var cri = 0; cri < pRaces.length; cri++) {
+                var pr = pRaces[cri];
+                if (md && md.race && ((pr === 'mutant' && md.race === 'swarm') ||
+                    (pr === 'swarm' && md.race === 'ember') ||
+                    (pr === 'ember' && md.race === 'mutant'))) {
+                    isCountered = true; break;
+                }
+            }
+            if (isCountered && !dead && !isVictory) {
+                var counterIcon = _ce('div', 'help-tip');
+                counterIcon.style.cssText = 'position:absolute;top:10px;right:10px;color:var(--accent-red);animation:mastery-pulse 2s infinite;z-index:10;';
+                counterIcon.setAttribute('data-tip', '<b style=color:var(--accent-red)>弱点暴露 (种族克制)</b>&#10;玩家当前专精完美克制目标。&#10;<b>效果：</b>伤害 +50% 且无视基础防御。');
+                counterIcon.innerHTML = '<span class="icon icon-crossed-swords" style="width:24px;height:24px;"></span>';
+                card.appendChild(counterIcon);
+            }
             if (!isVictory && !dead) {
                 card.onclick = function() { CS().selectTarget(idx); };
                 card.onmouseenter = function() { this.style.borderColor = mclr; this.style.boxShadow = '0 0 12px ' + mclr; };
@@ -527,11 +657,19 @@ window.UISystem = (function () {
             ico.style.cssText = 'margin:0 auto;' + (dead ? 'color:var(--text-disabled);' : 'color:' + mclr + ';');
             card.appendChild(ico);
 
+            // [新增] 怪物维度词缀显示 (紧凑化，放在名字右侧)
+            var affixIcons = "";
+            if (mon.affixes && mon.affixes.length > 0) {
+                mon.affixes.forEach(function(aff) {
+                    affixIcons += '<span class="help-tip" style="margin-left:8px;padding:1px 6px;border:1px solid ' + aff.color + ';border-radius:3px;font-size:10px;color:' + aff.color + ';animation:glitch 2s infinite;" data-tip="<b style=color:' + aff.color + '>【' + aff.name + '】</b>&#10;' + aff.desc + '">' + aff.name + '</span>';
+                });
+            }
+
             // 名称 + 目标标记
             var nameClr = dead ? 'var(--text-disabled)' : mclr;
             var raceNames = { mutant: '异变者', swarm: '寄生群落', ember: '机械余烬' };
-            card.innerHTML += '<div class="txt-md txt-bold" style="margin-top:8px;color:' + nameClr + ';">' +
-                (isTarget && !dead && !isVictory ? '<span style="color:var(--accent-red);">▸</span> ' : '') + mon.name + '</div>' +
+            card.innerHTML += '<div class="txt-md txt-bold" style="margin-top:8px;color:' + nameClr + ';display:flex;align-items:center;justify-content:center;">' +
+                (isTarget && !dead && !isVictory ? '<span style="color:var(--accent-red);margin-right:4px;">▸</span> ' : '') + mon.name + affixIcons + '</div>' +
                 '<div class="txt-xs" style="margin-top:2px;color:' + (dead ? 'var(--text-disabled)' : mclr) + ';opacity:0.7;">' + (raceNames[md.race] || '') + '</div>';
 
             // 所有怪物显示简版意图标签
@@ -551,118 +689,262 @@ window.UISystem = (function () {
                 if (mon.status['poison']) hpBarClass = 'tox-fill';
                 if (mon._dodging) hpBarClass = 'xp-fill';
             }
+
+            // [新增] 根据研究等级决定 HP 显示模式
+            var rl = (gs.bestiary && gs.bestiary.researchLevels) ? (gs.bestiary.researchLevels[mon.id] || 0) : 0;
+            var hpText = (rl >= 1) ? (mon.hp + ' / ' + mon.hpMax) : (Math.ceil(hpPct) + '%');
+
             card.innerHTML += '<div class="progress-container monster-bar" style="max-width:200px;width:100%;margin:8px auto 0;border:1px solid #442222;">' +
                 '<div class="progress-fill ' + hpBarClass + '" style="width:' + hpPct + '%;"></div></div>' +
-                '<div class="txt-xs txt-dim" style="margin-top:4px;">' + mon.hp + ' / ' + mon.hpMax + '</div>';
+                '<div class="txt-xs txt-dim" style="margin-top:4px;">' + hpText + '</div>';
 
             wrap.appendChild(card);
 
-            // 怪物状态标签（卡片外下方）
+            // 怪物状态 — 模仿玩家双排显示
             if (!dead && !isVictory) {
-                var statusRow = _ce('div');
-                statusRow.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:6px;';
-                var hasStatus = false;
+                var monStatusContainer = _ce('div');
+                monStatusContainer.style.cssText = 'display:flex;flex-direction:column;gap:6px;align-items:center;margin-top:8px;';
+
+                var monBuffRow = _ce('div'); // 上排：临时 Buff
+                monBuffRow.style.cssText = 'display:flex;gap:6px;justify-content:center;flex-wrap:wrap;';
+
+                var monPassiveRow = _ce('div'); // 下排：固定被动
+                monPassiveRow.style.cssText = 'display:flex;gap:6px;justify-content:center;flex-wrap:wrap;';
+
+                // --- 怪物临时 Buff (monBuffRow) ---
                 if (mon.status['poison']) {
-                    hasStatus = true;
                     var dotPct = bs.dualKey === 'swarm+swarm' ? 8 : 5;
-                    statusRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(206,147,216,0.15);border:1px solid rgba(206,147,216,0.3);border-radius:3px;color:var(--accent-purple);" data-tip="<b>基因毒素</b>&#10;每回合扣除 ' + dotPct + '% 最大HP&#10;剩余 ' + mon.status['poison'] + ' 回合&#10;使用 [腺体脉冲] 可引爆并吸血"><span class="icon icon-poison-gas"></span> 中毒 ' + mon.status['poison'] + '</span>';
+                    monBuffRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(206,147,216,0.15);border:1px solid var(--accent-purple);border-radius:3px;color:var(--accent-purple);" data-tip="<b>基因毒素</b>&#10;每回合扣除 ' + dotPct + '% 最大HP&#10;剩余 ' + mon.status['poison'] + ' 回合&#10;使用 [腺体脉冲] 可引爆并吸血"><span class="icon icon-poison-gas"></span> 中毒 ' + mon.status['poison'] + '</span>';
                 }
                 if (mon._shield > 0) {
-                    hasStatus = true;
-                    statusRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.25);border-radius:3px;color:var(--accent-blue);" data-tip="<b>科技护盾</b>&#10;吸收 ' + mon._shield + ' 点伤害&#10;护盾耗尽后才扣减HP"><span class="icon icon-energy-shield"></span> ' + mon._shield + '</span>';
+                    monBuffRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(0,212,255,0.12);border:1px solid var(--accent-blue);border-radius:3px;color:var(--accent-blue);" data-tip="<b>科技护盾</b>&#10;吸收 ' + mon._shield + ' 点伤害&#10;护盾耗尽后才扣减HP"><span class="icon icon-energy-shield"></span> ' + mon._shield + '</span>';
                 }
                 if (mon._dodging) {
-                    hasStatus = true;
-                    statusRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(255,213,79,0.12);border:1px solid rgba(255,213,79,0.3);border-radius:3px;color:var(--accent-yellow);" data-tip="<b>产卵闪避</b>&#10;所有攻击全部落空&#10;每3回合切换一次"><span class="icon icon-dodge"></span> 闪避</span>';
+                    monBuffRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(255,213,79,0.12);border:1px solid var(--accent-yellow);border-radius:3px;color:var(--accent-yellow);" data-tip="<b>产卵闪避</b>&#10;所有攻击全部落空&#10;每3回合切换一次"><span class="icon icon-dodge"></span> 闪避</span>';
                 }
                 if (mon._charged) {
-                    hasStatus = true;
-                    statusRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(245,124,0,0.12);border:1px solid rgba(245,124,0,0.3);border-radius:3px;color:var(--accent-orange);" data-tip="<b>蓄力中</b>&#10;下回合释放强力攻击&#10;可在蓄力期使用 [神经阻断] 打断"><span class="icon icon-lightning-arc"></span> 蓄力</span>';
+                    monBuffRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(245,124,0,0.12);border:1px solid var(--accent-orange);border-radius:3px;color:var(--accent-orange);" data-tip="<b>蓄力中</b>&#10;下回合释放强力攻击&#10;可在蓄力期使用 [神经阻断] 打断"><span class="icon icon-lightning-arc"></span> 蓄力</span>';
                 }
                 if (mon._enraged) {
-                    hasStatus = true;
-                    statusRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(255,68,85,0.15);border:1px solid rgba(255,68,85,0.3);border-radius:3px;color:var(--accent-red);" data-tip="<b>狂怒</b>&#10;攻击力永久翻倍&#10;速战速决，拖延必败"><span class="icon icon-enrage"></span> 狂怒</span>';
+                    monBuffRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(255,68,85,0.15);border:1px solid var(--accent-red);border-radius:3px;color:var(--accent-red);" data-tip="<b>狂怒</b>&#10;攻击力永久翻倍&#10;速战速决，拖延必败"><span class="icon icon-enrage"></span> 狂怒</span>';
                 }
                 if (mon._defBuff > 0) {
-                    hasStatus = true;
-                    statusRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(120,144,156,0.12);border:1px solid rgba(120,144,156,0.25);border-radius:3px;color:var(--text-dim);" data-tip="<b>防御强化</b>&#10;防御力 +' + mon._defBuff + '&#10;建议使用破甲组件或涂层"><span class="icon icon-energy-shield"></span>+ ' + mon._defBuff + '</span>';
+                    monBuffRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(120,144,156,0.12);border:1px solid var(--text-dim);border-radius:3px;color:var(--text-dim);" data-tip="<b>防御强化</b>&#10;防御力 +' + mon._defBuff + '&#10;建议使用破甲组件或涂层"><span class="icon icon-energy-shield"></span>+ ' + mon._defBuff + '</span>';
                 }
-                if (hasStatus) wrap.appendChild(statusRow);
+
+                // --- 怪物固定被动 (monPassiveRow) ---
+                var racePassives = {
+                    mutant: { name: '超速再生', desc: '该变异体具有极强的自我修复能力，不受[流血]效果影响。' },
+                    swarm: { name: '群体意识', desc: '受到伤害时，会向周围同类释放警告信息素，使自身受到的下次伤害降低。' },
+                    ember: { name: '金属外骨骼', desc: '全身覆盖高硬度合金，对所有非破甲类型的物理攻击具有 20% 的天生减伤。' }
+                };
+                var pass = racePassives[md.race];
+                if (pass) {
+                    monPassiveRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(255,255,255,0.02);border:1px solid ' + mclr + ';border-radius:3px;color:' + mclr + ';opacity:0.8;" data-tip="<b>' + pass.name + ' (' + raceNames[md.race] + ')</b>&#10;' + pass.desc + '"><span class="icon icon-dna"></span> ' + pass.name + '</span>';
+                }
+
+                if (monPassiveRow.children.length > 0) monStatusContainer.appendChild(monPassiveRow);
+                if (monBuffRow.children.length > 0) monStatusContainer.appendChild(monBuffRow);
+                wrap.appendChild(monStatusContainer);
             }
 
             row.appendChild(wrap);
         });
         _battleView.appendChild(row);
 
-        // 玩家状态 — 底部居中，不挤怪物卡片
-        if (!isVictory) {
-            var pRow = _ce('div');
-            pRow.style.cssText = 'position:absolute;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:8px;justify-content:center;flex-wrap:wrap;';
+        // 玩家状态 — 底部居中，双排显示
+        if (bs.phase === 'victory') {
+            // [修复] 胜利状态下如果存在 Boss 宝箱，显示宝箱按钮
+            if (bs._bossChest) {
+                var chestWrap = _ce('div');
+                chestWrap.style.cssText = 'position:absolute;bottom:30px;left:50%;transform:translateX(-50%);z-index:400;text-align:center;';
+                var chestBtn = _ce('button', 'btn btn-gold btn-lg');
+                chestBtn.style.cssText = 'padding:15px 40px;font-size:18px;box-shadow:0 0 20px var(--accent-yellow);animation:mastery-pulse 2s infinite;';
+                chestBtn.innerHTML = '<span class="icon icon-crown"></span> 开启领主宝箱';
+                chestBtn.onclick = function() { CS().openBossChest(); };
+                chestWrap.appendChild(chestBtn);
+                _battleView.appendChild(chestWrap);
+            }
+        } else {
+            var statusContainer = _ce('div');
+            statusContainer.style.cssText = 'position:absolute;bottom:20px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;align-items:center;';
+
+            var buffRow = _ce('div'); // 上排：临时 Buff
+            buffRow.style.cssText = 'display:flex;gap:8px;justify-content:center;flex-wrap:wrap;';
+
+            var passiveRow = _ce('div'); // 下排：固定被动
+            passiveRow.style.cssText = 'display:flex;gap:8px;justify-content:center;flex-wrap:wrap;';
+
             var p2 = gs.player;
-            if (bs.playerStatus['berserk']) pRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(206,147,216,0.15);border:1px solid rgba(206,147,216,0.3);border-radius:3px;color:var(--accent-purple);" data-tip="<b>狂暴</b>&#10;攻击力 +50%&#10;每回合扣除 1% 最大HP&#10;剩余 ' + bs.playerStatus['berserk'] + ' 回合"><span class="icon icon-enrage"></span> 狂暴</span>';
-            if (bs.playerStatus['bleed']) pRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(255,107,122,0.15);border:1px solid rgba(255,107,122,0.3);border-radius:3px;color:var(--accent-red);" data-tip="<b>流血</b>&#10;每回合扣除 4 HP&#10;剩余 ' + bs.playerStatus['bleed'] + ' 回合"><span class="icon icon-dripping-blade"></span> 流血</span>';
-            if (bs.shieldAmount > 0) pRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(0,212,255,0.15);border:1px solid rgba(0,212,255,0.3);border-radius:3px;color:var(--accent-blue);" data-tip="<b>科技护盾</b>&#10;吸收 ' + bs.shieldAmount + ' 点伤害"><span class="icon icon-energy-shield"></span> ' + bs.shieldAmount + '</span>';
+            // --- 临时 Buff (buffRow) ---
+            if (bs.playerStatus['berserk']) buffRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(206,147,216,0.15);border:1px solid var(--accent-purple);border-radius:3px;color:var(--accent-purple);" data-tip="<b>狂暴</b>&#10;攻击力 +50%&#10;每回合扣除 1% 最大HP&#10;剩余 ' + bs.playerStatus['berserk'] + ' 回合"><span class="icon icon-enrage"></span> 狂暴</span>';
+            if (bs.playerStatus['bleed']) buffRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(255,107,122,0.15);border:1px solid var(--accent-red);border-radius:3px;color:var(--accent-red);" data-tip="<b>流血</b>&#10;每回合扣除 4 HP&#10;剩余 ' + bs.playerStatus['bleed'] + ' 回合"><span class="icon icon-dripping-blade"></span> 流血</span>';
+            if (bs.shieldAmount > 0) buffRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(0,212,255,0.15);border:1px solid var(--accent-blue);border-radius:3px;color:var(--accent-blue);" data-tip="<b>科技护盾</b>&#10;吸收 ' + bs.shieldAmount + ' 点伤害"><span class="icon icon-energy-shield"></span> ' + bs.shieldAmount + '</span>';
+            if (p2.activeCoating) buffRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(255,213,79,0.12);border:1px solid var(--accent-yellow);border-radius:3px;color:var(--accent-yellow);" data-tip="<b>基因涂层</b>&#10;剩余 ' + (p2.coatingTurnsLeft||0) + ' 回合"><span class="icon icon-paintbrush"></span>涂层</span>';
+            if (p2.toxicity > 0) buffRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(206,147,216,0.1);border:1px solid var(--accent-purple);border-radius:3px;color:var(--accent-purple);" data-tip="<b>基因毒性</b>&#10;当前 ' + p2.toxicity + '/' + (p2.toxicity_max||50) + '&#10;超过 50 时每回合扣血 2%"><span class="icon icon-biohazard"></span> ' + p2.toxicity + '</span>';
+            // [修复] 增加“进程干扰”Debuff 的 UI 显示
+            if (bs._processPenalty > 0) buffRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(0,212,255,0.15);border:1px solid var(--accent-blue);border-radius:3px;color:var(--accent-blue);animation:glitch 1.5s infinite;" data-tip="<b>进程干扰</b>&#10;下一次打出器官卡牌时，额外消耗 ' + bs._processPenalty + ' 点进程"><span class="icon icon-ram"></span> 进程干扰 +' + bs._processPenalty + '</span>';
+
+            // --- 固定被动 (passiveRow) ---
             var counterTargets = { mutant: '寄生群落', swarm: '机械余烬', ember: '异变者' };
             if (bs.playerRaces && bs.playerRaces.length > 0) {
                 var countered = {};
                 bs.playerRaces.forEach(function(r) { countered[counterTargets[r]] = true; });
                 var cNames = Object.keys(countered);
-                if (cNames.length > 0) pRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(255,213,79,0.12);border:1px solid rgba(255,213,79,0.3);border-radius:3px;color:var(--accent-yellow);" data-tip="<b>种族克制 +50%</b>&#10;对 ' + cNames.join('、') + ' 伤害 +50%，无视防御"><span class="icon icon-crossed-swords"></span> ' + cNames.map(function(n) { return '克' + n.slice(0,2); }).join(' ') + '</span>';
+                if (cNames.length > 0) passiveRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(255,213,79,0.12);border:1px solid rgba(255,213,79,0.3);border-radius:3px;color:var(--accent-yellow);" data-tip="<b>种族克制 +50%</b>&#10;对 ' + cNames.join('、') + ' 伤害 +50%，无视防御"><span class="icon icon-crossed-swords"></span> ' + cNames.map(function(n) { return '克' + n.slice(0,2); }).join(' ') + '</span>';
             }
-            // 组件效果
+            // 专精特定被动说明
+            var dc = GD().DUAL_CLASSES[bs.dualKey];
+            if (dc) {
+                var dcClr = dc.color || 'var(--accent-yellow)';
+                passiveRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(255,255,255,0.03);border:1px solid ' + dcClr + ';border-radius:3px;color:' + dcClr + ';" data-tip="<b style=color:' + dcClr + '>' + dc.name + '：</b>&#10;<b>' + dc.passive + '</b>&#10;' + dc.passiveDesc + '"><span class="icon icon-dna"></span> ' + dc.passive + '</span>';
+            }
+
             var cfx = bs.componentEffects;
             if (cfx) {
-                if (cfx.armorPen > 0) pRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.2);border-radius:3px;color:var(--accent-blue);" data-tip="<b>破甲</b>&#10;无视目标 ' + Math.round(cfx.armorPen*100) + '% 防御"><span class="icon icon-shield-crack"></span> ' + Math.round(cfx.armorPen*100) + '%破</span>';
-                if (cfx.toxinConv > 0) pRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(206,147,216,0.12);border:1px solid rgba(206,147,216,0.25);border-radius:3px;color:var(--accent-purple);" data-tip="<b>毒素转化</b>&#10;攻击伤害的 ' + Math.round(cfx.toxinConv*100) + '% 转为额外毒素伤害"><span class="icon icon-poison-gas"></span> ' + Math.round(cfx.toxinConv*100) + '%毒转</span>';
-                if (cfx.lifeDrainChance > 0) pRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.2);border-radius:3px;color:var(--accent-green);" data-tip="<b>吸血</b>&#10;毒素自溶时 ' + Math.round(cfx.lifeDrainChance*100) + '% 概率吸取 ' + (cfx.lifeDrainAmt||0) + ' HP"><span class="icon icon-dripping-blade"></span> ' + Math.round(cfx.lifeDrainChance*100) + '%吸血</span>';
-                if (cfx.thornsPct > 0) pRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.2);border-radius:3px;color:var(--accent-blue);" data-tip="<b>电磁反伤</b>&#10;受到攻击时反弹 ' + Math.round(cfx.thornsPct*100) + '% 伤害"><span class="icon icon-lightning-arc"></span> ' + Math.round(cfx.thornsPct*100) + '%反伤</span>';
-                if (cfx.dotBonus > 0) pRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(206,147,216,0.12);border:1px solid rgba(206,147,216,0.25);border-radius:3px;color:var(--accent-purple);" data-tip="<b>DOT强化</b>&#10;每回合毒素伤害 +' + cfx.dotBonus + '"><span class="icon icon-poison-gas"></span>+ ' + cfx.dotBonus + '</span>';
-                if (cfx.bonusVsSwarm > 0) pRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(255,213,79,0.1);border:1px solid rgba(255,213,79,0.2);border-radius:3px;color:var(--accent-yellow);" data-tip="<b>对寄生增伤</b>&#10;对寄生群落种族伤害 +' + Math.round(cfx.bonusVsSwarm*100) + '%"><span class="icon icon-insect"></span> +' + Math.round(cfx.bonusVsSwarm*100) + '%</span>';
+                if (cfx.armorPen > 0) passiveRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.2);border-radius:3px;color:var(--accent-blue);" data-tip="<b>破甲</b>&#10;无视目标 ' + Math.round(cfx.armorPen*100) + '% 防御"><span class="icon icon-shield-crack"></span> ' + Math.round(cfx.armorPen*100) + '%破</span>';
+                if (cfx.toxinConv > 0) passiveRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(206,147,216,0.12);border:1px solid rgba(206,147,216,0.25);border-radius:3px;color:var(--accent-purple);" data-tip="<b>毒素转化</b>&#10;攻击伤害的 ' + Math.round(cfx.toxinConv*100) + '% 转为额外毒素伤害"><span class="icon icon-poison-gas"></span> ' + Math.round(cfx.toxinConv*100) + '%毒转</span>';
+                if (cfx.lifeDrainChance > 0) passiveRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.2);border-radius:3px;color:var(--accent-green);" data-tip="<b>吸血</b>&#10;毒素自溶时 ' + Math.round(cfx.lifeDrainChance*100) + '% 概率吸取 ' + (cfx.lifeDrainAmt||0) + ' HP"><span class="icon icon-dripping-blade"></span> ' + Math.round(cfx.lifeDrainChance*100) + '%吸血</span>';
+                if (cfx.thornsPct > 0) passiveRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.2);border-radius:3px;color:var(--accent-blue);" data-tip="<b>电磁反伤</b>&#10;受到攻击时反弹 ' + Math.round(cfx.thornsPct*100) + '% 伤害"><span class="icon icon-lightning-arc"></span> ' + Math.round(cfx.thornsPct*100) + '%反伤</span>';
+                if (cfx.dotBonus > 0) passiveRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(206,147,216,0.12);border:1px solid rgba(206,147,216,0.25);border-radius:3px;color:var(--accent-purple);" data-tip="<b>DOT强化</b>&#10;每回合毒素伤害 +' + cfx.dotBonus + '"><span class="icon icon-poison-gas"></span>+ ' + cfx.dotBonus + '</span>';
+                if (cfx.bonusVsSwarm > 0) passiveRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(255,213,79,0.1);border:1px solid rgba(255,213,79,0.2);border-radius:3px;color:var(--accent-yellow);" data-tip="<b>对寄生增伤</b>&#10;对寄生群落种族伤害 +' + Math.round(cfx.bonusVsSwarm*100) + '%"><span class="icon icon-insect"></span> +' + Math.round(cfx.bonusVsSwarm*100) + '%</span>';
             }
-            if (p2.toxicity > 0) pRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(206,147,216,0.1);border:1px solid rgba(206,147,216,0.2);border-radius:3px;color:var(--accent-purple);" data-tip="<b>基因毒性</b>&#10;当前 ' + p2.toxicity + '/' + (p2.toxicity_max||50) + '&#10;超过 50 时每回合扣血 2%"><span class="icon icon-biohazard"></span> ' + p2.toxicity + '</span>';
-            if (p2.activeCoating) pRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(255,213,79,0.12);border:1px solid rgba(255,213,79,0.25);border-radius:3px;color:var(--accent-yellow);" data-tip="<b>基因涂层</b>&#10;剩余 ' + (p2.coatingTurnsLeft||0) + ' 回合"><span class="icon icon-paintbrush"></span>涂层</span>';
-            if (pRow.children.length > 0) _battleView.appendChild(pRow);
+
+            if (buffRow.children.length > 0) statusContainer.appendChild(buffRow);
+            if (passiveRow.children.length > 0) statusContainer.appendChild(passiveRow);
+            _battleView.appendChild(statusContainer);
         }
     }
 
     function _renderActions(gs, inBattle) {
         var bar = document.getElementById('ui-action-bar'); if (!bar) return; bar.innerHTML = '';
         if (inBattle) {
-            // 技能详情面板 — 底部左侧，与日志栏对齐
             var bsv = CS().getBattleState();
             var skillInfo = document.getElementById('ui-skill-info');
+
+            // [新增] 伤害/数值预测逻辑
+            var getForecast = function(slot, baseAtk) {
+                if (!bsv) return { dmg: baseAtk, heal: 0, tag: "" };
+                var mon = bsv.monsters[bsv.currentTarget];
+                if (!mon || mon.hp <= 0) return { dmg: baseAtk, heal: 0, tag: "" };
+
+                var md = GD().MONSTERS[mon.id];
+                var dmg = baseAtk;
+                var ignoreDef = false;
+                var tag = "";
+
+                // 1. 研究等级 & 种族克制
+                var rl = (gs.bestiary && gs.bestiary.researchLevels) ? (gs.bestiary.researchLevels[mon.id] || 0) : 0;
+                if (rl >= 2) dmg *= 1.1;
+
+                var pRaces = gs.player.masteries.filter(function(r){return r;});
+                var isCounter = false;
+                for(var i=0; i<pRaces.length; i++){
+                    var pr = pRaces[i];
+                    if((pr==='mutant' && md.race==='swarm')||(pr==='swarm' && md.race==='ember')||(pr==='ember' && md.race==='mutant')){ isCounter = true; break; }
+                }
+                if (isCounter) { dmg *= 1.5; ignoreDef = true; tag = " (弱点)"; }
+
+                // 2. 器官/同调加成
+                var sData = gs.player[slot] || { tier: 1 };
+                var syncLvl = gs.inventory.organSyncLevels[sData.equipped] || 1;
+                var tierFactor = 1 + (sData.tier - 1) * 0.1 * syncLvl;
+                dmg *= tierFactor;
+
+                // 3. 特殊觉醒
+                if (slot === 'predatory_organ' && sData.equipped === '暴君核心' && syncLvl >= 3) ignoreDef = true;
+
+                // 4. 连招引爆
+                var heal = 0;
+                if (slot === 'gland_core') {
+                    if (sData.equipped === '蜂后髓核') { dmg *= 3; heal = dmg; }
+                    else if (sData.equipped === '高能电泳核') { dmg *= 2.0; ignoreDef = true; }
+                    else if (mon.status['poison']) { dmg *= 3; heal = dmg; tag = " (爆发)"; }
+                    else if (mon.status['compromised']) { dmg *= 2.0; tag = " (崩解)"; }
+                    else { dmg *= 0.5; }
+                }
+
+                // 5. 防御减免模拟
+                if (!ignoreDef) {
+                    var effDef = (mon.def || 0) + (mon._defBuff || 0);
+                    var cfx = bsv.componentEffects || {};
+                    if (cfx.armorPen > 0) effDef *= (1 - cfx.armorPen);
+                    var reduction = window.GameState.calcDamageReduction(effDef);
+                    dmg *= (1 - reduction);
+                }
+
+                return { dmg: Math.ceil(dmg), heal: Math.ceil(heal), tag: tag };
+            };
+
             if (skillInfo) {
-                var ram = gs.player.ram, atk = gs.player.atk;
+                skillInfo.style.display = '';
+                var proc = gs.player.process, atk = gs.player.atk;
                 var isVictory = bsv && bsv.phase === 'victory';
-                var curMonStatus = bsv && bsv.monsters && bsv.monsters[bsv.currentTarget] ? bsv.monsters[bsv.currentTarget].status['poison'] : false;
+                var curMon = bsv && bsv.monsters ? bsv.monsters[bsv.currentTarget] : null;
+                var curMonStatus = curMon ? curMon.status['poison'] : false;
+                var curMonIon = curMon ? curMon.status['ionized'] : false;
+                var curMonComp = curMon ? curMon.status['compromised'] : false;
+
+                // 计算受干扰后的实际消耗
+                var getActualCost = function(base) {
+                    var penalty = (bsv ? bsv._processPenalty || 0 : 0);
+                    var envPenalty = (bsv && bsv.dungeonEnv ? bsv.dungeonEnv.effect.ramPenalty || 0 : 0);
+                    return base + penalty + envPenalty;
+                };
+
                 var bos2 = GD().BOSS_ORGANS || {};
-                var s1Name = (gs.player.predatory_organ.equipped && bos2[gs.player.predatory_organ.equipped] ? bos2[gs.player.predatory_organ.equipped].skillName : '捕食打击');
-                var s1Cost = (gs.player.predatory_organ.equipped && bos2[gs.player.predatory_organ.equipped] ? bos2[gs.player.predatory_organ.equipped].skillCost : 2);
-                var s2Name = (gs.player.chitin_epidermis.equipped && bos2[gs.player.chitin_epidermis.equipped] ? bos2[gs.player.chitin_epidermis.equipped].skillName : '生物防御');
-                var s2Cost = (gs.player.chitin_epidermis.equipped && bos2[gs.player.chitin_epidermis.equipped] ? bos2[gs.player.chitin_epidermis.equipped].skillCost : 3);
-                var s3Name = (gs.player.gland_core.equipped && bos2[gs.player.gland_core.equipped] ? bos2[gs.player.gland_core.equipped].skillName : '腺体脉冲');
-                var s3Cost = (gs.player.gland_core.equipped && bos2[gs.player.gland_core.equipped] ? bos2[gs.player.gland_core.equipped].skillCost : 3);
-                var c1 = isVictory ? false : ram >= s1Cost, c2 = isVictory ? false : ram >= s2Cost, c3 = isVictory ? false : ram >= s3Cost;
+                var s1BaseCost = (gs.player.predatory_organ.equipped && bos2[gs.player.predatory_organ.equipped] ? bos2[gs.player.predatory_organ.equipped].skillCost : 2);
+                var s1Cost = getActualCost(s1BaseCost);
+                var f1 = getForecast('predatory_organ', atk);
+
+                var s2BaseCost = (gs.player.chitin_epidermis.equipped && bos2[gs.player.chitin_epidermis.equipped] ? bos2[gs.player.chitin_epidermis.equipped].skillCost : 3);
+                var s2Cost = getActualCost(s2BaseCost);
+
+                var s3BaseCost = (gs.player.gland_core.equipped && bos2[gs.player.gland_core.equipped] ? bos2[gs.player.gland_core.equipped].skillCost : 3);
+                var s3Cost = getActualCost(s3BaseCost);
+                var f3 = getForecast('gland_core', atk);
+
+                var c1 = isVictory ? false : proc >= s1Cost, c2 = isVictory ? false : proc >= s2Cost, c3 = isVictory ? false : proc >= s3Cost;
                 var gc = function(ok, clr) { return ok ? clr : 'var(--text-disabled)'; };
-                skillInfo.innerHTML = '<div class="txt-xs txt-green txt-bold" style="margin-bottom:10px;">> 战斗提示</div>' +
+
+                // 怪物意图预测 (Lv.1 研究解锁)
+                var intentHTML = "";
+                if (curMon && !isVictory && curMon.intent) {
+                    var rl2 = (gs.bestiary && gs.bestiary.researchLevels) ? (gs.bestiary.researchLevels[curMon.id] || 0) : 0;
+                    var valStr = (rl2 >= 1) ? " (" + Math.ceil(curMon.intent.value * (curMon._atkMult || 1) * (curMon._scaleAtk || 1)) + " 点)" : "";
+                    intentHTML = '<div style="margin-bottom:12px;padding:10px;background:rgba(255,68,85,0.05);border:1px solid rgba(255,68,85,0.2);border-radius:4px;">' +
+                        '<div class="txt-xs txt-red txt-bold">> 目标意图确认</div>' +
+                        '<div class="txt-xs txt-white" style="margin-top:4px;">' + curMon.name + ' 准备执行：<span style="color:var(--accent-red)">' + curMon.intent.label + valStr + '</span></div></div>';
+                }
+
+                skillInfo.innerHTML = '<div class="txt-xs txt-green txt-bold" style="margin-bottom:10px;">> 动态战术预测</div>' +
+                    intentHTML +
                     '<div style="display:flex;flex-direction:column;gap:6px;">' +
-                    '<div data-key="1" class="help-tip" style="background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;padding:6px 14px;' + (c1 ? '' : 'opacity:0.5;') + '" data-tip="<b style=color:var(--accent-red)>' + s1Name + '</b> (' + s1Cost + '进程)&#10;造成 <b>' + atk + '</b> 点<span style=color:var(--accent-red)>物理伤害</span>&#10;30% 概率施加<span style=color:var(--accent-purple)>毒素标记</span>&#10;涂有涂层时附加种族特效">' +
-                    '<span class="txt-xs txt-bold" style="color:' + gc(c1, 'var(--accent-red)') + ';">[1] ' + s1Name + '</span> <span class="txt-xs txt-dim">' + s1Cost + '进程 · ' + atk + '伤害 · 30%挂毒</span></div>' +
-                    '<div data-key="2" class="help-tip" style="background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;padding:6px 14px;' + (c2 ? '' : 'opacity:0.5;') + '" data-tip="<b style=color:var(--accent-green)>' + s2Name + '</b> (' + s2Cost + '进程)&#10;获得 <b>' + Math.ceil(atk * 0.6) + '</b> 点<span style=color:var(--accent-blue)>临时护盾</span>&#10;优先吸收所有类型伤害&#10;护盾耗尽后才扣减HP">' +
-                    '<span class="txt-xs txt-bold" style="color:' + gc(c2, 'var(--accent-green)') + ';">[2] ' + s2Name + '</span> <span class="txt-xs txt-dim">' + s2Cost + '进程 · +' + Math.ceil(atk * 0.6) + '护盾</span></div>' +
-                    '<div data-key="3" class="help-tip" style="background:var(--bg-card);border:1px solid ' + (c3 && curMonStatus ? 'rgba(255,213,79,0.8)' : 'var(--border-dim)') + ';border-radius:4px;padding:6px 14px;' + (c3 ? '' : 'opacity:0.5;') + (c3 && curMonStatus ? 'box-shadow:0 0 10px rgba(255,213,79,0.4);' : '') + '" data-tip="<b style=color:var(--accent-yellow)>' + s3Name + '</b> (' + s3Cost + '进程)&#10;<span style=color:var(--accent-purple)>目标中毒时</span>：<b>' + (atk * 3) + '</b> 点爆破 + <span style=color:var(--accent-green)>100%吸血</span>&#10;无中毒时：仅轻微酸蚀">' +
-                    '<span class="txt-xs txt-bold" style="color:' + gc(c3, 'var(--accent-yellow)') + ';">[3] ' + s3Name + '</span> <span class="txt-xs txt-dim">' + s3Cost + '进程 · ' + (c3 && curMonStatus ? '<span style="color:var(--accent-yellow);">⚡连招!</span> ' : '') + (atk * 3) + '爆破</span></div>' +
+                    '<div data-key="1" class="help-tip" style="background:var(--bg-card);border:1px solid ' + (c1 && curMonIon ? 'rgba(0,212,255,0.8)' : 'var(--border-dim)') + ';border-radius:4px;padding:6px 14px;' + (c1 ? '' : 'opacity:0.5;') + (c1 && curMonIon ? 'box-shadow:0 0 10px rgba(0,212,255,0.4);' : '') + '" data-tip="预期造成的最终净伤害，已扣除防御和护盾。">' +
+                    '<span class="txt-xs txt-bold" style="color:' + gc(c1, 'var(--accent-red)') + ';">[1] 打击</span> <span class="txt-xs txt-dim">' + s1Cost + '进程 · <b style="color:var(--accent-red)">' + f1.dmg + '</b>伤害' + f1.tag + '</span></div>' +
+                    '<div data-key="2" class="help-tip" style="background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;padding:6px 14px;' + (c2 ? '' : 'opacity:0.5;') + '" data-tip="当前攻击力下可生成的防御层强度。">' +
+                    '<span class="txt-xs txt-bold" style="color:' + gc(c2, 'var(--accent-green)') + ';">[2] 防御</span> <span class="txt-xs txt-dim">' + s2Cost + '进程 · <b style="color:var(--accent-blue)">+' + Math.ceil(atk * 0.6) + '</b>护盾</span></div>' +
+                    '<div data-key="3" class="help-tip" style="background:var(--bg-card);border:1px solid ' + (c3 && (curMonStatus || curMonComp) ? 'rgba(255,213,79,0.8)' : 'var(--border-dim)') + ';border-radius:4px;padding:6px 14px;' + (c3 ? '' : 'opacity:0.5;') + (c3 && (curMonStatus || curMonComp) ? 'box-shadow:0 0 10px rgba(255,213,79,0.4);' : '') + '" data-tip="检测连招标记，触发基因融毁或生物崩解。">' +
+                    '<span class="txt-xs txt-bold" style="color:' + gc(c3, 'var(--accent-yellow)') + ';">[3] 脉冲</span> <span class="txt-xs txt-dim">' + s3Cost + '进程 · <b style="color:var(--accent-yellow)">' + f3.dmg + '</b>爆破' + (f3.heal > 0 ? ' <b style="color:var(--accent-green)">+' + f3.heal + '吸血</b>' : '') + f3.tag + '</span></div>' +
                     '<div data-key="Space" style="background:var(--bg-card);border:1px solid ' + (isVictory ? 'rgba(0,255,136,0.3)' : 'var(--border-dim)') + ';border-radius:4px;padding:6px 14px;">' +
                     '<span class="txt-xs txt-bold" style="color:' + 'var(--accent-orange)' + ';">[空格] ' + (isVictory ? '退出战斗' : '回合结束 · 回复 3 进程') + '</span></div>' +
-                    (isVictory ? '' : '<div data-key="E" style="background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;padding:6px 14px;' + (ram >= 4 ? '' : 'opacity:0.5;') + '">' +
-                    '<span class="txt-xs txt-bold" style="color:' + gc(ram >= 4, 'var(--accent-red)') + ';">[E] 紧急切断</span> <span class="txt-xs txt-dim">· 消耗 4 进程 · 脱离战斗</span></div>') +
-                    ((!isVictory && gs.inventory.potions.length > 0) ? '<div class="txt-xs txt-purple txt-bold" style="margin-top:4px;">> 魔药 [' + ['4','5','6'].slice(0, gs.inventory.potions.length).join('][') + '] 不消耗进程</div>' : '') +
-                    (!isVictory ? gs.inventory.potions.map(function(pid, pi) {
-                        var pt = GD().POTIONS[pid]; if (!pt) return '';
+                    (isVictory ? '' : '<div data-key="E" style="background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;padding:6px 14px;' + (proc >= 4 ? '' : 'opacity:0.5;') + '">' +
+                    '<span class="txt-xs txt-bold" style="color:' + gc(proc >= 4, 'var(--accent-red)') + ';">[E] 紧急切断</span> <span class="txt-xs txt-dim">· 消耗 4 进程 · 脱离战斗</span></div>') +
+                    (isVictory && bsv && bsv.isDungeon && (bsv._dungeonFloor || 0) < 3 ? '<div data-key="0" style="background:var(--bg-card);border:1px solid var(--accent-green);border-radius:4px;padding:6px 14px;margin-bottom:4px;box-shadow:0 0 10px rgba(0,255,136,0.2);">' +
+                    '<span class="txt-xs txt-bold" style="color:var(--accent-green);">[0] 深入地下城</span> <span class="txt-xs txt-dim">· 进入下一层 · HP 继承</span></div>' : '') +
+                    '<div class="txt-xs txt-purple txt-bold" style="margin-top:4px;">> 魔药说明 (不消耗进程)</div>' +
+                    [0,1,2].map(function(idx) {
                         var pkeys = ['4','5','6'];
-                        return '<div data-key="' + pkeys[pi] + '" class="help-tip" style="background:var(--bg-card);border:1px solid rgba(156,39,176,0.3);border-radius:4px;padding:4px 14px;" data-tip="<b style=color:var(--accent-purple)>' + pt.name + '</b>&#10;<span style=color:var(--accent-green)>' + (pt.effect.desc || '') + '</span>&#10;<span style=color:var(--accent-purple)>毒性+' + pt.toxicity + '</span>&#10;<span style=color:var(--accent-red)>' + (pt.sideEffect && pt.sideEffect.desc ? pt.sideEffect.desc : '') + '</span>">' +
-                            '<span class="txt-xs txt-bold" style="color:var(--accent-purple);">[' + pkeys[pi] + '] ' + pt.name + '</span> <span class="txt-xs txt-dim">毒性+' + pt.toxicity + '</span></div>';
-                    }).join('') : '') +
+                        var pid = gs.inventory.potions[idx];
+                        if (pid && !isVictory) {
+                            var pt = GD().POTIONS[pid]; if (!pt) return '';
+                            return '<div data-key="' + pkeys[idx] + '" class="help-tip" style="background:var(--bg-card);border:1px solid rgba(156,39,176,0.3);border-radius:4px;padding:4px 14px;" data-tip="<b style=color:var(--accent-purple)>' + pt.name + '</b>&#10;<span style=color:var(--accent-green)>' + (pt.effect.desc || '') + '</span>&#10;<span style=color:var(--accent-purple)>毒性+' + pt.toxicity + '</span>&#10;<span style=color:var(--accent-red)>' + (pt.sideEffect && pt.sideEffect.desc ? pt.sideEffect.desc : '') + '</span>">' +
+                                '<span class="txt-xs txt-bold" style="color:var(--accent-purple);">[' + pkeys[idx] + '] ' + pt.name + '</span> <span class="txt-xs txt-dim">毒性+' + pt.toxicity + '</span></div>';
+                        } else {
+                            return '<div style="background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;padding:4px 14px;opacity:0.4;">' +
+                                '<span class="txt-xs txt-dim">[' + pkeys[idx] + '] 未装备魔药</span></div>';
+                        }
+                    }).join('') +
                     '</div>';
             }
 
@@ -675,11 +957,23 @@ window.UISystem = (function () {
             var organRaceCls = { '暴君核心': 'btn-red', '蜂后髓核': 'btn-green', '高能电泳核': 'btn-blue' };
             defs.forEach(function (btn) {
                 var eq = gs.player[btn.s].equipped;
-                if (eq && bos[eq] && bos[eq].skillName) { btn.l = bos[eq].skillName; btn.c = bos[eq].skillCost || btn.c; btn.cls = organRaceCls[eq] || btn.cls; }
-                var can = gs.player.ram >= btn.c;
+                var baseCost = btn.c;
+                if (eq && bos[eq] && bos[eq].skillName) {
+                    btn.l = bos[eq].skillName;
+                    baseCost = bos[eq].skillCost || btn.c;
+                    btn.cls = organRaceCls[eq] || btn.cls;
+                }
+
+                // [修复] 技能卡牌按钮消耗数值同步 Debuff 状态
+                var penalty = (bsv ? bsv._processPenalty || 0 : 0);
+                var envPenalty = (bsv && bsv.dungeonEnv ? bsv.dungeonEnv.effect.ramPenalty || 0 : 0);
+                var actualCost = baseCost + penalty + envPenalty;
+
+                var can = gs.player.process >= actualCost;
                 var b = _ce('button', 'btn btn-battle-card ' + (can ? btn.cls : 'btn-gray'));
-                b.innerHTML = '<span class="txt-sm txt-bold"><span class="icon '+btn.i+'"></span>' + btn.l + '</span>' +
-                              '<span class="txt-xs">' + btn.c + ' 进程</span>';
+                var costHTML = (penalty + envPenalty > 0) ? '<span style="color:var(--accent-red); font-weight:bold;">' + actualCost + '</span>' : actualCost;
+                b.innerHTML = '<span class="txt-sm txt-bold">[' + btn.k + '] ' + btn.l + '</span>' +
+                              '<span class="txt-xs">' + costHTML + ' 进程</span>';
                 if (can) b.onclick = function() { this.style.transform = 'translateY(2px)'; this.style.filter = 'brightness(0.8)'; var s = btn.s; setTimeout(function() { CS().playCard(s); }, 80); };
                 bar.appendChild(b);
             });
@@ -689,8 +983,9 @@ window.UISystem = (function () {
                 var potData = GD().POTIONS || {};
                 potions.forEach(function(pid, pidx) {
                     var pt = potData[pid]; if (!pt) return;
+                    var pkeys = ['4','5','6'];
                     var pb = _ce('button', 'btn btn-purple btn-battle-card');
-                    pb.innerHTML = '<span class="txt-sm txt-bold"><span class="icon icon-biohazard"></span>' + pt.name + '</span><span class="txt-xs">毒性+' + pt.toxicity + '</span>';
+                    pb.innerHTML = '<span class="txt-sm txt-bold">[' + pkeys[pidx] + '] ' + pt.name + '</span><span class="txt-xs">毒性+' + pt.toxicity + '</span>';
                     pb.onclick = function() { this.style.transform = 'translateY(2px)'; this.style.filter = 'brightness(0.8)'; setTimeout(function() { CS().playCard(null, pid); }, 80); };
                     bar.appendChild(pb);
                 });
@@ -699,30 +994,30 @@ window.UISystem = (function () {
             var bs = CS().getBattleState();
             if (bs && bs.phase === 'victory') {
                 // 地下城：深入按钮
-                if (bs.isDungeon && (bs._dungeonFloor || 0) < 2) {
+                if (bs.isDungeon && (bs._dungeonFloor || 0) < 3) {
                     var deep = _ce('button', 'btn btn-green btn-battle-card');
-                    deep.innerHTML = '<span class="txt-sm">深入地下城</span><span class="txt-xs">B' + ((bs._dungeonFloor||0)+2) + 'F</span>';
+                    deep.innerHTML = '<span class="txt-sm txt-bold">[0] 深入地下城</span><span class="txt-xs">B' + ((bs._dungeonFloor||0)+2) + 'F</span>';
                     deep.onclick = function() { this.style.transform = 'translateY(2px)'; setTimeout(function() { CS().dungeonDeep(); }, 80); };
                     bar.appendChild(deep);
                 }
                 var end = _ce('button', 'btn btn-orange btn-battle-card');
-                end.innerHTML = '<span class="txt-sm">退出战斗</span><span class="txt-xs">返回探索</span>';
+                end.innerHTML = '<span class="txt-sm txt-bold">[空格] 退出战斗</span><span class="txt-xs">返回探索</span>';
                 end.onclick = function() { this.style.transform = 'translateY(2px)'; setTimeout(function() { CS().exitBattle(); }, 80); };
                 bar.appendChild(end);
             } else {
                 var end = _ce('button', 'btn btn-orange btn-battle-card');
-                end.innerHTML = '<span class="txt-sm">结束回合</span><span class="txt-xs">回复 3 进程</span>';
+                end.innerHTML = '<span class="txt-sm txt-bold">[空格] 结束回合</span><span class="txt-xs">回复 3 进程</span>';
                 end.onclick = function() { this.style.transform = 'translateY(2px)'; this.style.filter = 'brightness(0.8)'; setTimeout(function() { CS().endTurn(); }, 80); };
                 bar.appendChild(end);
                 // 逃跑按钮
                 var fleeBtn = _ce('button', 'btn btn-red btn-battle-card');
-                fleeBtn.innerHTML = '<span class="txt-sm">紧急切断</span><span class="txt-xs">消耗 4 进程</span>';
+                fleeBtn.innerHTML = '<span class="txt-sm txt-bold">[E] 紧急切断</span><span class="txt-xs">消耗 4 进程</span>';
                 fleeBtn.onclick = function() { this.style.transform = 'translateY(2px)'; this.style.filter = 'brightness(0.8)'; setTimeout(function() { CS().flee(); }, 80); };
                 bar.appendChild(fleeBtn);
             }
         } else {
             var skillInfo = document.getElementById('ui-skill-info');
-            if (skillInfo) skillInfo.innerHTML = '';
+            if (skillInfo) { skillInfo.innerHTML = ''; skillInfo.style.display = 'none'; }
             // 楼层信息条
             var floor = gs.mapState.currentFloor || 1;
             var pool = gs.mapState.floorNodePool || [];
@@ -812,7 +1107,7 @@ window.UISystem = (function () {
         // 自动存档
         body.innerHTML += '<div style="padding:10px 16px;background:rgba(255,255,255,0.03);border-radius:6px;display:flex;justify-content:space-between;align-items:center;">' +
             '<span class="txt-sm txt-white">自动存档</span><span class="txt-xs txt-dim">等阶 ' + p.level + ' · 步数 ' + gs.mapState.stepsTaken + '</span>' +
-            '<span class="txt-xs txt-green">✓ 已保存</span></div>';
+            '<span class="txt-xs txt-green" style="text-shadow:0 0 5px var(--accent-green);">✓ 已同步</span></div>';
         // 3 槽位
         var slots = window.GameState.listSlots();
         for (var i = 0; i < 3; i++) {
@@ -848,43 +1143,121 @@ window.UISystem = (function () {
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
         var box = _ce('div', 'modal-box status-modal');
-        box.style.cssText = 'width:min(700px,90vw);max-height:55vh;background:var(--bg-modal);border:2px solid #f57f17;padding:0;display:flex;flex-direction:column;overflow:hidden;';
+        box.style.cssText = 'width:min(700px,90vw);max-height:85vh;background:var(--bg-modal);border:2px solid #f57f17;padding:0;display:flex;flex-direction:column;overflow:hidden;';
+
         var killedCount = 0; Object.keys(gs.bestiary.killCount || {}).forEach(function(id) { killedCount += (gs.bestiary.killCount[id] || 0); });
         var infoBar = _ce('div');
-        infoBar.style.cssText = 'margin-bottom:20px;padding:8px 16px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;width:min(700px,90vw);text-align:left;';
-        infoBar.innerHTML = '<span class="txt-xs txt-gold">已击杀 ' + killedCount + ' 只</span><span class="txt-xs txt-dim"> · 共收录 ' + Object.keys(allMonsters).length + ' 种</span>' +
-            '<div class="txt-xs txt-dim" style="margin-top:4px;">种族克制：<span style="color:#ff6b4a;">异变者</span> → <span style="color:#9acd32;">寄生</span> → <span style="color:#4ab8ff;">机械</span> → <span style="color:#ff6b4a;">异变者</span> · 对被克种族 +50% 伤害且无视防御</div>';
+        infoBar.style.cssText = 'margin-bottom:20px;padding:12px 16px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;width:min(700px,90vw);text-align:left;';
+        infoBar.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
+            '<span><span class="txt-xs txt-gold">已击杀 ' + killedCount + ' 只</span><span class="txt-xs txt-dim"> · 共收录 ' + Object.keys(allMonsters).length + ' 种</span></span>' +
+            '<span class="txt-xs txt-gold">当前基因点数: ' + gs.player.bp + '</span></div>' +
+            '<div class="txt-xs txt-dim"><b>研究奖励：</b> Lv.1 <span style="color:var(--accent-blue)">数值透明</span> | Lv.2 <span style="color:var(--accent-red)">伤害+10%</span> | Lv.3 <span style="color:var(--accent-yellow)">掉落+25%</span></div>';
         _modalOverlay.appendChild(infoBar);
+
         var head = _ce('div');
         head.style.cssText = 'padding:20px 30px;background:rgba(245,124,0,0.08);border-bottom:1px solid #f57f17;display:flex;justify-content:space-between;align-items:center;';
-        head.innerHTML = '<div class="txt-md txt-gold txt-bold">[ 变异体图鉴 ]</div>' +
+        head.innerHTML = '<div class="txt-md txt-gold txt-bold">[ 变异体图鉴 & 基因深度研究 ]</div>' +
             '<button class="btn btn-blue btn-sm" onclick="UISystem.closeModal()">关闭</button>';
         box.appendChild(head);
+
         var body = _ce('div');
         body.style.cssText = 'padding:25px 30px;display:flex;flex-direction:column;gap:15px;overflow-y:auto;flex:1;';
         var killed = gs.bestiary.killCount || {};
+        var research = gs.bestiary.researchLevels || {};
         var tierNames = { common: '普通', elite: '精英', world_boss: '世界首领' };
         var raceNames = { mutant: '异变者', swarm: '寄生群落', ember: '机械余烬' };
         var raceIcons = { mutant: 'icon-mutant', swarm: 'icon-swarm', ember: 'icon-ember' };
+
         ['mutant','swarm','ember'].forEach(function(race) {
             var raceHeaderClrs = { mutant: '#ff6b4a', swarm: '#9acd32', ember: '#4ab8ff' };
             body.innerHTML += '<div class="txt-sm txt-bold" style="margin-top:8px;color:' + (raceHeaderClrs[race] || '#ffd54f') + ';"><span class="icon ' + raceIcons[race] + '"></span> ' + raceNames[race] + '</div>';
+
             Object.keys(allMonsters).forEach(function(id) {
                 var m = allMonsters[id];
                 if (m.race !== race) return;
                 var kc = killed[id] || 0;
+                var rl = research[id] || 0;
                 var known = kc > 0;
                 var rclr = raceHeaderClrs[m.race] || '#ffd54f';
                 var bgClr = known ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.01)';
-                body.innerHTML += '<div style="padding:10px 14px;background:' + bgClr + ';border-radius:4px;border-left:3px solid ' + (known ? rclr : '#333') + ';">' +
-                    '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+
+                var item = _ce('div');
+                item.style.cssText = 'padding:15px 18px;background:' + bgClr + ';border-radius:4px;border-left:3px solid ' + (known ? rclr : '#333') + ';display:flex;flex-direction:column;gap:10px;';
+
+                var topRow = '<div style="display:flex;justify-content:space-between;align-items:center;">' +
                     '<span class="txt-sm txt-bold" style="color:' + (known ? rclr : 'var(--text-disabled)') + ';">' + (known ? m.name : '???') + '</span>' +
                     '<span class="txt-xs txt-dim">' + (known ? tierNames[m.tier] + ' · Lv.' + m.level : '未遭遇') + '</span>' +
-                    '</div>' +
-                    (known ? '<div class="txt-xs txt-dim" style="margin-top:4px;">生命:' + m.hp + ' 攻击:' + m.atk + ' 防御:' + m.def + ' | 击杀: ' + kc + ' | ' + m.weakness + '</div>' : '') +
                     '</div>';
+
+                var researchRow = '';
+                if (known) {
+                    var nextCost = [500, 1500, 3000][rl] || null;
+                    var canAfford = nextCost !== null && gs.player.bp >= nextCost;
+
+                    researchRow = '<div style="display:flex;align-items:center;gap:15px;margin-top:4px;padding:10px;background:rgba(0,0,0,0.2);border-radius:4px;">' +
+                        '<div style="flex:1;">' +
+                            '<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span class="txt-xs txt-gold">研究等级 ' + rl + '/3</span>' +
+                            (rl >= 3 ? '<span class="txt-xs txt-green">研究已饱和</span>' : '<span class="txt-xs txt-dim">下级需 ' + nextCost + ' BP</span>') + '</div>' +
+                            '<div class="progress-container" style="height:6px;background:#111;"><div class="progress-fill xp-fill" style="width:' + (rl/3*100) + '%; transition:width 0.5s;"></div></div>' +
+                        '</div>' +
+                        (rl < 3 ? '<button class="btn ' + (canAfford ? 'btn-gold' : 'btn-gray') + ' btn-sm" onclick="var r=GameState.researchMonster(\'' + id + '\'); if(r.success){UISystem.showBestiaryModal();UISystem.showNotification(\'研究突破！\', \'' + m.name + ' 等级提升至 \' + r.newLevel, \'var(--accent-yellow)\');}" style="padding:6px 15px;">' + (canAfford ? '投入研究' : 'BP不足') + '</button>' : '') +
+                        '</div>';
+                }
+
+                item.innerHTML = topRow +
+                    (known ? '<div class="txt-xs txt-dim">生命:' + m.hp + ' 攻击:' + m.atk + ' 防御:' + m.def + ' | 击杀: ' + kc + ' | ' + m.weakness + '</div>' : '') +
+                    researchRow;
+
+                body.appendChild(item);
             });
         });
+        box.appendChild(body);
+        _modalOverlay.appendChild(box);
+    }
+
+    function showDungeonWarning(pathIndex) {
+        var gs = GS(); if (!gs) return;
+        var path = gs.mapState.discoveryPaths[pathIndex]; if (!path) return;
+        var poolIdx = path._poolIndex;
+        var node = (poolIdx !== undefined) ? gs.mapState.floorNodePool[poolIdx] : null;
+        var env = (node && node.env) ? node.env : { name: '未知干扰', desc: '环境代码扫描失败，进入后可能面临未知风险。', effect: {} };
+
+        document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
+        _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
+        var box = _ce('div', 'modal-box');
+        box.style.cssText = 'width:min(500px,90vw);background:var(--bg-modal);border:2px solid var(--accent-red);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
+        var head = _ce('div');
+        head.style.cssText = 'padding:20px 30px;background:rgba(255,68,85,0.08);border-bottom:1px solid var(--accent-red);';
+        head.innerHTML = '<div class="txt-md txt-red txt-bold">[ 地下城准入环境预警 ]</div>';
+        box.appendChild(head);
+        var body = _ce('div');
+        body.style.cssText = 'padding:25px 30px;display:flex;flex-direction:column;gap:18px;';
+        body.innerHTML = '<div class="txt-sm txt-white" style="line-height:1.6;">你正准备进入一个深层隔离区。传感器监测到该区域存在<b>底层环境代码变异</b>。</div>' +
+            '<div style="padding:15px;background:rgba(255,68,85,0.05);border:1px solid rgba(255,68,85,0.25);border-radius:6px;">' +
+            '<div class="txt-sm txt-red txt-bold" style="margin-bottom:6px;"><span class="icon icon-hazard-sign"></span> ' + env.name + '</div>' +
+            '<div class="txt-xs txt-dim">' + env.desc + '</div></div>' +
+            '<div class="txt-xs txt-dim">建议在进入前前往 [实验室] 准备针对性的基因涂层或炼金魔药。</div>';
+        var btnRow = _ce('div');
+        btnRow.style.cssText = 'display:flex;gap:15px;justify-content:center;margin-top:10px;';
+        var confirmBtn = _ce('button', 'btn btn-red btn-capsule');
+        confirmBtn.textContent = '我准备好了';
+        confirmBtn.onclick = function() {
+            UISystem.closeModal();
+            // [修复] 确认后才淡出卡片并触发 discover，统一走处理中枢
+            _fadeOutCards(function() {
+                var res = WS().discover(pathIndex);
+                _handleDiscoveryResult(res, pathIndex, null);
+            });
+        };
+        var cancelBtn = _ce('button', 'btn btn-blue btn-capsule');
+        cancelBtn.textContent = '我再看看';
+        cancelBtn.onclick = function() {
+            UISystem.closeModal();
+            // [修复] 取消时不消耗卡片，由于之前没执行 _fadeOutCards 和 discover，卡片依然存在，只需关闭弹窗即可返回
+        };
+        btnRow.appendChild(confirmBtn);
+        btnRow.appendChild(cancelBtn);
+        body.appendChild(btnRow);
         box.appendChild(body);
         _modalOverlay.appendChild(box);
     }
@@ -893,40 +1266,72 @@ window.UISystem = (function () {
         var gs = GS(); var p = gs.player;
         // 清除残留悬浮提示
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
-        document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
-        // 说明栏（与其他弹窗统一）
+
+        // 1. 创建左右布局容器
+        var wrapper = _ce('div');
+        wrapper.style.cssText = 'display:flex;gap:20px;align-items:flex-start;width:min(920px,95vw);';
+
+        // 2. 左侧说明栏
         var infoBar = _ce('div');
-        infoBar.style.cssText = 'margin-bottom:20px;padding:8px 16px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;width:min(700px,90vw);text-align:left;';
-        infoBar.innerHTML = '<div style="margin-bottom:4px;"><span class="txt-xs txt-blue">核心指标</span><span class="txt-xs txt-dim"> — 当前原体的攻击、防御、生命、进程等基础属性</span></div>' +
-            '<div style="margin-bottom:4px;"><span class="txt-xs txt-blue">器官状态</span><span class="txt-xs txt-dim"> — 捕食器官、生物表皮、腺体核心的阶位与挂载</span></div>' +
-            '<div><span class="txt-xs txt-blue help-tip" data-tip="<b style=\'font-size:14px;color:var(--accent-blue);\'>专精流派：</b>&#10;每升一级获得 1 专精点&#10;可重复投入同一流派叠加属性&#10;双流派组合激活全局被动">专精流派</span><span class="txt-xs txt-dim"> — 升级获得专精点，投入流派叠加属性，双组合激活被动</span></div>';
-        _modalOverlay.appendChild(infoBar);
+        infoBar.style.cssText = 'flex:0 0 200px;padding:24px 16px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:6px;text-align:left;align-self:flex-start;';
+        infoBar.innerHTML = '<div style="margin-bottom:12px;"><span class="txt-xs txt-blue txt-bold">核心指标</span><div class="txt-xs txt-dim" style="margin-top:4px;">当前原体的最终属性。悬停数值可查看加成来源（溯源）。</div></div>' +
+            '<div style="margin-bottom:12px;"><span class="txt-xs txt-blue txt-bold">器官状态</span><div class="txt-xs txt-dim" style="margin-top:4px;">展示已挂载器官及其同调等级。</div></div>' +
+            '<div><span class="txt-xs txt-blue txt-bold">专精流派</span><div class="txt-xs txt-dim" style="margin-top:4px;">投入专精点提升属性，特定组合激活全局被动。</div></div>';
+
+        // 3. 右侧主内容盒
         var box = _ce('div', 'modal-box status-modal');
-        box.style.cssText = 'width:min(700px,90vw);max-height:85vh;background:var(--bg-modal);border:2px solid var(--accent-blue);display:flex;flex-direction:column;gap:0;padding:0;overflow:hidden;';
+        box.style.cssText = 'flex:1;max-height:90vh;background:var(--bg-modal);border:1px solid var(--accent-blue);display:flex;flex-direction:column;gap:0;padding:0;overflow:hidden;';
+
+        // 挂载
+        wrapper.appendChild(infoBar);
+        wrapper.appendChild(box);
+        _modalOverlay.appendChild(wrapper);
+
         var head = _ce('div');
         head.style.cssText = 'padding:20px 30px;background:rgba(0,212,255,0.05);border-bottom:1px solid var(--accent-blue);display:flex;justify-content:space-between;align-items:center;';
-        head.innerHTML = '<div class="txt-md txt-blue txt-bold">[ 原体序列深度扫描档案 ]</div>' +
+        head.innerHTML = '<div class="txt-md txt-blue txt-bold" style="text-shadow:0 0 8px var(--accent-blue);">[ 原体序列深度扫描档案 ]</div>' +
                          '<div style="display:flex;gap:10px;">' +
-                         (p.masteries[0] || p.masteries[1] ? '<button class="btn btn-red btn-sm" onclick="if(confirm(\'重置全部专精？\\n消耗 50 基因点数。\')){if(' + p.bp + '>=50){var gs=window.GameState.getState();gs.player.bp-=50;gs.player.masteries=[null,null];gs.player.masteryPoints={mutant:0,swarm:0,ember:0};gs.player.availableMasteryPoints+=1;window.GameState.recalcPlayerStats();window.GameState.save();UISystem.render();UISystem.showStatusModal();}}">重置专精</button>' : '') +
+                         (p.masteries.some(function(m){return m;}) ? '<button class="btn btn-red btn-sm" onclick="if(confirm(\'重置全部专精？\\n消耗 50 基因点数。\')){if(' + p.bp + '>=50){var gs=window.GameState.getState();gs.player.bp-=50;gs.player.masteries=[null,null,null];gs.player.masteryPoints={mutant:0,swarm:0,ember:0};gs.player.availableMasteryPoints+=1;window.GameState.recalcPlayerStats();window.GameState.save();UISystem.render();UISystem.showStatusModal();}}">重置专精</button>' : '') +
                          '<button class="btn btn-red btn-sm" onclick="UISystem.resetGame()">重置序列</button>' +
                          '<button class="btn btn-blue btn-sm" onclick="UISystem.closeModal()">关闭</button>' +
                          '</div>';
         box.appendChild(head);
+
         var body = _ce('div');
-        body.style.cssText = 'padding:25px 30px;display:flex;flex-direction:column;gap:20px;overflow-y:auto;flex:1;';
+        body.style.cssText = 'padding:30px;display:flex;flex-direction:column;gap:20px;overflow-y:auto;flex:1;';
+
         // 核心指标
         var atkBase2 = p.atk_base, defBase2 = p.def_base;
-        var atkBonus2 = p.atk - atkBase2, defBonus2 = p.def - defBase2, hpBonus2 = p.hp_max - 100, ramBonus2 = p.ram_max - 10;
+        var atkBonus2 = p.atk - atkBase2, defBonus2 = p.def - defBase2, hpBonus2 = p.hp_max - 100, processBonus2 = p.process_max - 10;
+
+        // [修复] 属性溯源计算逻辑及 _tip 引用
+        var getStatSource = function(type) {
+            var lines = ["基础序列: " + (type==='atk'?atkBase2:(type==='def'?defBase2:(type==='hp'?100:10)))];
+            var mPts = p.masteryPoints; var mData = GD().MASTERIES;
+            Object.keys(mPts).forEach(function(r){
+                var pts = mPts[r] || 0; if(pts<=0) return;
+                var val = mData[r].statsPerPoint[type==='hp'?'hp_max':(type==='process'?'process_max':type)] * pts;
+                if(val>0) lines.push("流派 [" + (r==='mutant'?'异变':(r==='swarm'?'寄生':'机械')) + "]: +" + val);
+            });
+            ['predatory_organ', 'chitin_epidermis', 'gland_core'].forEach(function(s){
+                var d = p[s]; if(d.tier<=1) return;
+                var bonus = (d.tier-1) * (type==='atk'?3:(type==='hp'?5:3));
+                if(type==='process') bonus = (d.tier-1);
+                if((type==='atk' && s==='predatory_organ')||(type==='def' && s==='chitin_epidermis')||(type==='hp')||(type==='process' && s==='gland_core')) lines.push("插槽 [" + d.tier + "阶]: +" + bonus);
+            });
+            return "<b>属性溯源 (" + type.toUpperCase() + "):</b>&#10;" + lines.join("&#10;");
+        };
+
         var _sv = function(base, bonus) { return bonus > 0 ? base + '<span style="color:var(--accent-green);"> +' + bonus + '</span>' : (bonus < 0 ? base + '<span style="color:var(--accent-red);"> ' + bonus + '</span>' : '' + base); };
-        var _tip = function(val, base, bonus) { return '<b>最终: ' + val + '</b>&#10;基础: ' + base + (bonus > 0 ? '&#10;装备/专精加成: +' + bonus : ''); };
+
         var coreHTML2 = '<div style="padding:15px 20px;background:rgba(0,212,255,0.03);border:1px solid rgba(0,212,255,0.15);border-radius:6px;display:flex;flex-direction:column;gap:10px;">' +
             '<div class="txt-sm txt-blue txt-bold">> 核心序列指标</div>' +
             '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;" class="txt-sm">' +
-            '<div class="stat-row help-tip" data-tip="' + _tip(p.atk, atkBase2, atkBonus2) + '"><span class="icon icon-atk"></span>攻击: <span class="stat-val txt-bold">' + _sv(atkBase2, atkBonus2) + '</span></div>' +
-            '<div class="stat-row help-tip" data-tip="' + _tip(p.def, defBase2, defBonus2) + '"><span class="icon icon-def"></span>防御: <span class="stat-val txt-bold">' + _sv(defBase2, defBonus2) + '</span></div>' +
-            '<div class="stat-row help-tip" data-tip="' + _tip(p.hp_max, 100, hpBonus2) + '"><span class="icon icon-health"></span>生命: <span class="stat-val txt-bold">' + _sv(100, hpBonus2) + '</span></div>' +
-            '<div class="stat-row help-tip" data-tip="' + _tip(p.ram_max, 10, ramBonus2) + '"><span class="icon icon-ram"></span>进程: <span class="stat-val txt-bold">' + _sv(10, ramBonus2) + '</span></div>' +
+            '<div class="stat-row help-tip" data-tip="' + getStatSource('atk') + '"><span class="icon icon-atk"></span>攻击: <span class="stat-val txt-bold">' + _sv(atkBase2, atkBonus2) + '</span></div>' +
+            '<div class="stat-row help-tip" data-tip="' + getStatSource('def') + '"><span class="icon icon-def"></span>防御: <span class="stat-val txt-bold">' + _sv(defBase2, defBonus2) + '</span></div>' +
+            '<div class="stat-row help-tip" data-tip="' + getStatSource('hp') + '"><span class="icon icon-health"></span>生命: <span class="stat-val txt-bold">' + _sv(100, hpBonus2) + '</span></div>' +
+            '<div class="stat-row help-tip" data-tip="' + getStatSource('process') + '"><span class="icon icon-ram"></span>进程: <span class="stat-val txt-bold">' + _sv(10, processBonus2) + '</span></div>' +
             '<div class="stat-row"><span class="icon icon-tox"></span>毒性: <span class="stat-val txt-bold">' + p.toxicity + '/' + (p.toxicity_max||50) + '</span></div>' +
             '<div class="stat-row"><span class="icon icon-upgrade"></span>等级: <span class="stat-val txt-bold">' + p.level + '</span></div>' +
             '<div class="stat-row"><span class="icon icon-dna"></span>基因: <span class="stat-val txt-bold">' + p.bp + '</span></div></div></div>';
@@ -978,8 +1383,15 @@ window.UISystem = (function () {
         var selRace = p.masteries[0] || p.masteries[1] || 'mutant';
         var mc = raceClrs[selRace] || raceClrs.mutant;
         var masteryHTML = '<div style="padding:15px 20px;background:' + mc.bg + ';border:1px solid ' + mc.bd + ';border-radius:6px;display:flex;flex-direction:column;gap:10px;">' +
-            '<div class="txt-sm txt-bold" style="color:' + mc.txt + ';">> 专精流派（每点提升属性，双流派激活被动） <span class="txt-gold">可用:' + p.availableMasteryPoints + '</span></div>';
-        if (dc) { var dcClr2 = dc.color || 'var(--accent-yellow)'; masteryHTML += '<div style="padding:12px;background:rgba(255,213,79,0.05);border:1px solid var(--accent-yellow);border-radius:4px;"><div class="txt-sm txt-bold help-tip" style="color:' + dcClr2 + ';" data-tip="<b style=color:' + dcClr2 + '>' + dc.name + '：</b>&#10;<b>' + dc.passive + '</b>&#10;' + dc.passiveDesc + '">' + dc.name + '</div><div class="txt-xs" style="color:' + dcClr2 + ';">' + dc.passiveDesc + '</div></div>'; }
+            '<div class="txt-sm txt-bold" style="color:' + mc.txt + ';">' +
+            '> 专精流派（每点提升属性，双流派激活被动） <span class="txt-gold">可用:' + p.availableMasteryPoints + '</span></div>';
+        masteryHTML += '<div>';
+        if (dc) {
+            var dcClr2 = dc.color || 'var(--accent-yellow)';
+            masteryHTML += '<div style="padding:12px;background:rgba(255,213,79,0.05);border:1px solid ' + dcClr2 + ';border-radius:4px;margin-bottom:18px;box-shadow:0 0 10px ' + dcClr2 + '44;">' +
+                '<div class="txt-sm txt-bold help-tip" style="color:' + dcClr2 + ';" data-tip="<b style=color:' + dcClr2 + '>' + dc.name + '：</b>&#10;<b>' + dc.passive + '</b>&#10;' + dc.passiveDesc + '">' + dc.name + '</div>' +
+                '<div class="txt-xs" style="color:' + dcClr2 + '; opacity:0.9;">' + dc.passiveDesc + '</div></div>';
+        }
         // 只选一个时，预览可选的双专精
         var selOne = p.masteries[0] || p.masteries[1];
         if (selOne && !dc) {
@@ -997,7 +1409,7 @@ window.UISystem = (function () {
                         '<div class="txt-xs txt-dim" style="color:' + dcClr + ';">' + d2.passiveDesc + '</div></div>';
                 }
             });
-            if (previewHTML) masteryHTML += '<div class="txt-xs txt-dim" style="margin-top:8px;">单流派已提供属性加成。选两个不同流派可激活下方双专精被动：</div><div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">' + previewHTML + '</div>';
+            if (previewHTML) masteryHTML += '<div class="txt-xs txt-dim" style="margin-top:8px;">单流派已提供属性加成。选两个不同流派可激活下方双专精被动：</div><div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;margin-bottom:18px;">' + previewHTML + '</div>';
         }
         var mData = GD().MASTERIES || {};
         var raceTips = {};
@@ -1008,13 +1420,16 @@ window.UISystem = (function () {
             if (m.statsPerPoint.hp_max) parts.push('生命+' + m.statsPerPoint.hp_max);
             if (m.statsPerPoint.atk) parts.push('攻击+' + m.statsPerPoint.atk);
             if (m.statsPerPoint.def) parts.push('防御+' + m.statsPerPoint.def);
-            if (m.statsPerPoint.ram_max) parts.push('进程上限+' + m.statsPerPoint.ram_max);
+            if (m.statsPerPoint.process_max) parts.push('进程上限+' + m.statsPerPoint.process_max);
             var pts = p.masteryPoints[r] || 0;
             raceTips[r] = '<b style=\'font-size:14px;color:' + rc3.txt + ';\'>' + m.name + '：</b>&#10;<span style=\'font-size:14px;\'>每级：' + parts.join('、') + '</span>&#10;<b>特质：</b>' + (m.traits ? m.traits.join(' · ') : '') + (pts > 0 ? '&#10;<b>已投入：</b>' + pts + ' 点' : '');
         });
+        var slotCount = (gs.mapState.loop >= 2) ? 3 : 2;
+        var slotIndices = []; for(var i=0; i<slotCount; i++) slotIndices.push(i);
+
         masteryHTML += '<div style="display:flex;flex-direction:column;gap:10px;">';
-        [0, 1].forEach(function(si) {
-            masteryHTML += '<div class="txt-xs txt-dim" style="display:flex;align-items:center;gap:10px;">流派' + (si+1) + ': ';
+        slotIndices.forEach(function(si) {
+            masteryHTML += '<div class="txt-xs txt-dim" style="display:flex;align-items:center;gap:10px;padding:8px;background:rgba(255,255,255,0.02);border-radius:4px;">流派' + (si+1) + ': ';
             if (p.masteries[si]) {
                 var src = raceClrs[p.masteries[si]] || raceClrs.mutant;
                 var pts2 = p.masteryPoints[p.masteries[si]] || 0;
@@ -1046,23 +1461,58 @@ window.UISystem = (function () {
             }
             masteryHTML += '</div>';
         });
-        masteryHTML += '</div>';
+        masteryHTML += '</div></div>'; // 关闭 fold-content 和外层容器
         body.innerHTML += masteryHTML;
         box.appendChild(body);
-        _modalOverlay.appendChild(box);
     }
 
-    function _claimReward(taskId, reward, rewardDesc) {
+    function _claimReward(taskId, reward, rewardDesc, components) {
         var gs = GS(); if (!gs) return;
         var p = gs.player;
         if (!p.claimedTaskRewards) p.claimedTaskRewards = [];
         if (p.claimedTaskRewards.indexOf(taskId) !== -1) return;
         p.claimedTaskRewards.push(taskId);
+
         p.bp += (reward || 0);
+        if (components) {
+            Object.keys(components).forEach(function(cid) {
+                gs.inventory.components[cid] = (gs.inventory.components[cid] || 0) + components[cid];
+            });
+        }
         window.GameState.save();
         _pushLog('指令完成：' + rewardDesc);
         UISystem.showNotification(rewardDesc || '奖励已领取', null, 'var(--accent-yellow)');
         UISystem.render();
+    }
+
+    function _claimAllTasks() {
+        var gs = GS(); if (!gs) return;
+        var stages = _getTaskStages(gs);
+        var p = gs.player;
+        var compCount = 0;
+
+        stages.forEach(function(tier) {
+            tier.forEach(function(t) {
+                if (t.c() && (!p.claimedTaskRewards || p.claimedTaskRewards.indexOf(t.id) === -1)) {
+                    if (!p.claimedTaskRewards) p.claimedTaskRewards = [];
+                    p.claimedTaskRewards.push(t.id);
+                    p.bp += (t.reward || 0);
+                    if (t.comps) {
+                        Object.keys(t.comps).forEach(function(cid) {
+                            gs.inventory.components[cid] = (gs.inventory.components[cid] || 0) + t.comps[cid];
+                        });
+                    }
+                    _pushLog('批量同步：' + t.rewardDesc);
+                    compCount++;
+                }
+            });
+        });
+
+        if (compCount > 0) {
+            window.GameState.save();
+            UISystem.showNotification('批量同步完成', '已领取 ' + compCount + ' 项指令奖励', 'var(--accent-green)');
+            UISystem.render();
+        }
     }
 
     function _renderTasks(gs) {
@@ -1092,16 +1542,23 @@ window.UISystem = (function () {
                 showing.push({ t: t, done: isDone, justDone: !!justDone, claimed: isClaimed });
             }
             if (showing.length === 0) showing.push({ t: { t: '所有序列指令已完成', id: '_all' }, done: true, justDone: false, claimed: true });
-if (showing.length === 0) h += '<div class="txt-xs txt-dim" style="margin-top:4px;">探索路径 → 击败 Boss → 进入传送门推进楼层</div>';
+
+            // [新增] 任务面板头部：一键领取
+            var hasAnythingToClaim = showing.some(function(s){ return s.justDone && !s.claimed; });
+            if (hasAnythingToClaim) {
+                h += '<div style="margin-bottom:12px;text-align:right;"><button class="btn btn-green btn-sm" onclick="UISystem._claimAllTasks()" style="box-shadow:0 0 10px var(--accent-green);">一键领取全部奖励</button></div>';
+            }
+
             showing.forEach(function(s) {
                 var style = '';
                 var tag = '';
                 if (s.justDone && !s.claimed) {
-                    tag = ' <span class="txt-green" style="cursor:pointer;" onclick="UISystem._claimReward(\'' + s.t.id + '\',' + (s.t.reward||0) + ',\'' + (s.t.rewardDesc||'奖励') + '\')">[领取' + (s.t.rewardDesc||'') + ']</span>';
+                    var compArg = s.t.comps ? JSON.stringify(s.t.comps).replace(/"/g, '&quot;') : 'null';
+                    tag = ' <button class="btn btn-green" style="padding:2px 10px;font-size:11px;height:22px;" onclick="UISystem._claimReward(\'' + s.t.id + '\',' + (s.t.reward||0) + ',\'' + (s.t.rewardDesc||'奖励') + '\',' + compArg + ')">领取奖励</button>';
                 } else if (s.done && s.claimed) {
                     style = 'text-decoration:line-through;color:var(--text-disabled);';
                 }
-                h += '<div class="txt-xs" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;' + style + '"><span><span class="' + ('txt-green') + '">></span> ' + s.t.t + '</span>' + tag + '</div>';
+                h += '<div class="txt-xs" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;' + style + '"><span style="flex:1;margin-right:10px;"><span class="txt-green">></span> ' + s.t.t + '</span>' + tag + '</div>';
             });
             el.style.display = '';
             el.innerHTML = h;
@@ -1176,25 +1633,36 @@ if (showing.length === 0) h += '<div class="txt-xs txt-dim" style="margin-top:4p
         var hasEliteKill = Object.keys(gs.bestiary.killCount || {}).some(function(k) { var m = GD().MONSTERS[k]; return m && m.tier === 'elite'; });
         var hasBossKill = Object.keys(gs.bestiary.killCount || {}).some(function(k) { var m = GD().MONSTERS[k]; return m && m.tier === 'world_boss'; });
         var hasUpgraded = (p.predatory_organ.tier > 1 || p.chitin_epidermis.tier > 1 || p.gland_core.tier > 1);
-        var potionUsed = p._potionsUsed > 0;
-        var hasRelic = (p.relicsFound || 0) > 0;
-        var hasDungeon = (p.dungeonsEntered || 0) > 0;
-        var _r = function(id, text, cond, reward, rewardDesc) {
-            return { id: id, t: text, c: cond, reward: reward || 0, rewardDesc: rewardDesc || '' };
+        var hasSynced = Object.keys(gs.inventory.organSyncLevels || {}).length > 0;
+        var hasResearched = Object.keys(gs.bestiary.researchLevels || {}).length > 0;
+
+        var _r = function(id, text, cond, reward, rewardDesc, comps) {
+            return { id: id, t: text, c: cond, reward: reward || 0, rewardDesc: rewardDesc || '', comps: comps || null };
         };
         return [
-            [_r('explore3', '探索 3 条路径', function () { return gs.mapState.stepsTaken >= 3; }, 10, '+10 基因点数'),
+            [_r('reach_lv3', '原体升至等阶 3', function () { return p.level >= 3; }, 20, '+20 基因点数'),
              _r('first_kill', '完成首次击杀', function () { return killCount >= 1; }, 15, '+15 基因点数'),
-             _r('reach_lv2', '原体升至等阶 2', function () { return p.level >= 2; }, 20, '+20 基因点数')],
-            [_r('find_relic', '发现基因遗物', function () { return hasRelic; }, 25, '+25 基因点数'),
+             _r('research_1', '完成首次基因研究', function () { return hasResearched; }, 50, '+50 基因点数')],
+
+            [_r('find_relic', '发现基因遗物', function () { return (p.relicsFound || 0) > 0; }, 0, '+5 纳米破片', { '纳米破片': 5 }),
              _r('kill_elite', '击败精英变异体', function () { return hasEliteKill; }, 30, '+30 基因点数'),
-             _r('use_potion', '使用一次炼金魔药', function () { return potionUsed; }, 20, '+20 基因点数')],
-            [_r('upgrade_organ', '进阶任意器官至阶 2', function () { return hasUpgraded; }, 30, '+30 基因点数'),
-             _r('enter_dungeon', '深入地下城', function () { return hasDungeon; }, 40, '+40 基因点数'),
-             _r('reach_lv5', '原体升至等阶 5', function () { return p.level >= 5; }, 50, '+50 基因点数')],
-            [_r('kill_15', '累计击杀 15 只变异体', function () { return killCount >= 15; }, 60, '+60 基因点数'),
-             _r('kill_boss', '挑战并击败区域领主', function () { return hasBossKill; }, 100, '+100 基因点数'),
-             _r('reach_lv8', '原体升至等阶 8', function () { return p.level >= 8; }, 80, '+80 基因点数')]
+             _r('reach_lv8', '原体升至等阶 8', function () { return p.level >= 8; }, 50, '+50 基因点数')],
+
+            [_r('upgrade_organ', '进阶任意器官至阶 2', function () { return hasUpgraded; }, 0, '+3 几丁质装甲', { '几丁质装甲': 3 }),
+             _r('organ_sync', '完成一次器官同调', function () { return hasSynced; }, 100, '+100 基因点数'),
+             _r('enter_dungeon', '深入地下城', function () { return (p.dungeonsEntered || 0) > 0; }, 40, '+40 基因点数')],
+
+            [_r('kill_boss', '挑战并击败区域领主', function () { return hasBossKill; }, 0, '+10 原始基因', { '原始基因': 10 }),
+             _r('reach_10f', '抵达实验室 10F', function () { return (gs.mapState.currentFloor || 1) >= 10; }, 200, '+200 基因点数'),
+             _r('mastery_5', '单系专精达到 5 级', function () { return Object.values(p.masteryPoints).some(function(v){return v>=5;}); }, 150, '+150 基因点数')],
+
+            [_r('reach_lv15', '原体升至巅峰等阶 15', function() { return p.level >= 15; }, 0, '+8 导电凝胶', { '导电凝胶': 8 }),
+             _r('kill_50', '累计猎杀 50 只变异体', function() { return killCount >= 50; }, 300, '+300 基因点数'),
+             _r('sync_lv3', '拥有一个 Lv.3 觉醒器官', function() { return Object.values(gs.inventory.organSyncLevels).some(function(v){return v>=3;}); }, 200, '+200 基因点数')],
+
+            [_r('clear_loop1', '完成首次超越进化', function() { return (gs.mapState.loop || 1) >= 2; }, 500, '+500 基因点数'),
+             _r('research_all_lv1', '看破 3 种怪物的意图', function() { return Object.values(gs.bestiary.researchLevels).filter(function(v){return v>=1;}).length >= 3; }, 0, '+10 变异组织', { '变异组织': 10 }),
+             _r('stat_mutation', '完成一次高阶属性突变', function() { return (p.atk_base > 12 || p.def_base > 5 || p.hp_max > 100); }, 150, '+150 基因点数')]
         ];
     }
 
@@ -1251,7 +1719,15 @@ if (showing.length === 0) h += '<div class="txt-xs txt-dim" style="margin-top:4p
                 var statsEl = document.getElementById('victory-stats');
                 var btn = document.getElementById('victory-restart-btn');
                 if (statsEl) statsEl.style.opacity = '1';
-                if (btn) { btn.style.opacity = '1'; btn.onclick = function() { ov.remove(); window.GameState.reset(); window.GameState.init(); render(); }; }
+                if (btn) {
+                    btn.textContent = "超越进化 (进入 Loop " + ((gs.mapState.loop || 1) + 1) + ")";
+                    btn.style.opacity = '1';
+                    btn.onclick = function() {
+                        ov.remove();
+                        window.GameState.startNextLoop();
+                        location.reload(); // 重新加载以初始化新地图
+                    };
+                }
                 return;
             }
             var li = lines[idx];
@@ -1313,12 +1789,8 @@ if (showing.length === 0) h += '<div class="txt-xs txt-dim" style="margin-top:4p
         var gs = GS(); if (gs) { gs.player.introSeen = true; GameState.save(); }
         _modalOverlay.style.display = 'none';
         _wakingUp = true;
-        _isFirstLoad = false;
+        // [修复] 不再手动设置 _isFirstLoad = false，让 render() 统一处理启动序列
         UISystem.render();
-        // 激活原体后启动加载动画序列
-        setTimeout(function() {
-            if (window._bootSequence) window._bootSequence();
-        }, 600);
     }
     function showNotification(title, subtitle, color) {
         var el = _ce('div');
@@ -1397,9 +1869,30 @@ if (showing.length === 0) h += '<div class="txt-xs txt-dim" style="margin-top:4p
                 else { dots += '<span style="display:inline-block;padding:4px 10px;margin:0 2px;border-radius:3px;border:1px dashed var(--border-dim);font-size:12px;color:var(--text-disabled);">空槽</span>'; }
             }
             if (selectCount === 3 && allSame) {
-                var c = GD().COMPONENTS && GD().COMPONENTS[selKeys[0]];
+                var selectedId = selKeys[0];
+                var c = GD().COMPONENTS && GD().COMPONENTS[selectedId];
                 var affixes = c && c.affixes ? c.affixes : {};
+
+                // [修复] 严格根据当前选择材料的层级决定下一级
+                var tiers = ['', 'Ⅰ', 'Ⅱ', 'Ⅲ'];
+                var currentTier = 0;
+                var baseName = selectedId;
+                for (var t = 1; t < tiers.length; t++) {
+                    if (selectedId.endsWith(tiers[t])) {
+                        currentTier = t;
+                        baseName = selectedId.substring(0, selectedId.length - tiers[t].length);
+                        break;
+                    }
+                }
+
+                if (currentTier >= 3) {
+                    preview.innerHTML = '<div class="txt-xs txt-red">已达最高级 Ⅲ，无法继续合成</div>';
+                    return;
+                }
+
+                var nextName = baseName + tiers[currentTier + 1];
                 var parts = [];
+                // 属性翻倍逻辑保持一致
                 if (affixes.atkBonus) parts.push('攻击+' + (affixes.atkBonus*2));
                 if (affixes.flatDefBonus) parts.push('防御+' + (affixes.flatDefBonus*2));
                 if (affixes.shieldBonus) parts.push('生命+' + (affixes.shieldBonus*2));
@@ -1410,10 +1903,7 @@ if (showing.length === 0) h += '<div class="txt-xs txt-dim" style="margin-top:4p
                 if (affixes.thornsPercent) parts.push('反伤' + Math.round(affixes.thornsPercent*200) + '%');
                 if (affixes.dotBonus) parts.push('毒伤+' + (affixes.dotBonus*2));
                 if (affixes.bonusVsSwarm) parts.push('对寄生+' + Math.round(affixes.bonusVsSwarm*200) + '%');
-                var base2 = selKeys[0];
-                var tiers2 = ['', 'Ⅰ', 'Ⅱ', 'Ⅲ']; var ct2 = 0; var comps2 = GD().COMPONENTS || {};
-                for (var t2 = tiers2.length - 1; t2 >= 0; t2--) { if (comps2[base2 + tiers2[t2]]) { ct2 = t2; break; } }
-                var nextName = base2 + (tiers2[ct2 + 1] || 'Ⅰ');
+
                 preview.innerHTML = '<div class="txt-xs txt-gold">→ <b>' + nextName + '</b></div><div class="txt-xs txt-dim">' + parts.join(' · ') + '</div>';
             } else if (selectCount === 3) {
                 preview.innerHTML = '<div class="txt-xs txt-gold">→ 随机新组件</div>';
@@ -1458,16 +1948,28 @@ if (showing.length === 0) h += '<div class="txt-xs txt-dim" style="margin-top:4p
             selKeys.forEach(function(k) { for (var si = 0; si < selected[k]; si++) { inv[k]--; consumed.push(k); } });
             var comps = GD().COMPONENTS || {};
             if (allSame) {
-                var base = selKeys[0];
+                var selectedId = selKeys[0];
                 var tiers = ['', 'Ⅰ', 'Ⅱ', 'Ⅲ'];
                 var currentTier = 0;
-                for (var ti = tiers.length - 1; ti >= 0; ti--) { if (comps[base + tiers[ti]]) { currentTier = ti; break; } }
-                var upgradedName = base + (tiers[currentTier + 1] || 'Ⅰ');
+                var baseName = selectedId;
+                for (var t = 1; t < tiers.length; t++) {
+                    if (selectedId.endsWith(tiers[t])) {
+                        currentTier = t;
+                        baseName = selectedId.substring(0, selectedId.length - tiers[t].length);
+                        break;
+                    }
+                }
+
+                var upgradedName = baseName + tiers[currentTier + 1];
                 if (!comps[upgradedName]) {
-                    var orig = comps[base];
-                    var mult = Math.pow(2, currentTier + 1);
+                    var orig = comps[selectedId];
+                    // 属性倍率基于被消耗的组件进行翻倍
                     comps[upgradedName] = { id: upgradedName, allowedSlots: (orig||{}).allowedSlots||[], affixes: {} };
-                    if (orig && orig.affixes) { Object.keys(orig.affixes).forEach(function(ak) { comps[upgradedName].affixes[ak] = orig.affixes[ak] * mult; }); }
+                    if (orig && orig.affixes) {
+                        Object.keys(orig.affixes).forEach(function(ak) {
+                            comps[upgradedName].affixes[ak] = orig.affixes[ak] * 2;
+                        });
+                    }
                 }
                 inv[upgradedName] = (inv[upgradedName] || 0) + 1;
             } else {
@@ -1490,38 +1992,52 @@ if (showing.length === 0) h += '<div class="txt-xs txt-dim" style="margin-top:4p
         _modalOverlay._returnToLab = true;
         var inv = gs.inventory.components;
         var comps = GD().COMPONENTS || {};
+        var curCid = gs.player[slot].component_slots[socketIndex];
+        var curComp = curCid ? (comps[curCid] || {}) : null;
+
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _modalOverlay.innerHTML = '';
         _modalOverlay.style.display = 'flex';
         var box = _ce('div', 'modal-box');
-        box.style.cssText = 'width:min(450px,90vw);background:var(--bg-modal);border:2px solid var(--accent-green);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
+        box.style.cssText = 'width:min(500px,90vw);background:var(--bg-modal);border:2px solid var(--accent-green);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
         var head = _ce('div');
         head.style.cssText = 'padding:14px 20px;background:rgba(0,255,136,0.05);border-bottom:1px solid var(--accent-green);display:flex;justify-content:space-between;align-items:center;';
         var slotNames = { predatory_organ: '捕食器官', chitin_epidermis: '生物表皮', gland_core: '腺体核心' };
         head.innerHTML = '<div class="txt-md txt-green txt-bold">[ 选择组件 ]</div><div class="txt-xs txt-dim">' + (slotNames[slot] || slot) + ' 槽' + (socketIndex+1) + '</div><button class="btn btn-blue btn-sm" onclick="UISystem.closeModal();UISystem.showReorganizeModal();">取消</button>';
         box.appendChild(head);
         var body = _ce('div');
-        body.style.cssText = 'padding:12px 20px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;max-height:50vh;';
+        body.style.cssText = 'padding:12px 20px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;max-height:50vh;';
         var hasAny = false;
         Object.keys(inv).forEach(function(ck) {
             if (inv[ck] <= 0 || !comps[ck] || !comps[ck].allowedSlots || comps[ck].allowedSlots.indexOf(slot) === -1) return;
             hasAny = true;
-            var sc = comps[ck]; var parts = []; var sa = sc.affixes;
-            if (sa) {
-                if (sa.atkBonus) parts.push('攻击+' + sa.atkBonus);
-                if (sa.flatDefBonus) parts.push('防御+' + sa.flatDefBonus);
-                if (sa.shieldBonus) parts.push('生命+' + sa.shieldBonus);
-                if (sa.physMultiplier) parts.push('物理×' + sa.physMultiplier);
-                if (sa.armorPenetration) parts.push('破甲' + Math.round(sa.armorPenetration*100) + '%');
-                if (sa.toxinConversion) parts.push('毒转' + Math.round(sa.toxinConversion*100) + '%');
-                if (sa.lifeDrainChance) parts.push('吸血' + Math.round(sa.lifeDrainChance*100) + '%' + (sa.lifeDrainAmount ? '·' + sa.lifeDrainAmount + 'HP' : ''));
-                if (sa.thornsPercent) parts.push('反伤' + Math.round(sa.thornsPercent*100) + '%');
-                if (sa.dotBonus) parts.push('毒伤+' + sa.dotBonus);
-                if (sa.bonusVsSwarm) parts.push('对寄生+' + Math.round(sa.bonusVsSwarm*100) + '%');
-            }
+            var sc = comps[ck]; var sa = sc.affixes || {};
+            var ca = (curComp && curComp.affixes) ? curComp.affixes : {};
+
+            var diffParts = [];
+            var fields = [
+                { k: 'atkBonus', l: '攻击' }, { k: 'flatDefBonus', l: '防御' }, { k: 'shieldBonus', l: '生命' },
+                { k: 'physMultiplier', l: '物理', mul: true }, { k: 'armorPenetration', l: '破甲', pct: true },
+                { k: 'toxinConversion', l: '毒转', pct: true }, { k: 'dotBonus', l: '毒伤' },
+                { k: 'lifeDrainChance', l: '吸血率', pct: true }, { k: 'thornsPercent', l: '反伤', pct: true }
+            ];
+
+            fields.forEach(function(f) {
+                var nv = sa[f.k] || 0, ov = ca[f.k] || 0;
+                if (nv === 0 && ov === 0) return;
+                var diff = nv - ov;
+                var color = diff > 0 ? 'var(--accent-green)' : (diff < 0 ? 'var(--accent-red)' : 'var(--text-dim)');
+                var sign = diff > 0 ? '+' : '';
+                var valStr = f.pct ? Math.round(nv*100)+'%' : (f.mul ? '×'+nv.toFixed(1) : nv);
+                var diffStr = f.pct ? Math.round(diff*100)+'%' : (f.mul ? diff.toFixed(1) : diff);
+                diffParts.push('<span>' + f.l + ': ' + valStr + ' <span style="color:' + color + '; font-size:11px;">(' + sign + diffStr + ')</span></span>');
+            });
+
             var row = _ce('div');
-            row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:rgba(255,213,79,0.06);border:1px solid rgba(255,213,79,0.2);border-radius:4px;cursor:pointer;';
-            row.innerHTML = '<div><span class="txt-xs txt-gold txt-bold">' + ck + '</span><span class="txt-xs txt-gold"> ×' + inv[ck] + '</span></div><span class="txt-xs txt-dim">' + (parts.length > 0 ? parts.join(' · ') : '') + '</span>';
+            row.style.cssText = 'display:flex;flex-direction:column;gap:4px;padding:10px 14px;background:rgba(255,213,79,0.06);border:1px solid rgba(255,213,79,0.2);border-radius:4px;cursor:pointer;';
+            row.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+                '<div><span class="txt-xs txt-gold txt-bold">' + ck + '</span><span class="txt-xs txt-gold"> ×' + inv[ck] + '</span></div>' +
+                '</div><div class="txt-xs txt-dim" style="display:flex;flex-wrap:wrap;gap:8px;">' + (diffParts.length > 0 ? diffParts.join('') : '无属性') + '</div>';
             row.onclick = function() { try { window.GameState.socketComponent(slot, socketIndex, ck); } catch(e) {} UISystem.showReorganizeModal(); UISystem.render(); };
             body.appendChild(row);
         });
@@ -1571,23 +2087,28 @@ if (showing.length === 0) h += '<div class="txt-xs txt-dim" style="margin-top:4p
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
         var box = _ce('div', 'modal-box status-modal');
-        box.style.cssText = 'width:min(700px,90vw);max-height:90vh;background:var(--bg-modal);border:1px solid var(--accent-green);display:flex;flex-direction:column;gap:0;padding:0;overflow:hidden;';
+        box.style.cssText = 'flex:1;max-height:90vh;background:var(--bg-modal);border:1px solid var(--accent-green);display:flex;flex-direction:column;gap:0;padding:0;overflow:hidden;';
         var head = _ce('div');
         head.style.cssText = 'padding:20px 30px;background:rgba(0,255,136,0.05);border-bottom:1px solid var(--accent-green);display:flex;justify-content:space-between;align-items:center;';
         head.innerHTML = '<div class="txt-md txt-green txt-bold">[ 基因重组实验室 ]</div>' +
                          '<div style="display:flex;align-items:center;gap:10px;"><span class="txt-xs txt-gold" style="margin-right:20px;line-height:1;">基因点数: ' + p.bp + '</span>' +
                          '<button class="btn btn-blue btn-sm" onclick="UISystem.closeModal()">关闭</button></div>';
         box.appendChild(head);
-        // 框外顶部说明
+        // 左侧固定说明栏
         var infoBar = _ce('div');
-        infoBar.style.cssText = 'margin-bottom:20px;padding:8px 16px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;width:min(700px,90vw);text-align:left;';
-        infoBar.innerHTML = '<div style="margin-bottom:4px;"><span class="txt-xs txt-green">进阶</span><span class="txt-xs txt-dim"> — 消耗碎片提升器官阶位（公式 5×1.6^当前阶）</span></div>' +
-            '<div style="margin-bottom:4px;"><span class="txt-xs txt-green">挂载</span><span class="txt-xs txt-dim"> — 更换器官，Boss 器官提供专属主动技能</span></div>' +
-            '<div style="margin-bottom:4px;"><span class="txt-xs txt-green">组件</span><span class="txt-xs txt-dim"> — 点击空槽嵌入碎片，获得攻击/防御/护盾等词条加成</span></div>' +
-            '<div style="margin-bottom:4px;"><span class="txt-xs txt-purple">魔药</span><span class="txt-xs txt-dim"> — 消耗碎片炼制战斗药剂，最多 3 瓶，注意毒性阈值</span></div>' +
-            '<div style="margin-bottom:4px;"><span class="txt-xs txt-gold">涂层</span><span class="txt-xs txt-dim"> — 为捕食器官涂抹基因涂层，针对特定种族造成融毁伤害</span></div>' +
-            '<div><span class="txt-xs txt-gold">基因点数</span><span class="txt-xs txt-dim"> — 卸载组件花费 10 BP，击败怪物获得</span></div>';
-        _modalOverlay.appendChild(infoBar);
+        infoBar.style.cssText = 'flex:0 0 200px;padding:24px 16px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:6px;text-align:left;align-self:flex-start;';
+        infoBar.innerHTML = '<div style="margin-bottom:10px;"><span class="txt-xs txt-green">进阶</span><div class="txt-xs txt-dim">消耗碎片提升器官阶位</div></div>' +
+            '<div style="margin-bottom:10px;"><span class="txt-xs txt-green">挂载</span><div class="txt-xs txt-dim">更换器官，Boss器官提供专属技能</div></div>' +
+            '<div style="margin-bottom:10px;"><span class="txt-xs txt-green">组件</span><div class="txt-xs txt-dim">空槽嵌入碎片，获得词条加成</div></div>' +
+            '<div style="margin-bottom:10px;"><span class="txt-xs txt-purple">魔药</span><div class="txt-xs txt-dim">炼制战斗药剂，最多3瓶</div></div>' +
+            '<div style="margin-bottom:10px;"><span class="txt-xs txt-gold">涂层</span><div class="txt-xs txt-dim">针对特定种族造成融毁伤害</div></div>' +
+            '<div><span class="txt-xs txt-gold">基因点数</span><div class="txt-xs txt-dim">卸载组件10BP，击败怪物获得</div></div>';
+        // 左右布局容器
+        var wrapper = _ce('div');
+        wrapper.style.cssText = 'display:flex;gap:20px;align-items:flex-start;width:min(920px,95vw);';
+        wrapper.appendChild(infoBar);
+        wrapper.appendChild(box);
+        _modalOverlay.appendChild(wrapper);
         var body = _ce('div');
         body.style.cssText = 'padding:30px;display:flex;flex-direction:column;gap:20px;overflow-y:auto;flex:1;';
         var organNames = { predatory_organ: '捕食器官', chitin_epidermis: '生物表皮', gland_core: '腺体核心' };
@@ -1624,20 +2145,35 @@ if (showing.length === 0) h += '<div class="txt-xs txt-dim" style="margin-top:4p
                         if (ea.bonusVsSwarm) ep.push('对寄生+' + Math.round(ea.bonusVsSwarm*100) + '%');
                         if (ep.length > 0) etip += '&#10;' + ep.join(' · ');
                     }
-                    slotHTML += '<span class="help-tip" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;font-size:13px;background:rgba(255,213,79,0.08);border:1px solid rgba(255,213,79,0.2);border-radius:4px;color:var(--accent-yellow);cursor:pointer;" data-tip="' + etip + '&#10;点击卸下" data-slot="' + s + '" data-sidx="' + si + '">' + cid + '</span>';
+                    slotHTML += '<span class="help-tip" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;font-size:13px;background:rgba(255,213,79,0.08);border:1px solid rgba(255,213,79,0.2);border-radius:4px;color:var(--accent-yellow);' + (p.bp < 10 ? 'opacity:0.5;cursor:not-allowed;filter:grayscale(1);background:rgba(255,255,255,0.05);border-color:var(--border-dim);' : 'cursor:pointer;') + '" data-tip="' + etip + (p.bp < 10 ? '&#10;<b style=color:var(--accent-red)>BP 不足 (需10)</b>' : '&#10;点击卸下 (10 BP)') + '" data-slot="' + s + '" data-sidx="' + si + '">' + cid + '</span>';
                 } else {
                     var hasAvail = false; Object.keys(inv).forEach(function(ck) { if (inv[ck] > 0 && comps[ck] && comps[ck].allowedSlots && comps[ck].allowedSlots.indexOf(s) !== -1) hasAvail = true; });
                     var slotCls = hasAvail ? 'slot-ready' : '';
                     var slotStyle = hasAvail ? 'padding:6px 10px;font-size:13px;background:rgba(0,255,136,0.04);border:1px dashed rgba(0,255,136,0.3);border-radius:4px;color:var(--accent-green);cursor:pointer;' : 'padding:6px 10px;font-size:13px;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.15);border-radius:4px;color:var(--text-dim);cursor:pointer;';
-                    slotHTML += '<span class="' + slotCls + '" style="' + slotStyle + '" onclick="UISystem._showSocketPicker(\'' + s + '\',' + si + ')">+ 空槽</span>';
+                    slotHTML += '<span class="' + slotCls + '" style="' + slotStyle + '" onclick="UISystem._showSocketPicker(\'' + s + '\',' + si + ')">+ 空槽' + (hasAvail ? ' <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent-green);box-shadow:0 0 6px var(--accent-green);margin-left:2px;vertical-align:middle;"></span>&nbsp;<span style="font-size:11px;color:var(--accent-green);">可嵌入</span>' : '') + '</span>';
                 }
             });
             row.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px;width:100%;">' +
                 '<div class="txt-sm txt-green txt-bold">' + organNames[s] + ' <span class="txt-xs">[' + d.tier + '阶]</span></div>' +
                 '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between;">' +
                 '<span class="txt-xs txt-dim" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">挂载: ' + (d.equipped ? '<span class="help-tip btn-organ" style="padding:6px 10px;font-size:13px;background:' + (_organColors[d.equipped]||_organColors._default).bg + ';border:1px solid ' + (_organColors[d.equipped]||_organColors._default).bd + ';border-radius:4px;color:' + (_organColors[d.equipped]||_organColors._default).hex + ';cursor:pointer;" data-tip="点击卸下该器官" onclick="try{GameState.equipOrgan(\'' + s + '\',null);}catch(e){}UISystem.showReorganizeModal();UISystem.render();">' + d.equipped + '</span>' : '<span class="btn-organ' + (gs.inventory.organs.length > 0 ? ' slot-ready' : '') + '" style="padding:6px 10px;font-size:13px;background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);border-radius:4px;color:var(--accent-green);cursor:pointer;" onclick="UISystem._showOrganPicker(\'' + s + '\')">标准原型</span>') + ' 组件: <span style="display:inline-flex;align-items:center;gap:8px;">' + slotHTML + '</span></span>' +
-                '<button class="btn btn-green btn-sm help-tip" ' + (canUpgrade ? '' : 'disabled') + ' data-tip="' + (canUpgrade ? '当前 ' + d.tier + '阶 → ' + (d.tier + 1) + '阶&#10;消耗任意组件 ×' + cost + '&#10;库存共 ' + Object.values(inv).reduce(function(a,b){return a+b;},0) + ' 个' : '当前 ' + d.tier + '阶 → ' + (d.tier + 1) + '阶（不足）&#10;需要任意组件 ×' + cost + '&#10;库存仅 ' + Object.values(inv).reduce(function(a,b){return a+b;},0) + ' 个&#10;击败怪物或合成获得') + '" onclick="GameState.upgradeOrganTier(\'' + s + '\'); UISystem.showReorganizeModal();">' +
-                '进阶</button></div>' +
+                (function() {
+                    // [新增] 进阶收益预览逻辑
+                    var nextTier = d.tier + 1;
+                    var bonusDesc = "";
+                    if (s === 'predatory_organ') bonusDesc = "攻击 +3, 生命 +5";
+                    else if (s === 'chitin_epidermis') bonusDesc = "防御 +3, 生命 +3";
+                    else if (s === 'gland_core') bonusDesc = "进程回复 +1, 进程上限 +1";
+
+                    var tipText = "<b style='color:var(--accent-green)'>器官进阶：第 " + d.tier + " 阶 → " + nextTier + " 阶</b>&#10;";
+                    tipText += "<b>预估收益：</b><span style='color:var(--accent-green)'>" + bonusDesc + "</span>&#10;";
+                    tipText += "<b>进阶消耗：</b>任意组件 ×" + cost + "&#10;";
+                    tipText += "<b>当前库存：</b>共 " + Object.values(inv).reduce(function(a,b){return a+b;},0) + " 个";
+                    if (!canUpgrade) tipText += "&#10;<b style='color:var(--accent-red)'>材料不足，无法进阶</b>";
+
+                    return '<button class="btn btn-green btn-sm help-tip" ' + (canUpgrade ? '' : 'disabled') + ' data-tip="' + tipText + '" onclick="GameState.upgradeOrganTier(\'' + s + '\'); UISystem.showReorganizeModal();">进阶</button>';
+                })() +
+                '</div>' +
                 '</div>';
             organBlock.appendChild(row);
         });
@@ -1686,33 +2222,69 @@ if (showing.length === 0) h += '<div class="txt-xs txt-dim" style="margin-top:4p
         potSection.innerHTML = potHTML;
         body.appendChild(potSection);
 
-        // --- 涂层涂抹 ---
-        var coatData = GD().COATINGS || {};
-        var coatSection = _ce('div');
-        coatSection.style.cssText = 'padding:15px 20px;background:rgba(255,213,79,0.03);border:1px solid rgba(255,213,79,0.15);border-radius:6px;';
-        var coatHTML = '<div class="txt-xs txt-gold txt-bold" style="margin-bottom:10px;">> 基因涂层涂抹（捕食器官 · 当前: ' + (p.activeCoating ? (coatData[p.activeCoating] ? coatData[p.activeCoating].name : p.activeCoating) + ' (' + p.coatingTurnsLeft + '回合)' : '无') + '）</div>';
-        coatHTML += '<div style="display:flex;flex-wrap:wrap;gap:8px;">';
-        var coatRaceColors = { COAT_ANTI_MUTANT: { hex: '#ff6b4a', bg: 'rgba(255,107,74,0.1)', border: 'rgba(255,107,74,0.25)' }, COAT_ANTI_SWARM: { hex: '#9acd32', bg: 'rgba(154,205,50,0.1)', border: 'rgba(154,205,50,0.25)' }, COAT_ANTI_EMBER: { hex: '#4ab8ff', bg: 'rgba(74,184,255,0.1)', border: 'rgba(74,184,255,0.25)' } };
-        var coatIds = ['COAT_ANTI_MUTANT', 'COAT_ANTI_SWARM', 'COAT_ANTI_EMBER'];
-        coatIds.forEach(function(cid) {
-            var ct = coatData[cid]; if (!ct) return;
-            var clr = coatRaceColors[cid] || { hex: '#ffd54f', bg: 'rgba(255,213,79,0.1)', border: 'rgba(255,213,79,0.2)' };
-            var canApply = true;
-            var costText = '';
-            Object.keys(ct.cost).forEach(function(mk) { if (!inv[mk] || inv[mk] < ct.cost[mk]) canApply = false; costText += (costText ? '、' : '') + mk + '×' + ct.cost[mk]; });
-            var effects = [];
-            if (ct.effect.damageBonus) effects.push('伤害+' + Math.round(ct.effect.damageBonus*100) + '%');
-            if (ct.effect.ignoreDefense) effects.push('无视防御');
-            if (ct.effect.toxinBonus) effects.push('毒素+' + Math.round(ct.effect.toxinBonus*100) + '%');
-            if (ct.effect.shieldStrip) effects.push('拆' + ct.effect.shieldStrip + '盾');
-            coatHTML += '<span class="help-tip" style="padding:6px 10px;background:' + clr.bg + ';border:1px solid ' + clr.border + ';border-radius:4px;color:' + clr.hex + ';" data-tip="<b style=\'font-size:14px;color:' + clr.hex + ';\'>' + ct.name + '：</b>&#10;<span style=\'font-size:14px;\'>' + effects.join('&#10;') + '</span>&#10;<b>效果：</b>持续' + ct.duration + '回合&#10;<b>消耗：</b>' + costText + '">' +
-                '<span class="txt-xs" style="color:' + clr.hex + ';">' + ct.name + '</span>' +
-                (canApply && !p.activeCoating ? ' <button class="btn btn-gold" style="padding:1px 8px;font-size:12px;" onclick="GameState.applyCoating(\'' + cid + '\');UISystem.showReorganizeModal();">涂抹</button>' : '') +
+        // --- [新增] 器官深度同调 (消耗同名器官提升 Lv) ---
+        var organSyncSection = _ce('div');
+        organSyncSection.style.cssText = 'padding:15px 20px;background:rgba(255,213,79,0.03);border:1px solid rgba(255,213,79,0.15);border-radius:6px;';
+        var syncHTML = '<div class="txt-xs txt-gold txt-bold" style="margin-bottom:10px;">> 器官深度同调（消耗同名器官提升技能效能，最高 Lv.3）</div>';
+        syncHTML += '<div style="display:flex;flex-wrap:wrap;gap:8px;">';
+
+        var bossOrganIds = ['暴君核心', '蜂后髓核', '高能电泳核'];
+        var hasAnyBossOrgan = false;
+
+        bossOrganIds.forEach(function(oid) {
+            var syncLvl = gs.inventory.organSyncLevels[oid] || 1;
+            var countInInv = gs.inventory.organs.filter(function(id) { return id === oid; }).length;
+            var isEquipped = [p.predatory_organ.equipped, p.chitin_epidermis.equipped, p.gland_core.equipped].indexOf(oid) !== -1;
+            var totalOwned = countInInv + (isEquipped ? 1 : 0);
+
+            if (totalOwned > 0) {
+                hasAnyBossOrgan = true;
+                var nextSyncCost = [0, 2000, 5000][syncLvl] || null;
+                var canSync = totalOwned >= 2 && nextSyncCost !== null && p.bp >= nextSyncCost;
+
+                var syncTips = {
+                    '暴君核心': 'Lv.3 觉醒：攻击变为<b style=color:var(--accent-red)>真实伤害</b>，无视防御',
+                    '蜂后髓核': 'Lv.3 觉醒：召唤突袭时额外<b style=color:var(--accent-blue)>吸取 50% 伤害的护盾</b>',
+                    '高能电泳核': 'Lv.3 觉醒：电弧过载将对<b style=color:var(--accent-blue)>全场敌人</b>造成 50% 溅射伤害'
+                };
+
+                var oTip = '<b style=color:var(--accent-yellow)>' + oid + ' (Lv.' + syncLvl + ')</b>&#10;' +
+                    '<b>当前加成：</b>基础属性 ×' + (1 + (syncLvl-1)*0.5).toFixed(1) + '&#10;' +
+                    '<b>技能成长：</b>随阶位 (Tier) 额外提升倍率&#10;' +
+                    (syncLvl < 3 ? '<b>下一级：</b>' + syncTips[oid] + '&#10;<b>消耗：</b>同名器官 ×1 + ' + nextSyncCost + ' BP' : '<b style=color:var(--accent-green)>同调已满级 (觉醒态)</b>');
+
+                syncHTML += '<span class="help-tip" style="padding:6px 12px;background:rgba(255,213,79,0.05);border:1px solid rgba(255,213,79,0.2);border-radius:4px;display:flex;align-items:center;gap:10px;" data-tip="' + oTip + '">' +
+                    '<span class="txt-xs" style="color:var(--accent-yellow);"><span class="icon icon-crown"></span>' + oid + ' <small>Lv.' + syncLvl + '</small></span>' +
+                    (syncLvl < 3 ? ' <button class="btn ' + (canSync ? 'btn-gold' : 'btn-gray') + ' btn-sm" style="padding:1px 8px;font-size:11px;" onclick="if(' + canSync + '){ var r=GameState.syncOrgan(\'' + oid + '\'); if(r.success){ UISystem.showReorganizeModal(); UISystem.showNotification(\'同调突破！\', \'' + oid + ' 等级提升至 \' + r.newLevel, \'var(--accent-yellow)\'); } }">' + (totalOwned < 2 ? '缺少副本' : (p.bp < nextSyncCost ? 'BP不足' : '深度同调')) + '</button>' : '') +
+                    '</span>';
+            }
+        });
+
+        if (!hasAnyBossOrgan) syncHTML += '<span class="txt-xs txt-dim">未发现可同调的领主器官</span>';
+        syncHTML += '</div>';
+        organSyncSection.innerHTML = syncHTML;
+        body.appendChild(organSyncSection);
+
+        // --- [新增] 基因突变 (消耗 BP 提升基础属性) ---
+        var mutationSection = _ce('div');
+        mutationSection.style.cssText = 'padding:15px 20px;background:rgba(0,212,255,0.03);border:1px solid rgba(0,212,255,0.15);border-radius:6px;';
+        var mutationHTML = '<div class="txt-xs txt-blue txt-bold" style="margin-bottom:10px;">> 高阶基因突变（消耗基因点数永久提升基础序列）</div>';
+        mutationHTML += '<div style="display:flex;flex-wrap:wrap;gap:8px;">';
+        var muts = [
+            { type: 'atk', name: '攻击突变', cost: 500, val: '+1', icon: 'icon-atk' },
+            { type: 'def', name: '防御突变', cost: 400, val: '+1', icon: 'icon-def' },
+            { type: 'hp', name: '生命突变', cost: 300, val: '+5', icon: 'icon-health' }
+        ];
+        muts.forEach(function(m) {
+            var canMut = p.bp >= m.cost;
+            mutationHTML += '<span class="help-tip" style="padding:6px 12px;background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.2);border-radius:4px;" data-tip="<b style=\'color:var(--accent-blue)\'>' + m.name + '：</b>&#10;永久提升基础属性 ' + m.val + '&#10;<b>消耗：</b>' + m.cost + ' 基因点数' + (canMut ? '' : '（不足）') + '">' +
+                '<span class="txt-xs" style="color:var(--accent-blue);"><span class="icon ' + m.icon + '"></span>' + m.name + '</span>' +
+                (canMut ? ' <button class="btn btn-blue" style="padding:1px 8px;font-size:12px;" onclick="GameState.mutateStat(\'' + m.type + '\');UISystem.showReorganizeModal();">突变</button>' : '') +
                 '</span>';
         });
-        coatHTML += '</div>';
-        coatSection.innerHTML = coatHTML;
-        body.appendChild(coatSection);
+        mutationHTML += '</div>';
+        mutationSection.innerHTML = mutationHTML;
+        body.appendChild(mutationSection);
 
         // 器官背包
         var bos3 = GD().BOSS_ORGANS || {};
@@ -1743,10 +2315,95 @@ if (showing.length === 0) h += '<div class="txt-xs txt-dim" style="margin-top:4p
         invRow.innerHTML = invHTML;
         body.appendChild(invRow);
         box.appendChild(body);
-        _modalOverlay.appendChild(box);
         UISystem.render();
     }
 
-    return { init: init, render: render, showStatusModal: showStatusModal, showReorganizeModal: showReorganizeModal, showBestiaryModal: showBestiaryModal, showSaveModal: showSaveModal, closeModal: closeModal, closeIntro: closeIntro, resetGame: resetGame, triggerShake: triggerShake, showDamageFloat: showDamageFloat, showNotification: showNotification, showHelpPanel: showHelpPanel, _claimReward: _claimReward, _showSynthesizeModal: _showSynthesizeModal, _showSocketPicker: _showSocketPicker, _showOrganPicker: _showOrganPicker };
+    function showEventModal(eventId, pathIndex) {
+        var gs = GS(); if (!gs) return;
+        var evt = GD().RANDOM_EVENTS[eventId]; if (!evt) return;
+
+        document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
+        _modalOverlay.innerHTML = '';
+        _modalOverlay.style.display = 'flex';
+
+        var box = _ce('div', 'modal-box');
+        box.style.cssText = 'width:min(600px,90vw);background:var(--bg-modal);border:2px solid var(--accent-yellow);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 0 40px rgba(0,0,0,1);';
+
+        var head = _ce('div');
+        head.style.cssText = 'padding:20px 30px;background:rgba(255,213,79,0.08);border-bottom:1px solid var(--accent-yellow);';
+        head.innerHTML = '<div class="txt-md txt-gold txt-bold">[ 突发异常事件：' + evt.title + ' ]</div>';
+        box.appendChild(head);
+
+        var body = _ce('div');
+        body.style.cssText = 'padding:30px;display:flex;flex-direction:column;gap:20px;';
+
+        var desc = _ce('div');
+        desc.className = 'txt-sm txt-white';
+        desc.style.cssText = 'line-height:1.8;letter-spacing:1px;';
+        desc.innerHTML = '<span class="typewriter"></span>';
+        body.appendChild(desc);
+
+        var optContainer = _ce('div');
+        optContainer.style.cssText = 'display:flex;flex-direction:column;gap:12px;margin-top:10px;opacity:0;transition:opacity 0.8s;';
+
+        evt.options.forEach(function(opt, idx) {
+            var btn = _ce('div', 'event-option-card');
+            btn.style.cssText = 'padding:15px 20px;background:rgba(255,255,255,0.03);border:1px solid var(--border-dim);border-radius:6px;cursor:pointer;transition:all 0.2s;';
+
+            var canAfford = true;
+            var costText = '';
+            if (opt.cost) {
+                if (opt.cost.bp && gs.player.bp < opt.cost.bp) canAfford = false;
+                if (!canAfford) btn.style.opacity = '0.5';
+            }
+
+            btn.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+                '<span class="txt-sm txt-bold" style="color:var(--accent-yellow);">' + opt.label + '</span>' +
+                (opt.cost ? '<span class="txt-xs txt-red">消耗 ' + opt.cost.bp + ' BP</span>' : '') +
+                '</div>' +
+                '<div class="txt-xs txt-dim" style="margin-top:4px;">' + opt.desc + '</div>';
+
+            if (canAfford) {
+                btn.onmouseenter = function() { this.style.background = 'rgba(255,213,79,0.08)'; this.style.borderColor = 'var(--accent-yellow)'; };
+                btn.onmouseleave = function() { this.style.background = 'rgba(255,255,255,0.03)'; this.style.borderColor = 'var(--border-dim)'; };
+                btn.onclick = function() {
+                    if (opt.cost && opt.cost.bp) gs.player.bp -= opt.cost.bp;
+                    var res = opt.action(gs);
+
+                    // 显示结果
+                    optContainer.style.pointerEvents = 'none';
+                    optContainer.style.opacity = '0.3';
+
+                    var resDiv = _ce('div');
+                    resDiv.style.cssText = 'margin-top:20px;padding:15px;background:rgba(0,0,0,0.4);border-radius:6px;border-left:4px solid ' + (res.type === 'hazard' ? 'var(--accent-red)' : 'var(--accent-green)') + ';animation: slideIn 0.5s forwards;';
+                    resDiv.innerHTML = '<div class="txt-sm txt-white">' + res.msg + '</div>' +
+                        '<div class="txt-xs txt-dim" style="margin-top:10px;text-align:right;">点击任意位置继续...</div>';
+                    body.appendChild(resDiv);
+
+                    _modalOverlay.onclick = function() {
+                        _modalOverlay.onclick = null; // 清除本次监听
+                        UISystem.closeModal();
+
+                        // 事件结束，淡出路径卡片并正式进入预定房间
+                        _fadeOutCards(function() {
+                            var resSub = window.WorldSystem.discover(pathIndex);
+                            _handleDiscoveryResult(resSub, pathIndex, null);
+                        });
+                    };
+                };
+            }
+            optContainer.appendChild(btn);
+        });
+
+        body.appendChild(optContainer);
+        box.appendChild(body);
+        _modalOverlay.appendChild(box);
+
+        _typeText(desc.querySelector('.typewriter'), evt.desc, function() {
+            optContainer.style.opacity = '1';
+        }, 20);
+    }
+
+    return { init: init, render: render, _foldSection: _foldSection, showStatusModal: showStatusModal, showReorganizeModal: showReorganizeModal, showBestiaryModal: showBestiaryModal, showDungeonWarning: showDungeonWarning, showSaveModal: showSaveModal, closeModal: closeModal, closeIntro: closeIntro, resetGame: resetGame, triggerShake: triggerShake, showDamageFloat: showDamageFloat, showNotification: showNotification, showHelpPanel: showHelpPanel, _claimReward: _claimReward, _claimAllTasks: _claimAllTasks, _showSynthesizeModal: _showSynthesizeModal, _showSocketPicker: _showSocketPicker, _showOrganPicker: _showOrganPicker, showEventModal: showEventModal };
 }
 )();

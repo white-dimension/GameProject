@@ -11,17 +11,23 @@ window.GameState = (function () {
     // 楼层配置 — 每层节点类型数量 + Boss ID
     // =========================================================================
     var FLOOR_CONFIG = {
-        1: { monster: 2, elite: 1, camp: 0, relic: 1, dungeon: 0, bossId: 'MON_CH1_TYRANT' },
-        2: { monster: 2, elite: 1, camp: 1, relic: 1, dungeon: 1, bossId: 'MON_CH1_QUEEN' },
-        3: { monster: 3, elite: 1, camp: 1, relic: 1, dungeon: 1, bossId: 'MON_CH1_CORE' },
-        4: { monster: 3, elite: 2, camp: 1, relic: 1, dungeon: 1, bossId: null }
+        1:  { monster: 2, elite: 1, camp: 0, relic: 1, dungeon: 0, bossId: null, depth: 1 },
+        2:  { monster: 2, elite: 1, camp: 1, relic: 1, dungeon: 1, bossId: null, depth: 2 },
+        3:  { monster: 3, elite: 1, camp: 1, relic: 1, dungeon: 1, bossId: null, depth: 3 },
+        4:  { monster: 3, elite: 2, camp: 1, relic: 1, dungeon: 1, bossId: null, depth: 4 },
+        5:  { monster: 3, elite: 2, camp: 1, relic: 1, dungeon: 1, bossId: null, depth: 5 },
+        6:  { monster: 4, elite: 2, camp: 1, relic: 1, dungeon: 1, bossId: null, depth: 6 },
+        7:  { monster: 4, elite: 2, camp: 1, relic: 1, dungeon: 2, bossId: null, depth: 7 },
+        8:  { monster: 4, elite: 3, camp: 1, relic: 1, dungeon: 2, bossId: null, depth: 8 },
+        9:  { monster: 5, elite: 3, camp: 1, relic: 2, dungeon: 2, bossId: null, depth: 9 },
+        10: { monster: 5, elite: 3, camp: 1, relic: 2, dungeon: 3, bossId: null, depth: 10 }
     };
 
-    var _allMonsters = ['MON_CH1_ZOMBIE','MON_CH1_RIOT','MON_CH1_RAT','MON_CH1_LARVA','MON_CH1_CLEANER_ROBOT','MON_CH1_WATCHER'];
+    var _allMonsters = ['MON_CH1_ZOMBIE','MON_CH1_RIOT','MON_CH1_RAT','MON_CH1_LARVA','MON_CH1_CLEANER_ROBOT','MON_CH1_WATCHER','MON_CH1_AMALGAM','MON_CH1_MOTH','MON_CH1_DRONE'];
     var _eliteMonsters = ['MON_CH1_CLEANER','MON_CH1_GUARD','MON_CH1_SPORE','MON_CH1_HIVE','MON_CH1_BEE','MON_CH1_SENTINEL'];
     var _bossMonsters = ['MON_CH1_TYRANT', 'MON_CH1_QUEEN', 'MON_CH1_CORE'];
 
-    var _raceColors = { mutant: '#ff6b4a', swarm: '#9acd32', ember: '#4ab8ff', _default: '#c8e6c9' };
+    var _raceColors = { mutant: 'var(--race-mutant)', swarm: 'var(--race-swarm)', ember: 'var(--race-ember)', _default: 'var(--text-main)' };
     // 描述文案池（按击杀数渐进）
     function _pickDesc(list, gs) {
         var kills = gs ? Object.values(gs.bestiary.killCount || {}).reduce(function(a,b){return a+b;},0) : 0;
@@ -37,7 +43,10 @@ window.GameState = (function () {
             '破碎的实验器皿散落一地，变异组织仍在缓慢蠕动，似乎仍未完全失去活性。',
             '腐败的肉纤维从天花板垂落，地面覆盖着黏滑的分泌物。墙上的抓痕深可见骨。',
             '肉质的触须从通风口垂下，随着不知来源的脉搏节律微微颤动。这里已经彻底沦为了某个生物的巢穴。',
-            '整条走廊被一层厚厚的生物膜覆盖，每一步都能感受到地面在脚下的黏弹。传感器显示这里的生物质密度已经达到了警戒值。'
+            '整条走廊被一层厚厚的生物膜覆盖，每一步都能感受到地面在脚下的黏弹。传感器显示这里的生物质密度已经达到了警戒值。',
+            '一股温热的气流扑面而来，带着浓重的铁锈味。墙角的实验舱门被从内部撑爆，里面的东西不知去向。',
+            '地板上凝结着一层暗红色的胶状物，踩上去会发出令人不安的黏连声。某种巨型生物刚刚经过这里。',
+            '数个培养皿被撞翻在地，碎裂的玻璃中残留着暗绿色的培养液。一条湿漉漉的拖痕延伸进黑暗。'
         ],
         swarm: [
             '通风管道中传出细微的沙沙声，像是无数细小的节肢在金属表面爬行。',
@@ -45,7 +54,10 @@ window.GameState = (function () {
             '几只拇指大的飞虫从面前掠过，消失在走廊深处的黑暗里。地面上散落着透明的虫蜕。',
             '蜂巢状的有机结构覆盖了原来的金属墙壁，不断有幼虫从中钻出。空气中漂浮着致幻的孢子云雾。',
             '酸性黏液腐蚀了地板，每走一步都能听到金属溶解的嘶嘶声。整个区域已经被改造成了一个巨大的虫巢。',
-            '嗡嗡声震耳欲聋，空气中弥漫着浓烈的信息素。墙壁上每一个孔洞都可能是攻击的源头——这里已经是虫群的领域。'
+            '嗡嗡声震耳欲聋，空气中弥漫着浓烈的信息素。墙壁上每一个孔洞都可能是攻击的源头——这里已经是虫群的领域。',
+            '天花板上的通风口不断滴落黏稠的液体，在地面聚成一滩发光的绿色水洼。某种幼虫在其中蠕动。',
+            '墙壁被一层半透明的蛹状物质覆盖，透过薄壳能看到内部有东西在缓慢跳动。这里是一个孵化场。',
+            '地面上散落着数以千计的微小虫卵，每一个都随着脚步声微微发亮。踩碎它们会释放出刺鼻的信息素。'
         ],
         ember: [
             '远处的服务器机柜发出低沉的嗡鸣，几根光纤从断裂的天花板垂下，末端闪着微弱的红光。',
@@ -53,7 +65,10 @@ window.GameState = (function () {
             '墙壁上嵌着一排排早已停摆的监控摄像头，它们的镜头统一转向黑暗深处——像在注视着什么。',
             '电弧在破损的线缆间跳跃，烧焦的电路板散发出刺鼻的臭氧。机械残骸堆砌成巢穴的形状。',
             '冷却液泄漏形成的雾气笼罩着整个区域，纳米菌丝爬满了控制面板。红色的传感器光点在黑暗中明灭。',
-            '整个走廊就是一座巨大的电路坟场。每一块金属表面都爬满了接入电极的银色菌丝，它们正在用电流改写自己的基因编码。'
+            '整个走廊就是一座巨大的电路坟场。每一块金属表面都爬满了接入电极的银色菌丝，它们正在用电流改写自己的基因编码。',
+            '一台高大的工业机器人瘫倒在走廊中央，胸腔被内部生长的真菌菌丝撑裂。散热风扇仍在无力地转动。',
+            '墙壁上的电路板已经和生物组织融为一体——银色的纳米菌丝与铜质导线交织成某种半机械、半有机的神经网络。',
+            '空气中弥漫着高浓度臭氧，每靠近一步，皮肤表面都会产生微弱的静电刺痛。这里的电磁场极不稳定。'
         ]
     };
     var _eliteDescs = [
@@ -79,6 +94,12 @@ window.GameState = (function () {
         '电梯井已被变异组织完全覆盖，但一条狭窄的通气管道仍然敞开。空气流动的声响暗示着下方有巨大的空间。',
         '门上的警示标签已经被时间腐蚀得难以辨认，但门后传来的低频轰鸣不会骗人——这是一个还在运作的深层隔离区。'
     ];
+    var _dungeonEnvs = [
+        { name: '底层代码变异', desc: '全技能 [进程] 消耗 +1', effect: { ramPenalty: 1 } },
+        { name: '高压电弧环境', desc: '每回合结束受到 5 点电离伤害', effect: { turnDamage: 5 } },
+        { name: '机械浓度超标', desc: '非机械类技能伤害降低 30%', effect: { nonEmberAtkMult: 0.7 } },
+        { name: '生化隔离泄露', desc: '初始 [毒性] +20，脱离后重置', effect: { startTox: 20 } }
+    ];
     var _portalDescs = [
         '空间在这里如同融化的玻璃一样扭曲，一道发光的裂隙悬浮在半空，透过它可以隐约看到另一端的实验室。',
         '量子隧穿效应在此处形成了一个临时的时空褶皱，周围的空气电离化，皮肤能感受到微弱的电流穿过。',
@@ -101,7 +122,7 @@ window.GameState = (function () {
     ];
 
     // 生成单层节点池
-    function _genFloorNodePool(floor) {
+    function _genFloorNodePool(floor, gs) {
         var cfg = FLOOR_CONFIG[floor] || FLOOR_CONFIG[1];
         var nodes = [];
         var id = 0;
@@ -116,7 +137,7 @@ window.GameState = (function () {
             var mid = _allMonsters[Math.floor(Math.random() * _allMonsters.length)];
             var m = GD().MONSTERS[mid];
             var raceSuffix = { mutant: '异变者', swarm: '寄生群落', ember: '机械余烬' };
-            nodes.push({ id: 'node_' + (id++), type: 'monster', monsterId: mid, raceClr: _raceColors[m.race] || _raceColors._default, label: '<span class="icon icon-infested-mass"></span> ' + m.name + ' <span style="opacity:0.6;">' + (raceSuffix[m.race] || '领地') + '</span>', desc: _pickDesc(_raceDescs[m.race] || _raceDescs.mutant, null), exhausted: false });
+            nodes.push({ id: 'node_' + (id++), type: 'monster', monsterId: mid, raceClr: _raceColors[m.race] || _raceColors._default, label: '<span class="icon icon-infested-mass"></span> ' + m.name + ' <span style="opacity:0.6;">' + (raceSuffix[m.race] || '领地') + '</span>', desc: _pickDesc(_raceDescs[m.race] || _raceDescs.mutant, gs), exhausted: false });
         }
 
         // 精英
@@ -124,28 +145,30 @@ window.GameState = (function () {
             var eid = _eliteMonsters[Math.floor(Math.random() * _eliteMonsters.length)];
             var em = GD().MONSTERS[eid];
             var raceSuffix2 = { mutant: '异变者', swarm: '寄生群落', ember: '机械余烬' };
-            nodes.push({ id: 'node_' + (id++), type: 'elite', monsterId: eid, raceClr: _raceColors[em.race] || _raceColors._default, label: '<span class="icon icon-fanged-skull"></span> 强敌：' + em.name + ' <span style="opacity:0.6;">' + (raceSuffix2[em.race] || '') + '</span>', desc: _pickDesc(_eliteDescs, null), exhausted: false });
+            nodes.push({ id: 'node_' + (id++), type: 'elite', monsterId: eid, raceClr: _raceColors[em.race] || _raceColors._default, label: '<span class="icon icon-fanged-skull"></span> 强敌：' + em.name + ' <span style="opacity:0.6;">' + (raceSuffix2[em.race] || '') + '</span>', desc: _pickDesc(_eliteDescs, gs), exhausted: false });
         }
 
         // 营地（非B1）
         for (var ci = 0; ci < cfg.camp; ci++) {
-            nodes.push({ id: 'node_' + (id++), type: 'camp', label: '<span class="icon icon-campfire"></span> 中立细胞核营地', desc: _pickDesc(_campDescs, null), exhausted: false });
+            nodes.push({ id: 'node_' + (id++), type: 'camp', label: '<span class="icon icon-campfire"></span> 中立细胞核营地', desc: _pickDesc(_campDescs, gs), exhausted: false });
         }
 
         // 遗物
         for (var ri = 0; ri < cfg.relic; ri++) {
-            nodes.push({ id: 'node_' + (id++), type: 'relic', label: '<span class="icon icon-upgrade"></span> 基因遗物', desc: _pickDesc(_relicDescs, null), exhausted: false });
+            nodes.push({ id: 'node_' + (id++), type: 'relic', label: '<span class="icon icon-upgrade"></span> 基因遗物', desc: _pickDesc(_relicDescs, gs), exhausted: false });
         }
 
         // 地下城
         for (var di = 0; di < cfg.dungeon; di++) {
-            nodes.push({ id: 'node_' + (id++), type: 'dungeon', label: '<span class="icon icon-dungeon-light"></span> 地下城入口', desc: _pickDesc(_dungeonDescs, null), exhausted: false });
+            var env = _dungeonEnvs[Math.floor(Math.random() * _dungeonEnvs.length)];
+            nodes.push({ id: 'node_' + (id++), type: 'dungeon', label: '<span class="icon icon-dungeon-light"></span> 地下城入口', desc: _pickDesc(_dungeonDescs, gs), env: env, exhausted: false });
         }
 
         // Boss（随机或在 B4 从三个领主中随机抽）
         var bossId = cfg.bossId || _bossMonsters[Math.floor(Math.random() * _bossMonsters.length)];
         var bm = GD().MONSTERS[bossId];
-        nodes.push({ id: 'node_' + (id++), type: 'boss', monsterId: bossId, raceClr: _raceColors[bm.race] || _raceColors._default, label: '<span class="icon icon-crown"></span> 领主：' + bm.name, desc: _pickDesc(_bossDescsBase, null).replace('它', bm.name), exhausted: false, hidden: true });
+        var bossRaceSuffix = { mutant: '异变者', swarm: '寄生群落', ember: '机械余烬' };
+        nodes.push({ id: 'node_' + (id++), type: 'boss', monsterId: bossId, raceClr: _raceColors[bm.race] || _raceColors._default, label: '<span class="icon icon-crown"></span> 领主：' + bm.name + ' <span style="opacity:0.6;">' + (bossRaceSuffix[bm.race] || '') + '</span>', desc: _pickDesc(_bossDescsBase, gs).replace('它', bm.name), exhausted: false, hidden: true });
 
         // 传送门（预置，portalUnlocked 时启用）
         nodes.push({ id: 'node_' + (id++), type: 'portal', label: '<span class="icon icon-portal"></span> 传送门 [' + (floor + 1) + 'F]', desc: _portalDescs[Math.floor(Math.random() * _portalDescs.length)], exhausted: false, hidden: true });
@@ -164,22 +187,41 @@ window.GameState = (function () {
             nodes.splice(nodes.length - 1, 0, bossNode);
         }
 
+        // [新增] 路径词缀系统：为战斗类节点赋予环境加成
+        var envAffixes = [
+            { id: 'high_process', name: '高能反应', desc: '开局额外获得 2 点进程', color: 'var(--accent-green)' },
+            { id: 'weak_bio', name: '生物辐射', desc: '全场敌人初始降低 20% HP', color: 'var(--accent-red)' },
+            { id: 'data_rich', name: '信号富集', desc: '击败后获得的经验提升 50%', color: 'var(--accent-blue)' },
+            { id: 'scrap_rich', name: '金属堆积', desc: '击败后额外获得 1 个组件碎片', color: 'var(--accent-yellow)' },
+            { id: 'corrosive', name: '酸蚀环境', desc: '进入后敌人获得 3 层中毒', color: 'var(--accent-purple)' }
+        ];
+
+        nodes.forEach(function(n) {
+            if (['monster', 'elite', 'boss', 'dungeon'].indexOf(n.type) !== -1) {
+                if (Math.random() < 0.4) { // 40% 概率带词缀
+                    n.synapseAffix = envAffixes[Math.floor(Math.random() * envAffixes.length)];
+                }
+            }
+        });
+
         return nodes;
     }
 
     function _genDiscoveryPaths(gs) {
         var ms = gs.mapState;
         if (!ms.floorNodePool || ms.floorNodePool.length === 0) {
-            ms.floorNodePool = _genFloorNodePool(ms.currentFloor || 1);
+            ms.floorNodePool = _genFloorNodePool(ms.currentFloor || 1, gs);
         }
         var pool = ms.floorNodePool;
         var paths = [];
-        // 母巢内只生成普通怪物和遗物路径
-        var isInCamp = ms.currentRoom && ms.currentRoom.type === 'camp';
+        // [修复] 仅在 B1F 的第一个母巢（ stepsTaken 为 0）内限制路径类型，作为新手教学区
+        // 之后的普通营地不再限制后续路径，防止出现无路可走的 BUG
+        var isTutorialCamp = ms.currentRoom && ms.currentRoom.type === 'camp' && ms.currentFloor === 1 && ms.stepsTaken <= 1;
+
         var available = [];
         for (var i = 0; i < pool.length; i++) {
             if (pool[i].exhausted || pool[i].hidden) continue;
-            if (isInCamp && (pool[i].type === 'boss' || pool[i].type === 'camp' || pool[i].type === 'elite' || pool[i].type === 'dungeon' || pool[i].type === 'portal')) continue;
+            if (isTutorialCamp && (pool[i].type === 'boss' || pool[i].type === 'camp' || pool[i].type === 'elite' || pool[i].type === 'dungeon' || pool[i].type === 'portal')) continue;
             available.push(i);
         }
 
@@ -191,7 +233,7 @@ window.GameState = (function () {
                 for (var bi = 0; bi < pool.length; bi++) { if (pool[bi].type === 'boss' && pool[bi].hidden) { pool[bi].hidden = false; break; } }
                 // 重新计算 available
                 available = [];
-                for (var ri = 0; ri < pool.length; ri++) { if (!pool[ri].exhausted && !pool[ri].hidden) { if (!(isInCamp && (pool[ri].type === 'boss' || pool[ri].type === 'camp' || pool[ri].type === 'elite' || pool[ri].type === 'dungeon' || pool[ri].type === 'portal'))) available.push(ri); } }
+                for (var ri = 0; ri < pool.length; ri++) { if (!pool[ri].exhausted && !pool[ri].hidden) { if (!(isTutorialCamp && (pool[ri].type === 'boss' || pool[ri].type === 'camp' || pool[ri].type === 'elite' || pool[ri].type === 'dungeon' || pool[ri].type === 'portal'))) available.push(ri); } }
             }
         }
 
@@ -200,14 +242,15 @@ window.GameState = (function () {
             if (!ms.bossDefeated) {
                 for (var bi2 = 0; bi2 < pool.length; bi2++) { if (pool[bi2].type === 'boss' && !pool[bi2].hidden) { if (pool[bi2].exhausted) pool[bi2].exhausted = false; available.push(bi2); break; } }
             }
-            if (available.length === 0 && ms.bossDefeated && ms.currentFloor < 4) {
+            // Boss击败后若无可选节点，强制显示传送门推进进度（全楼层通用）
+            if (available.length === 0 && ms.bossDefeated && ms.currentFloor <= 10) {
                 for (var pi2 = 0; pi2 < pool.length; pi2++) { if (pool[pi2].type === 'portal') { pool[pi2].hidden = false; available.push(pi2); break; } }
             }
         }
 
-        // 如果传送门已解锁且为最终层，直接通关
-        if (ms.portalUnlocked && ms.currentFloor >= 4) {
-            paths.push({ id: 'victory', type: 'victory', label: '<span class="icon icon-crown"></span> 基因序列完整', desc: '三股毁灭力量已被清除。黑平线实验室终于归于沉寂。你的原体完成了终极进化。' });
+        // 通关：10F 传送门已穿越，或 10F Boss 已击败且传送门已解锁
+        if (ms.currentFloor > 10 || (ms.bossDefeated && ms.currentFloor >= 10)) {
+            paths.push({ id: 'victory', type: 'victory', label: '<span class="icon icon-crown"></span> 基因序列完整', desc: '三股毁灭力量已被清除。黑地平线实验室终于归于沉寂。你的原体完成了终极进化。' });
             return paths;
         }
 
@@ -225,13 +268,18 @@ window.GameState = (function () {
         for (var ci = available.length - 1; ci > 0; ci--) { var ji = Math.floor(Math.random() * (ci + 1)); var ti = available[ci]; available[ci] = available[ji]; available[ji] = ti; }
         for (var pi3 = 0; pi3 < count; pi3++) {
             var node = pool[available[pi3]];
-            paths.push({ id: node.id, type: node.type, monsterId: node.monsterId, label: node.label, desc: node.desc, raceClr: node.raceClr, _poolIndex: available[pi3] });
+            paths.push({
+                id: node.id, type: node.type, monsterId: node.monsterId,
+                label: node.label, desc: node.desc, raceClr: node.raceClr,
+                _poolIndex: available[pi3],
+                synapseAffix: node.synapseAffix // [新增] 传递词缀
+            });
         }
 
         // 兜底：如果路径为空且不是通关状态，生成一条空路径防止软锁
         if (paths.length === 0) {
-            if (ms.bossDefeated && ms.currentFloor >= 4) {
-                paths.push({ id: 'victory', type: 'victory', label: '<span class="icon icon-crown"></span> 基因序列完整', desc: '三股毁灭力量已被清除。黑平线实验室终于归于沉寂。你的原体完成了终极进化。' });
+            if (ms.bossDefeated && ms.currentFloor >= 10) {
+                paths.push({ id: 'victory', type: 'victory', label: '<span class="icon icon-crown"></span> 基因序列完整', desc: '三股毁灭力量已被清除。黑地平线实验室终于归于沉寂。你的原体完成了终极进化。' });
             } else {
                 paths.push({ id: 'empty', type: 'empty', label: '信号微弱', desc: '传感器无法锁定任何有效路径。尝试重新校准。' });
             }
@@ -249,15 +297,16 @@ window.GameState = (function () {
                 bossDefeated: false,
                 portalUnlocked: false,
                 stepsTaken: 0,
-                introSeen: false,
                 completedTasks: [],
-                mapLevel: 1
+                mapLevel: 1,
+                loop: 1 // [新增] 周目计数
             },
             player: {
-                hp: 100, hp_max: 100, ram: 10, ram_max: 10, toxicity: 0, toxicity_max: 50,
-                atk: 12, atk_base: 12, def: 5, def_base: 5, bp: 50,
+                hp: 100, hp_max: 100, process: 10, process_max: 10, toxicity: 0, toxicity_max: 50,
+                atk: 12, atk_base: 12, def: 5, def_base: 5, bp: 50, process_recovery: 3,
                 level: 1, xp: 0, xpToNext: 30, availableMasteryPoints: 1,
                 masteryPoints: { mutant: 0, swarm: 0, ember: 0 },
+                introSeen: false,
                 predatory_organ: { equipped: null, tier: 1, component_slots: [null, null] },
                 chitin_epidermis: { equipped: null, tier: 1, component_slots: [null, null] },
                 gland_core: { equipped: null, tier: 1, component_slots: [null, null] },
@@ -265,32 +314,45 @@ window.GameState = (function () {
                 _potionHistory: [], _potionHistoryTick: 0, _potionsUsed: 0,
                 activeCoating: null, coatingTurnsLeft: 0,
                 relicsFound: 0, dungeonsEntered: 0,
-                claimedTaskRewards: []
+                claimedTaskRewards: [],
+                bossFailCount: 0 // 连败计数
             },
-            inventory: { components: {}, potions: [], organs: [] },
+            inventory: { components: {}, potions: [], organs: [], organSyncLevels: {} },
             bestiary: { scanned: [], killCount: {} },
             meta: { version: '3.0.0', createdAt: Date.now(), lastSavedAt: null, gameTime: 0 }
         };
-        gs.mapState.floorNodePool = _genFloorNodePool(1);
+        gs.mapState.floorNodePool = _genFloorNodePool(1, gs);
         gs.mapState.discoveryPaths = _genDiscoveryPaths(gs);
         return gs;
     }
 
     function recalcPlayerStats() {
         var gs = getState(); if (!gs) return; var p = gs.player; var data = GD(); if (!data) return;
-        p.atk = p.atk_base; p.def = p.def_base; p.hp_max = 100; p.ram_max = 10;
+        // 基础重置
+        p.atk = p.atk_base || 10;
+        p.def = p.def_base || 5;
+        p.hp_max = 100;
+        p.process_max = 10;
+        p.process_recovery = 3;
         var slots = ['predatory_organ', 'chitin_epidermis', 'gland_core'];
-        var slotTypes = { 'predatory_organ': 'atk', 'chitin_epidermis': 'def', 'gland_core': 'ram' };
+        var slotTypes = { 'predatory_organ': 'atk', 'chitin_epidermis': 'def', 'gland_core': 'process' };
         slots.forEach(function (sn) {
             var slot = p[sn]; if (!slot) return;
-            var tierBonus = Math.max(0, slot.tier - 1);
+            var tierBonus = Math.max(0, (slot.tier || 1) - 1);
             if (slotTypes[sn] === 'atk') { p.atk += tierBonus * 3; p.hp_max += tierBonus * 5; }
             else if (slotTypes[sn] === 'def') { p.def += tierBonus * 3; p.hp_max += tierBonus * 3; }
-            else { p.ram_max = Math.min(15, p.ram_max + tierBonus); }
+            else {
+                p.process_max = Math.min(15, p.process_max + tierBonus);
+                p.process_recovery += tierBonus; // 代谢腺体每阶+1恢复
+            }
             if (slot.equipped && data.BOSS_ORGANS && data.BOSS_ORGANS[slot.equipped]) {
                 var bo = data.BOSS_ORGANS[slot.equipped];
-                if (bo.tier >= 2) { p.atk += bo.tier; p.def += bo.tier; }
-                if (bo.tier >= 3) { p.hp_max += 30; }
+                var syncLvl = gs.inventory.organSyncLevels[slot.equipped] || 1;
+                // 同调等级加成：Lv.2 +50%, Lv.3 +100%
+                var syncMult = 1 + (syncLvl - 1) * 0.5;
+
+                if (bo.tier >= 2) { p.atk += Math.ceil(bo.tier * syncMult); p.def += Math.ceil(bo.tier * syncMult); }
+                if (bo.tier >= 3) { p.hp_max += Math.ceil(30 * syncMult); }
             }
             if (!slot.component_slots) return;
             slot.component_slots.forEach(function (cid) {
@@ -309,19 +371,39 @@ window.GameState = (function () {
                 var pts = p.masteryPoints[race] || 0; if (pts <= 0 || !mData[race]) return;
                 var sp = mData[race].statsPerPoint;
                 p.hp_max += (sp.hp_max || 0) * pts; p.atk += (sp.atk || 0) * pts; p.def += (sp.def || 0) * pts;
-                p.ram_max = Math.min(15, p.ram_max + (sp.ram_max || 0) * pts);
+                p.process_max = Math.min(15, p.process_max + (sp.process_max || 0) * pts);
+                if (race === 'ember') { p.process_recovery += pts * 0.5; } // 机械专精每点+0.5恢复
             });
             }
         }
-        p.hp = Math.min(p.hp, p.hp_max); p.ram = Math.min(p.ram, p.ram_max);
+        p.hp = Math.min(p.hp, p.hp_max); p.process = Math.min(p.process, p.process_max);
     }
 
-    function xpForLevel(level) { return Math.ceil(30 * Math.pow(1.5, level - 1)); }
+    function xpForLevel(level) {
+        if (level >= 30) return 0; // [优化] 等级上限根据用户需求提升至 30
+        return Math.ceil(30 * Math.pow(1.6, level - 1));
+    }
 
     function gainXp(amount) {
         var gs = getState(); if (!gs) return null; var p = gs.player;
+        if (p.level >= 30) {
+            p.xp = 0; p.xpToNext = 0; return { leveled: false };
+        }
+
         p.xp += amount; var leveled = false;
-        while (p.xp >= p.xpToNext) { p.xp -= p.xpToNext; p.level += 1; p.xpToNext = xpForLevel(p.level); p.availableMasteryPoints += 1; p.hp = p.hp_max; leveled = true; }
+        while (p.xp >= p.xpToNext && p.level < 30) {
+            p.xp -= p.xpToNext;
+            p.level += 1;
+            if (p.level >= 30) {
+                p.xp = 0;
+                p.xpToNext = 0;
+            } else {
+                p.xpToNext = xpForLevel(p.level);
+            }
+            p.availableMasteryPoints += 1;
+            p.hp = p.hp_max;
+            leveled = true;
+        }
         recalcPlayerStats(); save();
         return { leveled: leveled, newLevel: p.level, points: p.availableMasteryPoints };
     }
@@ -330,7 +412,11 @@ window.GameState = (function () {
         var gs = getState(); if (!gs) return { success: false, error: '状态未初始化' }; var p = gs.player;
         var validRaces = ['mutant', 'swarm', 'ember'];
         if (validRaces.indexOf(race) === -1) return { success: false, error: '无效种族' };
-        if (slotIndex !== 0 && slotIndex !== 1) return { success: false, error: '无效专精槽' };
+
+        // [新增] 支持第三个专精槽 (Loop 2 解锁)
+        var maxSlots = (gs.mapState.loop >= 2) ? 3 : 2;
+        if (slotIndex < 0 || slotIndex >= maxSlots) return { success: false, error: '无效专精槽' };
+
         if (p.availableMasteryPoints < 1) return { success: false, error: '无可用专精点' };
         if (p.masteries[slotIndex] === race) {
             p.availableMasteryPoints -= 1; p.masteryPoints[race] = (p.masteryPoints[race] || 0) + 1;
@@ -347,14 +433,17 @@ window.GameState = (function () {
     function resetMastery(slotIndex) {
         var gs = getState(); if (!gs) return { success: false, error: '未初始化' };
         var p = gs.player;
-        if (slotIndex !== 0 && slotIndex !== 1) return { success: false, error: '无效专精槽' };
+        var maxSlots = (gs.mapState.loop >= 2) ? 3 : 2;
+        if (slotIndex < 0 || slotIndex >= maxSlots) return { success: false, error: '无效专精槽' };
+
         var oldRace = p.masteries[slotIndex];
         if (!oldRace) return { success: false, error: '该槽无专精' };
-        p.availableMasteryPoints += (p.masteryPoints[oldRace] || 0);
+        var refunded = p.masteryPoints[oldRace] || 0;
+        p.availableMasteryPoints += refunded;
         p.masteryPoints[oldRace] = 0;
         p.masteries[slotIndex] = null;
         recalcPlayerStats(); save();
-        return { success: true, refunded: p.masteryPoints[oldRace] || 0 };
+        return { success: true, refunded: refunded };
     }
 
     function equipOrgan(slot, organId) {
@@ -413,7 +502,7 @@ window.GameState = (function () {
 
     function applyCoating(coatingId) {
         var gs = getState(); if (!gs) return { success: false, error: '未初始化' };
-        var data = GD(); if (!data || !data.COATINGS[coatingId]) return { success: false, error: '未知涂层' };
+        var data = GD(); if (!data || !data.COATINGS || !data.COATINGS[coatingId]) return { success: false, error: '未知涂层' };
         var coat = data.COATINGS[coatingId]; var inv = gs.inventory.components;
         var missing = []; Object.keys(coat.cost).forEach(function (m) { if (!inv[m] || inv[m] < coat.cost[m]) missing.push(m); });
         if (missing.length > 0) return { success: false, error: '碎片不足: ' + missing.join(',') };
@@ -443,6 +532,21 @@ window.GameState = (function () {
     }
 
     function getState() { return window._activeGameState; }
+    function getMapLevelScaling(gs) {
+        var ml = (gs.mapState.mapLevel || 1) - 1;
+        var loop = gs.mapState.loop || 1;
+        // [优化] 基础倍率随楼层增长，且二周目怪物强度大幅提升
+        var loopMult = 1 + (loop - 1) * 0.5; // 每多一周目，基础属性提升 50%
+
+        if (ml <= 0 && loop === 1) return { hpMul: 1, atkMul: 1, defMul: 1, bpMul: 1, xpMul: 1 };
+        return {
+            hpMul: (1 + ml * 0.08) * loopMult,
+            atkMul: (1 + ml * 0.06) * loopMult,
+            defMul: (1 + ml * 0.05) * loopMult,
+            bpMul: (1 + ml * 0.20) * (1 + (loop-1)*0.2),
+            xpMul: (1 + ml * 0.15)
+        };
+    }
     function calcDamageReduction(def) { return def / (def + 40); }
     function exportSaveText() {
         var state = getState(); if (!state) return '';
@@ -458,7 +562,7 @@ window.GameState = (function () {
             var bin = atob(str);
             var encoded = bin.split('').map(function(c) { return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2); }).join('');
             var decoded = JSON.parse(decodeURIComponent(encoded));
-            if (decoded && decoded.player && decoded.mapState) { window._activeGameState = decoded; save(); return { success: true }; }
+            if (decoded && decoded.player && decoded.mapState) { _migrateOldSave(decoded); window._activeGameState = decoded; save(); return { success: true }; }
             return { success: false, error: '序列残缺' };
         } catch (e) { return { success: false, error: '解码失败' }; }
     }
@@ -491,35 +595,63 @@ window.GameState = (function () {
         return slots;
     }
 
-    function reset() { localStorage.removeItem('blackHorizon_save'); return true; }
+    function reset() { localStorage.removeItem('blackHorizon_save'); window._activeGameState = null; return true; }
 
     function _migrateOldSave(state) {
         if (!state.player) return;
         var p = state.player;
-        if (p.level === undefined) p.level = 1;
-        if (p.xp === undefined) p.xp = 0;
-        if (p.xpToNext === undefined) p.xpToNext = xpForLevel(p.level || 1);
-        if (p.availableMasteryPoints === undefined) p.availableMasteryPoints = 1;
+
+        // 关键属性有效性检查与默认值补全
+        var validateNum = function(val, def) { return (typeof val === 'number' && isFinite(val)) ? val : def; };
+
+        p.level = validateNum(p.level, 1);
+        p.xp = validateNum(p.xp, 0);
+        p.xpToNext = validateNum(p.xpToNext, xpForLevel(p.level));
+        p.availableMasteryPoints = validateNum(p.availableMasteryPoints, 1);
         if (!p.masteryPoints) p.masteryPoints = { mutant: 0, swarm: 0, ember: 0 };
-        if (p.bp === undefined) p.bp = 50;
-        if (p._potionsUsed === undefined) p._potionsUsed = 0;
-        if (p.relicsFound === undefined) p.relicsFound = 0;
-        if (p.dungeonsEntered === undefined) p.dungeonsEntered = 0;
-        if (!p.claimedTaskRewards) p.claimedTaskRewards = [];
-        if (!state.inventory) state.inventory = { components: {}, potions: [], organs: [] };
+        p.bp = validateNum(p.bp, 50);
+        p._potionsUsed = validateNum(p._potionsUsed, 0);
+        p.relicsFound = validateNum(p.relicsFound, 0);
+        p.dungeonsEntered = validateNum(p.dungeonsEntered, 0);
+        if (p.claimedTaskRewards === undefined) p.claimedTaskRewards = [];
+
+        p.process = validateNum(p.process, 10);
+        p.process_max = validateNum(p.process_max, 10);
+        p.process_recovery = validateNum(p.process_recovery, 3);
+
+        if (!state.inventory) state.inventory = { components: {}, potions: [], organs: [], organSyncLevels: {} };
         if (!state.inventory.organs) state.inventory.organs = [];
-        if (state.inventory.components) { ['暴君核心','蜂后髓核','高能电泳核'].forEach(function(oid) { if (state.inventory.components[oid]) { var c2 = state.inventory.components[oid]; for (var oi = 0; oi < c2; oi++) state.inventory.organs.push(oid); delete state.inventory.components[oid]; } }); }
-        if (!state.bestiary) state.bestiary = { scanned: [], killCount: {} };
+        if (!state.inventory.organSyncLevels) state.inventory.organSyncLevels = {};
+        if (state.inventory.components) {
+            ['暴君核心','蜂后髓核','高能电泳核'].forEach(function(oid) {
+                if (state.inventory.components[oid]) {
+                    var c2 = state.inventory.components[oid];
+                    for (var oi = 0; oi < c2; oi++) state.inventory.organs.push(oid);
+                    delete state.inventory.components[oid];
+                }
+            });
+        }
+        if (!state.bestiary) state.bestiary = { scanned: [], killCount: {}, researchLevels: {} };
         if (!state.bestiary.killCount) state.bestiary.killCount = {};
+        if (!state.bestiary.researchLevels) state.bestiary.researchLevels = {};
         if (!state.meta) state.meta = { version: '3.0.0', createdAt: Date.now(), lastSavedAt: null, gameTime: 0 };
+
         // 楼层系统迁移
         if (!state.mapState) state.mapState = {};
         var ms = state.mapState;
-        if (ms.currentFloor === undefined) ms.currentFloor = 1;
+        ms.currentFloor = validateNum(ms.currentFloor, 1);
         if (ms.bossDefeated === undefined) ms.bossDefeated = false;
         if (ms.portalUnlocked === undefined) ms.portalUnlocked = false;
+
+        // 迁移 introSeen 到 player 对象
+        if (ms.introSeen !== undefined && p.introSeen === undefined) {
+            p.introSeen = ms.introSeen;
+            delete ms.introSeen;
+        }
+        if (p.introSeen === undefined) p.introSeen = false;
+
         if (!ms.floorNodePool || ms.floorNodePool.length === 0) {
-            ms.floorNodePool = _genFloorNodePool(ms.currentFloor);
+            ms.floorNodePool = _genFloorNodePool(ms.currentFloor, state);
         }
         if (!ms.discoveryPaths || ms.discoveryPaths.length === 0) {
             ms.discoveryPaths = _genDiscoveryPaths(state);
@@ -527,7 +659,7 @@ window.GameState = (function () {
         if (!ms.currentRoom) {
             ms.currentRoom = { type: 'camp', label: '未知区域', desc: '你在混乱中重组。' };
         }
-        if (ms.mapLevel === undefined) ms.mapLevel = 1;
+        ms.mapLevel = validateNum(ms.mapLevel, 1);
         ['predatory_organ', 'chitin_epidermis', 'gland_core'].forEach(function (s) {
             if (!p[s]) p[s] = { equipped: null, tier: 1, component_slots: [null, null] };
         });
@@ -537,11 +669,126 @@ window.GameState = (function () {
         var state = load();
         if (!state) { state = createNewGame(); } else { _migrateOldSave(state); }
         window._activeGameState = state;
+        recalcPlayerStats();
         return state;
     }
 
+    function buyComponent(componentId) {
+        var gs = getState(); if (!gs) return { success: false, error: '未初始化' };
+        var cost = 150;
+        if (gs.player.bp < cost) return { success: false, error: 'BP不足(需' + cost + ')' };
+        gs.player.bp -= cost;
+        gs.inventory.components[componentId] = (gs.inventory.components[componentId] || 0) + 1;
+        save();
+        return { success: true, component: componentId, cost: cost };
+    }
+
+    function upgradeOrganTierWithBP(slot) {
+        var gs = getState(); if (!gs || !gs.player[slot]) return { success: false, error: '无效' };
+        var cost = Math.ceil(5 * Math.pow(1.6, gs.player[slot].tier));
+        var inv = gs.inventory.components; var totalFrags = 0;
+        Object.keys(inv).forEach(function (k) { totalFrags += (inv[k] || 0); });
+        if (totalFrags + gs.player.bp < cost) return { success: false, error: '资源不足，需' + cost + '(碎片+' + totalFrags + ' BP' + gs.player.bp + ')' };
+        var remaining = cost;
+        Object.keys(inv).forEach(function (k) { if (remaining <= 0) return; var take = Math.min(inv[k] || 0, remaining); inv[k] -= take; remaining -= take; });
+        if (remaining > 0) { gs.player.bp -= remaining; }
+        gs.player[slot].tier += 1; recalcPlayerStats(); save();
+        return { success: true, slot: slot, newTier: gs.player[slot].tier, bpCost: Math.max(0, cost - totalFrags) };
+    }
+
+    function clearToxicity() {
+        var gs = getState(); if (!gs) return { success: false };
+        var cost = 50;
+        if (gs.player.bp < cost) return { success: false, error: 'BP不足(需' + cost + ')' };
+        gs.player.bp -= cost;
+        gs.player.toxicity = 0;
+        save();
+        return { success: true, cost: cost };
+    }
+
+    function mutateStat(statType) {
+        var gs = getState(); if (!gs) return { success: false };
+        var costs = { atk: 1500, def: 1200, hp: 1000 }; // 调高单次成本
+        var cost = costs[statType] || 1500;
+        if (gs.player.bp < cost) return { success: false, error: 'BP不足(需' + cost + ')' };
+        gs.player.bp -= cost;
+        // 大幅提升单次突变收益
+        if (statType === 'atk') { gs.player.atk += 5; gs.player.atk_base += 5; }
+        else if (statType === 'def') { gs.player.def += 5; gs.player.def_base += 5; }
+        else if (statType === 'hp') { gs.player.hp_max += 25; gs.player.hp += 25; }
+        recalcPlayerStats(); save();
+        return { success: true, stat: statType, cost: cost };
+    }
+
+    function researchMonster(monsterId) {
+        var gs = getState(); if (!gs) return { success: false, error: '未初始化' };
+        var currentLevel = gs.bestiary.researchLevels[monsterId] || 0;
+        if (currentLevel >= 3) return { success: false, error: '已达最高研究等级' };
+
+        var costs = [500, 1500, 3000];
+        var cost = costs[currentLevel];
+        if (gs.player.bp < cost) return { success: false, error: 'BP 不足，需 ' + cost };
+
+        gs.player.bp -= cost;
+        gs.bestiary.researchLevels[monsterId] = currentLevel + 1;
+        save();
+        return { success: true, monsterId: monsterId, newLevel: currentLevel + 1, cost: cost };
+    }
+
+    function syncOrgan(organId) {
+        var gs = getState(); if (!gs) return { success: false, error: '未初始化' };
+        var inv = gs.inventory;
+        var currentSync = inv.organSyncLevels[organId] || 1;
+        if (currentSync >= 3) return { success: false, error: '已达最高同调等级' };
+
+        // 检查是否有至少 2 个同名器官（1个装备中+1个在背包，或者2个都在背包）
+        var countInInv = inv.organs.filter(function(id) { return id === organId; }).length;
+        var isEquipped = [gs.player.predatory_organ.equipped, gs.player.chitin_epidermis.equipped, gs.player.gland_core.equipped].indexOf(organId) !== -1;
+        var totalCount = countInInv + (isEquipped ? 1 : 0);
+
+        if (totalCount < 2) return { success: false, error: '同名器官不足 (需2个)' };
+
+        var bpCosts = [0, 2000, 5000]; // 从 Lv.1 升 Lv.2 需 2000，从 Lv.2 升 Lv.3 需 5000
+        var cost = bpCosts[currentSync];
+        if (gs.player.bp < cost) return { success: false, error: 'BP 不足，需 ' + cost };
+
+        // 消耗掉一个背包中的器官
+        var idx = inv.organs.indexOf(organId);
+        inv.organs.splice(idx, 1);
+
+        gs.player.bp -= cost;
+        inv.organSyncLevels[organId] = currentSync + 1;
+
+        recalcPlayerStats();
+        save();
+        return { success: true, organId: organId, newLevel: currentSync + 1, cost: cost };
+    }
+
+    function startNextLoop() {
+        var gs = getState(); if (!gs) return;
+        // 保留玩家属性 (p)、背包 (inventory)、图鉴 (bestiary)
+        // 仅重置地图状态
+        var loop = (gs.mapState.loop || 1) + 1;
+        gs.mapState = {
+            currentRoom: { type: 'camp', label: '源初母巢', desc: '你在更深层的震动中睁开双眼。原体感官已完全不同。' },
+            currentFloor: 1,
+            floorNodePool: [],
+            bossDefeated: false,
+            portalUnlocked: false,
+            stepsTaken: 0,
+            introSeen: true,
+            completedTasks: [],
+            mapLevel: 1,
+            loop: loop
+        };
+        gs.mapState.floorNodePool = _genFloorNodePool(1, gs);
+        gs.mapState.discoveryPaths = _genDiscoveryPaths(gs);
+        save();
+        return gs;
+    }
+
     return {
-        init: init, save: save, reset: reset,
+        init: init, save: save, reset: reset, startNextLoop: startNextLoop,
         getState: getState, calcDamageReduction: calcDamageReduction,
         recalcPlayerStats: recalcPlayerStats, equipOrgan: equipOrgan, upgradeOrganTier: upgradeOrganTier,
         socketComponent: socketComponent, unloadComponent: unloadComponent,
@@ -549,6 +796,10 @@ window.GameState = (function () {
         craftPotion: craftPotion, applyCoating: applyCoating,
         exportSaveText: exportSaveText, importSaveText: importSaveText,
         saveToSlot: saveToSlot, loadFromSlot: loadFromSlot, deleteSlot: deleteSlot, listSlots: listSlots,
+        getMapLevelScaling: getMapLevelScaling,
+        buyComponent: buyComponent, upgradeOrganTierWithBP: upgradeOrganTierWithBP,
+        clearToxicity: clearToxicity, mutateStat: mutateStat,
+        researchMonster: researchMonster, syncOrgan: syncOrgan,
         _genDiscoveryPaths: _genDiscoveryPaths,
         _genFloorNodePool: _genFloorNodePool
     };

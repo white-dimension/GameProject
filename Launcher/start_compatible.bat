@@ -1,5 +1,5 @@
 @echo off
-title 黑平线：原体觉醒
+title 黑地平线：原体觉醒
 cd /d "%~dp0.."
 
 echo 正在启动中...
