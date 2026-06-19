@@ -2048,7 +2048,7 @@ window.UISystem = (function () {
             }
         };
         var compRow = _ce('div');
-        compRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;';
+        compRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;';
         keys.forEach(function(k) {
             var count = inv[k]; if (count <= 0) return;
             var chip = _ce('div');
@@ -2222,7 +2222,7 @@ window.UISystem = (function () {
         updateStatus();
 
         var chipRow = _ce('div');
-        chipRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;';
+        chipRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;';
         items.forEach(function(item) {
             var chip = _ce('div');
             chip.style.cssText = 'padding:6px 12px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;cursor:pointer;font-size:13px;color:var(--text-main);';
@@ -2685,7 +2685,7 @@ window.UISystem = (function () {
         if (gs.inventory.organs.length > 0) {
             var organInvRow = _ce('div');
             organInvRow.style.cssText = 'padding:12px 16px;background:rgba(0,255,136,0.02);border:1px solid rgba(0,255,136,0.1);border-radius:6px;margin-bottom:4px;';
-            var orgHTML = '<div class="txt-xs txt-green txt-bold" style="margin-bottom:6px;">> 突变器官（' + gs.inventory.organs.length + '个）</div><div style="display:flex;flex-wrap:wrap;gap:6px;">';
+            var orgHTML = '<div class="txt-xs txt-green txt-bold" style="margin-bottom:6px;">> 突变器官（' + gs.inventory.organs.length + '个）</div><div style="display:flex;flex-wrap:wrap;gap:8px;">';
             gs.inventory.organs.forEach(function(oid) {
                 var oc3 = organColors3[oid] || { hex:'var(--accent-green)', bg:'rgba(0,255,136,0.06)', bd:'rgba(0,255,136,0.15)' };
                 var bo3 = bos3[oid]; var slotName3 = bo3 ? (bo3.slotType==='predatory_organ'?'捕食器官':bo3.slotType==='gland_core'?'腺体核心':'生物表皮') : '未知';
