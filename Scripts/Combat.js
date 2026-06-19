@@ -995,12 +995,13 @@ window.CombatSystem = (function () {
         }
         var dropCounts = {}; allDrops.forEach(function(d) { dropCounts[d] = (dropCounts[d] || 0) + 1; });
         var dropParts = []; Object.keys(dropCounts).forEach(function(d) { dropParts.push(d + ' \u00D7' + dropCounts[d]); });
-        var dropMsg = dropParts.length > 0 ? ' | 获得材料：' + dropParts.join(', ') : '';
-        _log('<span style="color:var(--accent-red)">>> 全部目标已融毁。</span> <span style="color:var(--accent-yellow)">获得基因点数：' + totalBp + '</span>' + dropMsg);
         var xpResult = window.GameState.gainXp(totalXp);
+        var dropMsg = dropParts.length > 0 ? ' | 获得材料：' + dropParts.join(', ') : '';
+        var rewardMsg = '<span style="color:var(--accent-red)">>> 全部目标已融毁。</span> <span style="color:var(--accent-yellow)">获得基因点数：' + totalBp + '</span>' + dropMsg;
         if (xpResult && xpResult.leveled) {
-            _log('<span style="color:var(--accent-blue);font-weight:bold;">>> 等阶提升至 ' + xpResult.newLevel + '！获得 1 专精点（可用：' + xpResult.points + '）</span>');
+            rewardMsg += '  <span style="color:var(--accent-blue);font-weight:bold;">等阶提升至 ' + xpResult.newLevel + '！+1专精点</span>';
         }
+        _log(rewardMsg);
         window.UISystem.render();
 
         // 合并战斗胜利通知
