@@ -341,6 +341,7 @@ window.GameData = (function () {
             name: '训练人偶·异变',
             hp: 9999, atk: 0, def: 1,
             race: 'mutant', tier: 'common',
+            trainingOnly: true,
             intents: [{ type: 'dummy', label: '待命中...' }]
         },
         TRAINING_DUMMY_SWARM: {
@@ -348,6 +349,7 @@ window.GameData = (function () {
             name: '训练人偶·寄生',
             hp: 9999, atk: 0, def: 1,
             race: 'swarm', tier: 'common',
+            trainingOnly: true,
             intents: [{ type: 'dummy', label: '待命中...' }]
         },
         TRAINING_DUMMY_EMBER: {
@@ -355,6 +357,7 @@ window.GameData = (function () {
             name: '训练人偶·机械',
             hp: 9999, atk: 0, def: 1,
             race: 'ember', tier: 'common',
+            trainingOnly: true,
             intents: [{ type: 'dummy', label: '待命中...' }]
         },
         // —— v2.1 新怪 ——

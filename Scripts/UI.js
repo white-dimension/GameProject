@@ -419,12 +419,12 @@ window.UISystem = (function () {
                 var baseMon = GD().MONSTERS[p.monsterId];
                 var targetRace = baseMon ? baseMon.race : 'mutant';
                 var ePool = Object.keys(GD().MONSTERS).filter(function(k) {
-                    var m = GD().MONSTERS[k]; return m.tier === 'elite' && m.race === targetRace;
+                    var m = GD().MONSTERS[k]; return m.tier === 'elite' && m.race === targetRace && !m.trainingOnly;
                 });
                 if (ePool.length === 0) ePool = ['MON_CH1_CLEANER','MON_CH1_GUARD','MON_CH1_SPORE','MON_CH1_HIVE','MON_CH1_BEE','MON_CH1_SENTINEL'];
                 var eid = ePool[Math.floor(Math.random() * ePool.length)];
                 var commonPool = Object.keys(GD().MONSTERS).filter(function(k) {
-                    var m = GD().MONSTERS[k]; return m.tier === 'common' && m.race === targetRace;
+                    var m = GD().MONSTERS[k]; return m.tier === 'common' && m.race === targetRace && !m.trainingOnly;
                 });
                 if (commonPool.length === 0) commonPool = ['MON_CH1_ZOMBIE','MON_CH1_RIOT','MON_CH1_RAT','MON_CH1_LARVA','MON_CH1_CLEANER_ROBOT','MON_CH1_WATCHER'];
                 CS().startBattle([eid, commonPool[Math.floor(Math.random() * commonPool.length)]], {});
@@ -433,7 +433,7 @@ window.UISystem = (function () {
                 var baseMon3 = GD().MONSTERS[p.monsterId];
                 var targetRace3 = baseMon3 ? baseMon3.race : 'mutant';
                 var commons = Object.keys(GD().MONSTERS).filter(function(k) {
-                    var m = GD().MONSTERS[k]; return m.tier === 'common' && m.race === targetRace3;
+                    var m = GD().MONSTERS[k]; return m.tier === 'common' && m.race === targetRace3 && !m.trainingOnly;
                 });
                 if (commons.length === 0) commons = ['MON_CH1_ZOMBIE','MON_CH1_RIOT','MON_CH1_RAT','MON_CH1_LARVA','MON_CH1_CLEANER_ROBOT','MON_CH1_WATCHER'];
                 var cnt = 1 + Math.floor(Math.random() * 3);
@@ -1217,6 +1217,7 @@ window.UISystem = (function () {
 
             Object.keys(allMonsters).forEach(function(id) {
                 var m = allMonsters[id];
+                if (m.trainingOnly) return;
                 if (m.race !== race) return;
                 var kc = killed[id] || 0;
                 var rl = research[id] || 0;
