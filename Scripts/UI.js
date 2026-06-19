@@ -2607,7 +2607,7 @@ window.UISystem = (function () {
             if (ct.effect.toxinImmune) effectParts.push('免疫中毒');
             if (ct.effect.shieldStrip) effectParts.push('剥离' + ct.effect.shieldStrip + '护盾');
             var tip = '<b>' + ct.name + '</b>&#10;目标种族：' + (raceNames2[ct.targetRace]||ct.targetRace) + '&#10;效果：' + effectParts.join(' · ') + '&#10;持续 ' + ct.duration + ' 回合&#10;消耗：' + costParts.join(' + ');
-            coatHTML += '<button class="btn btn-sm help-tip" style="background:' + rc.bg + ';border:1px solid ' + rc.bd + ';color:' + rc.hex + ';' + (canAfford ? '' : 'opacity:0.4;') + '" data-tip="' + tip + '" ' + (canAfford ? 'onclick="GameState.applyCoating(\'' + coatId + '\');UISystem.render();UISystem.showReorganizeModal();"' : 'disabled') + '>' + ct.name + '</button>';
+            coatHTML += '<button class="btn btn-sm help-tip" style="padding:6px 14px;font-size:13px;background:' + rc.bg + ';border:1px solid ' + rc.bd + ';color:' + rc.hex + ';' + (canAfford ? '' : 'opacity:0.4;') + '" data-tip="' + tip + '" ' + (canAfford ? 'onclick="GameState.applyCoating(\'' + coatId + '\');UISystem.render();UISystem.showReorganizeModal();"' : 'disabled') + '>' + ct.name + '</button>';
             hasCoatings = true;
         });
         if (!hasCoatings) coatHTML += '<span class="txt-xs txt-dim">暂无可用涂层配方</span>';
