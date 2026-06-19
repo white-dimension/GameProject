@@ -25,7 +25,15 @@ window.Sound = (function () {
 
     // ======== 音效 ========
     function attack()    { _playRand(['attack_01.ogg','attack_02.ogg','attack_03.ogg','attack_04.ogg','attack_05.ogg'], 1.0); }
-    function monster()   { _playRand(['alien_07.ogg','alien_08.ogg','bug_05.ogg','monster_08.ogg','roar_04.ogg'], 0.5); }
+    // 种族专属怪物音效
+    function monsterMutant(){ _playRand(['monster_08.ogg','monster_09.ogg','monster_10.ogg','monster_11.ogg','monster_12.ogg','roar_04.ogg','roar_05.ogg','roar_06.ogg'], 0.5); }
+    function monsterSwarm() { _playRand(['bug_05.ogg','bug_06.ogg','bug_07.ogg','bug_08.ogg','bug_09.ogg','bug_10.ogg','bug_11.ogg','bug_12.ogg','bug_13.ogg','alien_07.ogg','alien_08.ogg','alien_09.ogg','alien_10.ogg','alien_11.ogg','alien_12.ogg'], 0.5); }
+    function monsterEmber() { _playRand(['PM_SD_UI_MAGIC_CONFIRM_1.wav','PM_SD_UI_MAGIC_CONFIRM_2.wav','PM_SD_UI_MAGIC_CONFIRM_4.wav','PM_SD_UI_MAGIC_CONFIRM_6.wav','PM_SD_UI_MAGIC_CONFIRM_8.wav','PM_SD_UI_MAGIC_CONFIRM_10.wav','PM_SD_UI_MAGIC_CONFIRM_11.wav','PM_SD_UI_MAGIC_CONFIRM_12.wav','PM_SD_UI_MAGIC_CONFIRM_13.wav'], 0.5); }
+    function monsterRace(race) {
+        if (race === 'swarm') monsterSwarm();
+        else if (race === 'ember') monsterEmber();
+        else monsterMutant();
+    }
     function hit()       { _playRand(['grunt_06.ogg','grunt_07.ogg','human_01.ogg','human_02.ogg'], 1.0); }
     function electric()  { _playRand(['PM_SD_UI_MAGIC_CONFIRM_2.wav','PM_SD_UI_MAGIC_CONFIRM_4.wav','PM_SD_UI_MAGIC_CONFIRM_6.wav','PM_SD_UI_MAGIC_CONFIRM_8.wav','PM_SD_UI_MAGIC_CONFIRM_12.wav'], 1.0); }
     function victory() {
@@ -135,7 +143,7 @@ window.Sound = (function () {
     function isMuted() { return !_enabled; }
 
     return {
-        attack: attack, monster: monster, hit: hit, electric: electric,
+        attack: attack, monster: monsterRace, hit: hit, electric: electric,
         victory: victory, defeat: defeat, click: click,
         playExploreBGM: playExploreBGM, playBattleBGM: playBattleBGM,
         stopBGM: stopBGM,

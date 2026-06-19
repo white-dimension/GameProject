@@ -102,7 +102,10 @@ window.CombatSystem = (function () {
         _battleState.componentEffects = _getComponentEffects();
 
         window.UISystem.render();
-        if (window.Sound) window.Sound.monster();
+        if (window.Sound && _battleState.monsters.length > 0) {
+            var md = window.GameData.MONSTERS[_battleState.monsters[0].id];
+            window.Sound.monster(md ? md.race : null);
+        }
     }
 
     // 获取当前目标怪物数据
@@ -141,7 +144,10 @@ window.CombatSystem = (function () {
                 if (_battleState.monsters[i].hp > 0) { _battleState.currentTarget = i; break; }
             }
         }
-        if (_battleState.currentTarget !== prev && window.Sound) window.Sound.monster();
+        if (_battleState.currentTarget !== prev && window.Sound) {
+            var md = window.GameData.MONSTERS[_battleState.monsters[_battleState.currentTarget].id];
+            window.Sound.monster(md ? md.race : null);
+        }
         window.UISystem.render();
     }
 
