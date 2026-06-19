@@ -1543,9 +1543,9 @@ window.UISystem = (function () {
                     if (r === p.masteries[si]) return;
                     var srr = raceClrs[r] || raceClrs.mutant;
                     if (p.availableMasteryPoints > 0) {
-                        masteryHTML += '<span style="display:inline-block;padding:4px 8px;font-size:12px;background:' + srr.bg + ';border:1px solid ' + srr.bd + ';border-radius:4px;cursor:pointer;color:' + srr.txt + ';margin-left:4px;" onclick="GameState.learnMastery(\'' + r + '\',' + si + ');UISystem.render();UISystem.showStatusModal();">' + raceNames[r] + '</span>';
+                        masteryHTML += '<span style="display:inline-block;min-width:90px;text-align:center;padding:6px 10px;font-size:13px;background:' + srr.bg + ';border:1px solid ' + srr.bd + ';border-radius:4px;cursor:pointer;color:' + srr.txt + ';margin-left:4px;" onclick="GameState.learnMastery(\'' + r + '\',' + si + ');UISystem.render();UISystem.showStatusModal();">' + raceNames[r] + '</span>';
                     } else {
-                        masteryHTML += '<span style="display:inline-block;padding:4px 8px;font-size:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:4px;color:var(--text-disabled);margin-left:4px;">' + raceNames[r] + '</span>';
+                        masteryHTML += '<span style="display:inline-block;min-width:90px;text-align:center;padding:6px 10px;font-size:13px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:4px;color:var(--text-disabled);margin-left:4px;">' + raceNames[r] + '</span>';
                     }
                 });
             } else {
