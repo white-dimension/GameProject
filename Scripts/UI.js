@@ -2169,13 +2169,25 @@ window.UISystem = (function () {
 
             var diffParts = [];
             var fields = [
-                { k: 'atkBonus', l: '攻击' }, { k: 'flatDefBonus', l: '防御' }, { k: 'shieldBonus', l: '生命' },
+                { k: 'atkBonus', l: '攻击' }, { k: 'defBonus', l: '防御' }, { k: 'flatDefBonus', l: '防御' },
+                { k: 'shieldBonus', l: '生命' },
                 { k: 'physMultiplier', l: '物理', mul: true }, { k: 'armorPenetration', l: '破甲', pct: true },
                 { k: 'toxinConversion', l: '毒转', pct: true }, { k: 'dotBonus', l: '毒伤' },
-                { k: 'lifeDrainChance', l: '吸血率', pct: true }, { k: 'thornsPercent', l: '反伤', pct: true }
+                { k: 'lifeDrainChance', l: '吸血率', pct: true }, { k: 'thornsPercent', l: '反伤', pct: true },
+                { k: 'killHeal', l: '击杀恢复' }, { k: 'deathDefy', l: '免死', bool: true },
+                { k: 'processOnHit', l: '受击回能' }, { k: 'critChance', l: '暴击率', pct: true },
+                { k: 'critMultiplier', l: '暴伤', mul: true },
+                { k: 'poisonImmune', l: '免疫中毒', bool: true }, { k: 'bonusVsSwarm', l: '对寄生', pct: true }
             ];
 
             fields.forEach(function(f) {
+                if (f.bool) {
+                    var nv = !!sa[f.k], ov = !!ca[f.k];
+                    if (!nv && !ov) return;
+                    var color = nv ? 'var(--accent-green)' : 'var(--text-dim)';
+                    diffParts.push('<span style="color:' + color + ';">' + f.l + (nv ? ' ✓' : '') + '</span>');
+                    return;
+                }
                 var nv = sa[f.k] || 0, ov = ca[f.k] || 0;
                 if (nv === 0 && ov === 0) return;
                 var diff = nv - ov;
