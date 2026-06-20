@@ -697,7 +697,7 @@ window.UISystem = (function () {
             var cardBorder = dead ? 'var(--border-dim)' : mclr;
             var cardGlow = (isTarget && !dead && !isVictory) ? 'box-shadow:0 0 20px ' + (raceCardClrs[md.race] || '#ff4455') + ';' : '';
             var cardBg = (isBoss && !dead)
-                ? 'linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.5)), url(' + md.image + ') center/cover no-repeat'
+                ? 'linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.35) 55%, rgba(0,0,0,0.75) 100%), url(' + md.image + ') center/cover no-repeat'
                 : 'var(--bg-card)';
             card.style.cssText = 'position:relative;background:' + cardBg + ';border:2px solid ' + cardBorder + ';border-radius:8px;padding:24px;text-align:center;min-width:280px;max-width:380px;min-height:320px;display:flex;flex-direction:column;justify-content:flex-end;' + cardGlow +
                 (dead ? 'opacity:0.4;filter:grayscale(0.5);' : '') + 'cursor:' + (isVictory || dead ? 'default' : 'pointer') + ';';
