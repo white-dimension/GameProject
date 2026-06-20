@@ -306,6 +306,7 @@ window.UISystem = (function () {
         document.addEventListener('keydown', function(e) {
             // ESC 关闭弹窗/遮罩
             if (e.key === 'Escape') {
+                var fp = document.getElementById('organ-picker-panel'); if (fp) { fp.remove(); return; }
                 if (_msgOverlay && _msgOverlay.style.display !== 'none') { _msgOverlay.style.display = 'none'; return; }
                 if (_modalOverlay.style.display !== 'none' && !_introActive) { if (_modalOverlay._returnToLab) { _modalOverlay._returnToLab = false; UISystem.showReorganizeModal(); } else { closeModal(); } return; }
             }
