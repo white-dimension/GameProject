@@ -1005,6 +1005,8 @@ window.CombatSystem = (function () {
         if (xpResult && xpResult.leveled) {
             rewardMsg += '  <span style="color:var(--accent-blue);font-weight:bold;">等阶提升至 ' + xpResult.newLevel + '！+1专精点</span>';
         }
+        // 同步进程到全局状态
+        GS().player.process = _battleState.playerProcess;
         _log(rewardMsg);
         window.UISystem.render();
 
