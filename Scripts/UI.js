@@ -1007,16 +1007,15 @@ window.UISystem = (function () {
                 }
                 if (isCounter) { dmg *= 1.5; ignoreDef = true; tag = " (弱点)"; }
 
-                // 2. 器官基础倍率
+                // 2. 器官基础倍率（仅对非连招槽; gland_core在步骤6单独处理）
                 var sData = gs.player[slot] || { tier: 1 };
                 var eqId = sData.equipped;
                 var boData = eqId ? (GD().BOSS_ORGANS || {})[eqId] : null;
                 var syncLvl = gs.inventory.organSyncLevels[eqId] || 1;
                 var tierFactor = 1 + (sData.tier - 1) * 0.1 * syncLvl;
-                // Boss器官的基础倍率
-                if (boData && boData.skillEffect && boData.skillEffect.baseMultiplier) {
+                if (slot !== 'gland_core' && boData && boData.skillEffect && boData.skillEffect.baseMultiplier) {
                     dmg *= boData.skillEffect.baseMultiplier * tierFactor;
-                } else {
+                } else if (slot !== 'gland_core') {
                     dmg *= tierFactor;
                 }
 
@@ -1033,9 +1032,10 @@ window.UISystem = (function () {
                 // 5. 特殊觉醒
                 if (slot === 'predatory_organ' && sData.equipped === '暴君核心' && syncLvl >= 3) ignoreDef = true;
 
-                // 6. 连招引爆
+                // 6. 连招引爆（gland_core 单独处理 tierFactor + 器官倍率）
                 var heal = 0;
                 if (slot === 'gland_core') {
+                    dmg *= tierFactor;
                     if (sData.equipped === '蜂后髓核') { dmg *= 3; heal = dmg; }
                     else if (sData.equipped === '高能电泳核') { dmg *= 2.0; ignoreDef = true; }
                     else if (mon.status['poison']) { dmg *= 3; heal = dmg; tag = " (爆发)"; }
