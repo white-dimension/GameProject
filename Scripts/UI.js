@@ -515,6 +515,8 @@ window.UISystem = (function () {
     }
 
     function _hudBarFill(val, max, fillClass) {
+        var R = window.TemplateEngine ? window.TemplateEngine.UIRenderers : null;
+        if (R) return '<div style="width:155px;">' + R.renderBar({current:val, max:max, width:155, fillClass:fillClass, animated:!_wakingUp}) + '</div>';
         var pct = Math.min(100, Math.max(0, val / max * 100));
         var startPct = _wakingUp ? '0' : pct;
         return '<div style="width:155px;"><div class="progress-container hp-bar"><div class="progress-fill ' + fillClass + '" style="width:' + startPct + '%;transition:width 1.2s ease-out;"></div></div></div>';
@@ -944,7 +946,7 @@ window.UISystem = (function () {
             if (bs.playerStatus["berserk"]) buffRow.innerHTML += R ? R.renderTag({icon:"icon-enrage",text:"狂暴",color:"var(--accent-purple)",bg:"rgba(206,147,216,0.15)",tooltip:"<b>狂暴</b>&#10;攻击力 +50%&#10;每回合扣除 1% 最大HP&#10;剩余 "+bs.playerStatus["berserk"]+" 回合"}) : "";
             if (bs.playerStatus["bleed"]) buffRow.innerHTML += R ? R.renderTag({icon:"icon-dripping-blade",text:"流血",color:"var(--accent-red)",bg:"rgba(255,107,122,0.15)",tooltip:"<b>流血</b>&#10;每回合扣除 4 HP&#10;剩余 "+bs.playerStatus["bleed"]+" 回合"}) : "";
             if (bs.shieldAmount > 0) buffRow.innerHTML += R ? R.renderTag({icon:"icon-energy-shield",text:""+bs.shieldAmount,color:"var(--accent-blue)",bg:"rgba(0,212,255,0.15)",tooltip:"<b>科技护盾</b>&#10;吸收 "+bs.shieldAmount+" 点伤害"}) : "";
-            if (p2.activeCoating) buffRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(255,213,79,0.12);border:1px solid var(--accent-yellow);border-radius:3px;color:var(--accent-yellow);" data-tip="<b>基因涂层</b>&#10;剩余 ' + (p2.coatingTurnsLeft||0) + ' 回合"><span class="icon icon-paintbrush"></span>涂层</span>';
+            if (p2.activeCoating) buffRow.innerHTML += R ? R.renderTag({icon:"icon-paintbrush",text:"涂层",color:"var(--accent-yellow)",bg:"rgba(255,213,79,0.12)",tooltip:"<b>基因涂层</b>&#10;剩余 "+(p2.coatingTurnsLeft||0)+" 回合"}) : "";
             if (p2.toxicity > 0) buffRow.innerHTML += R ? R.renderTag({icon:"icon-biohazard",text:""+p2.toxicity,color:"var(--accent-purple)",bg:"rgba(206,147,216,0.1)",tooltip:"<b>基因毒性</b>&#10;当前 "+p2.toxicity+"/"+(p2.toxicity_max||50)+"&#10;超过 50 时每回合扣血 2%"}) : "";
             // [修复] 增加“进程干扰”Debuff 的 UI 显示
             if (bs._processPenalty > 0) buffRow.innerHTML += R ? R.renderTag({icon:"icon-ram",text:"进程干扰 +"+bs._processPenalty,color:"var(--accent-blue)",bg:"rgba(0,212,255,0.15)",tooltip:"<b>进程干扰</b>&#10;下一次打出器官卡牌时，额外消耗 "+bs._processPenalty+" 点进程"}) : "";
@@ -955,23 +957,23 @@ window.UISystem = (function () {
                 var countered = {};
                 bs.playerRaces.forEach(function(r) { countered[counterTargets[r]] = true; });
                 var cNames = Object.keys(countered);
-                if (cNames.length > 0) passiveRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(255,213,79,0.12);border:1px solid rgba(255,213,79,0.3);border-radius:3px;color:var(--accent-yellow);" data-tip="<b>种族克制 +50%</b>&#10;对 ' + cNames.join('、') + ' 伤害 +50%，无视防御"><span class="icon icon-crossed-swords"></span> ' + cNames.map(function(n) { return '克' + n.slice(0,2); }).join(' ') + '</span>';
+                if (cNames.length > 0) passiveRow.innerHTML += R ? R.renderTag({icon:"icon-crossed-swords",text:cNames.map(function(n){return "克"+n.slice(0,2)}).join(" "),color:"var(--accent-yellow)",bg:"rgba(255,213,79,0.12)",tooltip:"<b>种族克制 +50%</b>&#10;对 "+cNames.join("、")+" 伤害 +50%，无视防御"}) : "";
             }
             // 专精特定被动说明
             var dc = GD().DUAL_CLASSES[bs.dualKey];
             if (dc) {
                 var dcClr = dc.color || 'var(--accent-yellow)';
-                passiveRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(255,255,255,0.03);border:1px solid ' + dcClr + ';border-radius:3px;color:' + dcClr + ';" data-tip="<b style=color:' + dcClr + '>' + dc.name + '：</b>&#10;<b>' + dc.passive + '</b>&#10;' + dc.passiveDesc + '"><span class="icon icon-dna"></span> ' + dc.passive + '</span>';
+                passiveRow.innerHTML += R ? R.renderTag({icon:"icon-dna",text:dc.passive,color:dcClr,bg:"rgba(255,255,255,0.03)",tooltip:"<b style=color:"+dcClr+">"+dc.name+"：</b>&#10;<b>"+dc.passive+"</b>&#10;"+dc.passiveDesc}) : "";
             }
 
             var cfx = bs.componentEffects;
             if (cfx) {
-                if (cfx.armorPen > 0) passiveRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.2);border-radius:3px;color:var(--accent-blue);" data-tip="<b>破甲</b>&#10;无视目标 ' + Math.round(cfx.armorPen*100) + '% 防御"><span class="icon icon-shield-crack"></span> ' + Math.round(cfx.armorPen*100) + '%破</span>';
-                if (cfx.toxinConv > 0) passiveRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(206,147,216,0.12);border:1px solid rgba(206,147,216,0.25);border-radius:3px;color:var(--accent-purple);" data-tip="<b>毒素转化</b>&#10;攻击伤害的 ' + Math.round(cfx.toxinConv*100) + '% 转为额外毒素伤害"><span class="icon icon-poison-gas"></span> ' + Math.round(cfx.toxinConv*100) + '%毒转</span>';
-                if (cfx.lifeDrainChance > 0) passiveRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.2);border-radius:3px;color:var(--accent-green);" data-tip="<b>吸血</b>&#10;毒素发作时 ' + Math.round(cfx.lifeDrainChance*100) + '% 概率吸取 ' + (cfx.lifeDrainAmt||0) + ' HP"><span class="icon icon-dripping-blade"></span> ' + Math.round(cfx.lifeDrainChance*100) + '%吸血</span>';
-                if (cfx.thornsPct > 0) passiveRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.2);border-radius:3px;color:var(--accent-blue);" data-tip="<b>电磁反伤</b>&#10;受到攻击时反弹 ' + Math.round(cfx.thornsPct*100) + '% 伤害"><span class="icon icon-lightning-arc"></span> ' + Math.round(cfx.thornsPct*100) + '%反伤</span>';
-                if (cfx.dotBonus > 0) passiveRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(206,147,216,0.12);border:1px solid rgba(206,147,216,0.25);border-radius:3px;color:var(--accent-purple);" data-tip="<b>DOT强化</b>&#10;每回合毒素伤害 +' + cfx.dotBonus + '"><span class="icon icon-poison-gas"></span>+ ' + cfx.dotBonus + '</span>';
-                if (cfx.bonusVsSwarm > 0) passiveRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(255,213,79,0.1);border:1px solid rgba(255,213,79,0.2);border-radius:3px;color:var(--accent-yellow);" data-tip="<b>对寄生增伤</b>&#10;对寄生群落种族伤害 +' + Math.round(cfx.bonusVsSwarm*100) + '%"><span class="icon icon-insect"></span> +' + Math.round(cfx.bonusVsSwarm*100) + '%</span>';
+                if (cfx.armorPen > 0) passiveRow.innerHTML += R ? R.renderTag({icon:"icon-shield-crack",text:Math.round(cfx.armorPen*100)+"%破",color:"var(--accent-blue)",bg:"rgba(0,212,255,0.1)",tooltip:"<b>破甲</b>&#10;无视目标 "+Math.round(cfx.armorPen*100)+"% 防御"}) : "";
+                if (cfx.toxinConv > 0) passiveRow.innerHTML += R ? R.renderTag({icon:"icon-poison-gas",text:Math.round(cfx.toxinConv*100)+"%毒转",color:"var(--accent-purple)",bg:"rgba(206,147,216,0.12)",tooltip:"<b>毒素转化</b>&#10;攻击伤害的 "+Math.round(cfx.toxinConv*100)+"% 转为额外毒素伤害"}) : "";
+                if (cfx.lifeDrainChance > 0) passiveRow.innerHTML += R ? R.renderTag({icon:"icon-dripping-blade",text:Math.round(cfx.lifeDrainChance*100)+"%吸血",color:"var(--accent-green)",bg:"rgba(0,255,136,0.1)",tooltip:"<b>吸血</b>&#10;毒素发作时 "+Math.round(cfx.lifeDrainChance*100)+"% 概率吸取 "+(cfx.lifeDrainAmt||0)+" HP"}) : "";
+                if (cfx.thornsPct > 0) passiveRow.innerHTML += R ? R.renderTag({icon:"icon-lightning-arc",text:Math.round(cfx.thornsPct*100)+"%反伤",color:"var(--accent-blue)",bg:"rgba(0,212,255,0.1)",tooltip:"<b>电磁反伤</b>&#10;受到攻击时反弹 "+Math.round(cfx.thornsPct*100)+"% 伤害"}) : "";
+                if (cfx.dotBonus > 0) passiveRow.innerHTML += R ? R.renderTag({icon:"icon-poison-gas",text:"+"+cfx.dotBonus,color:"var(--accent-purple)",bg:"rgba(206,147,216,0.12)",tooltip:"<b>DOT强化</b>&#10;每回合毒素伤害 +"+cfx.dotBonus}) : "";
+                if (cfx.bonusVsSwarm > 0) passiveRow.innerHTML += R ? R.renderTag({icon:"icon-insect",text:"+"+Math.round(cfx.bonusVsSwarm*100)+"%",color:"var(--accent-yellow)",bg:"rgba(255,213,79,0.1)",tooltip:"<b>对寄生增伤</b>&#10;对寄生群落种族伤害 +"+Math.round(cfx.bonusVsSwarm*100)+"%"}) : "";
             }
 
             if (buffRow.children.length > 0) statusContainer.appendChild(buffRow);
