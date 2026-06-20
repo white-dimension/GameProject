@@ -1996,7 +1996,7 @@ window.UISystem = (function () {
         box.appendChild(head);
         var body = _ce('div');
         body.style.cssText = 'padding:16px 24px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;max-height:50vh;';
-        body.innerHTML = '<div class="txt-xs txt-dim">选择 3 个组件（同种 → 升级版，不同 → 随机）</div>';
+        body.innerHTML = '<div class="txt-xs txt-dim">选择三个组件（同种 → 升级版，不同 → 随机）</div>';
         var selected = {};
         var selectCount = 0;
         var keys = []; Object.keys(inv).forEach(function(k) { if (inv[k] > 0) keys.push(k); });
@@ -2053,7 +2053,7 @@ window.UISystem = (function () {
             var chip = _ce('div');
             chip.style.cssText = 'padding:6px 12px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;cursor:pointer;font-size:13px;color:var(--text-main);';
             var renderChip = function() {
-              chip.innerHTML = '<span>' + k + '</span> <span class=\"txt-xs txt-dim\">×' + count + '</span>' + (selected[k] ? ' <span class=\"txt-xs txt-gold\">已选' + selected[k] + '</span>' : '') + (count >= 3 && selectCount === 0 ? ' <span class=\"txt-xs\" style=\"color:var(--accent-yellow);opacity:0.5;\">右键一键3连</span>' : '');
+              chip.innerHTML = '<span>' + k + '</span> <span class=\"txt-xs txt-dim\">×' + count + '</span>' + (selected[k] ? ' <span class=\"txt-xs txt-gold\">已选' + selected[k] + '</span>' : '') + (count >= 3 && selectCount === 0 ? ' <span class=\"txt-xs\" style=\"color:var(--accent-yellow);opacity:0.5;\">右键一键三连</span>' : '');
             };
             renderChip();
             chip.onclick = function() {
@@ -2834,7 +2834,7 @@ window.UISystem = (function () {
         var invRow = _ce('div');
         invRow.style.cssText = 'padding:15px 20px;background:rgba(255,213,79,0.03);border:1px solid rgba(255,213,79,0.15);border-radius:6px;';
         var totalCount = 0; Object.keys(inv).forEach(function(k) { totalCount += (inv[k] || 0); });
-        var synBtn = totalCount >= 3 ? '<button class="btn btn-gold btn-sm" style="padding:2px 10px;font-size:12px;" onclick="UISystem._showSynthesizeModal()">合成 3→1</button>' : '';
+        var synBtn = totalCount >= 3 ? '<button class="btn btn-gold btn-sm" style="padding:2px 10px;font-size:12px;" onclick="UISystem._showSynthesizeModal()">合成 三→一</button>' : '';
         var invHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><span class="txt-xs txt-gold txt-bold">> 组件库存（' + totalCount + '个）</span>' + synBtn + '</div><div style="display:flex;flex-wrap:wrap;gap:8px;">';
         var hasAny = false;
         Object.keys(inv).forEach(function(k) { if (inv[k] > 0) { hasAny = true; var tip = _buildCompTooltip(k); invHTML += '<span class="txt-xs txt-gold help-tip" style="padding:4px 10px;background:rgba(255,213,79,0.1);border:1px solid rgba(255,213,79,0.2);border-radius:4px;" data-tip="' + tip + '" data-cname="' + k + '">' + _fmtRoman(k) + ' ×' + inv[k] + '</span>'; } });
