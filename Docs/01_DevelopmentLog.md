@@ -5,9 +5,21 @@
 - **版本号统一升级至 3.0.0**：package.json / Data.js / Core.js 存档 meta
 - 全系统模板引擎 + 9 Boss器官 + AI怪物立绘 + 战斗预测审计
 
-### 图鉴布局修复 + HUD头部对齐
+### 性能优化 (P0-P4)
+- **P0 存档校验**: 20+ 关键字段防 NaN/非法值崩溃（HP/ATK/DEF/器官/专精/涂层）
+- **P1 图片预加载**: `_genFloorNodePool` 生成时预缓存怪物立绘，战斗秒开
+- **P1 公式预编译**: `evaluateFormula` 添加缓存层，同公式复用编译结果
+- **P2 局部刷新**: `render({hudOnly:true})` + `_refreshHUDValues` 直更 DOM
+- **P3 EventBus**: 最小化发布订阅，`playerStatsChanged` → UI 自动刷新
+- **P4 CSS 解耦规则**: UI_Guideline 新增第9章渐进式迁移规范
+
+### UI 修复与打磨
 - **showBestiaryModal**: 删除末尾重复的 `_modalOverlay.appendChild(box)`（DOM 移动语义导致 box 从 wrapper flex 容器中被抽走，左右布局崩溃）
 - **图鉴种族筛选按钮**: `width:100%` → 固定 `width:180px`，`display:inline-flex` → `display:flex`
+- **HUD头部**: `justify-content:space-between` → `flex-start` + `gap:15px`，轮回徽章 `flex-shrink:0`
+- **光标黑框**: `cursor:url(透明PNG)` → `cursor:none`，删除 main.js 冗余 JS 注入
+- **器官阶位显示**: `_renderOrganRow` 名称后追加 ⭐/MAX（实验室+档案共用）
+- **图鉴卡片布局**: 一行4列，180×240 卡片，内容区拓宽至 1050px
 - **HUD头部**: `justify-content:space-between` → `flex-start` + `gap:15px`，轮回徽章 `flex-shrink:0`
 
 ## v2.1.5 — 2026-06-20 🐛 图鉴布局修复 + HUD头部对齐（已合并至 v3.0.0）
