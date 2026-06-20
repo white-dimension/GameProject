@@ -751,14 +751,6 @@ window.UISystem = (function () {
                 (isTarget && !dead && !isVictory ? '<span style="color:var(--accent-red);margin-right:4px;">▸</span> ' : '') + mon.name + affixIcons +
                 ' <span style="font-weight:bold;font-size:0.85em;">· ' + (raceNames[md.race] || '') + '</span></div>';
 
-            // 技能/意图标签
-            if (mon.intent && !dead) {
-                var intentClrs2 = _INTENT_COLORS;
-                var iclr2 = intentClrs2[mon.intent.type] || 'var(--accent-red)';
-                var labelText = mon.intent.label.replace(/<[^>]*>/g, '').trim();
-                card.innerHTML += '<div class="txt-xs" style="margin-top:4px;color:' + iclr2 + ';">' + labelText + '</div>';
-            }
-
             if (dead) {
                 card.innerHTML += '<div class="txt-xs txt-dim" style="margin-top:6px;">已融毁</div>';
             }
@@ -774,7 +766,15 @@ window.UISystem = (function () {
             var rl = (gs.bestiary && gs.bestiary.researchLevels) ? (gs.bestiary.researchLevels[mon.id] || 0) : 0;
             var hpText = (rl >= 1) ? (mon.hp + ' / ' + mon.hpMax) : (Math.ceil(hpPct) + '%');
 
-            card.innerHTML += '<div style="margin-top:auto;width:100%;">' +
+            // 技能标签（靠下，贴近血条）
+            var skillLabel = '';
+            if (mon.intent && !dead) {
+                var iclr2 = (_INTENT_COLORS[mon.intent.type] || 'var(--accent-red)');
+                var labelText = mon.intent.label.replace(/<[^>]*>/g, '').trim();
+                skillLabel = '<div class="txt-xs" style="margin-bottom:6px;color:' + iclr2 + ';">' + labelText + '</div>';
+            }
+
+            card.innerHTML += '<div style="margin-top:auto;width:100%;">' + skillLabel +
                 '<div class="progress-container monster-bar" style="max-width:200px;width:100%;margin:8px auto 0;border:1px solid #442222;">' +
                 '<div class="progress-fill ' + hpBarClass + '" style="width:' + hpPct + '%;"></div></div>' +
                 '<div class="txt-xs txt-dim" style="margin-top:4px;">' + hpText + '</div></div>';
