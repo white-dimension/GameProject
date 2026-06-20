@@ -751,13 +751,6 @@ window.UISystem = (function () {
                 (isTarget && !dead && !isVictory ? '<span style="color:var(--accent-red);margin-right:4px;">▸</span> ' : '') + mon.name + affixIcons +
                 ' <span style="opacity:0.5;font-weight:normal;font-size:0.8em;">· ' + (raceNames[md.race] || '') + '</span></div>';
 
-            // 所有怪物显示简版意图标签
-            if (mon.intent && !dead) {
-                var intentClrs2 = _INTENT_COLORS;
-                var iclr2 = intentClrs2[mon.intent.type] || 'var(--accent-red)';
-                var labelText = mon.intent.label.replace(/<[^>]*>/g, '').trim();
-                card.innerHTML += '<div class="txt-xs" style="margin-top:6px;color:' + iclr2 + ';">' + labelText + '</div>';
-            }
             if (dead) {
                 card.innerHTML += '<div class="txt-xs txt-dim" style="margin-top:6px;">已融毁</div>';
             }
