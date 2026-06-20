@@ -39,7 +39,7 @@ window.GameConfig = (function () {
     // 3. 等级/经验
     // =========================================================================
     var LEVEL_CAP = 30;
-    function xpForLevel(lv) { return Math.ceil(30 * Math.pow(1.6, lv - 1)); }
+    function xpForLevel(lv) { if (lv >= LEVEL_CAP) return 0; return Math.ceil(30 * Math.pow(1.6, lv - 1)); }
 
     // =========================================================================
     // 4. 基因研究价格

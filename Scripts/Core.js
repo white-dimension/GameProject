@@ -351,10 +351,7 @@ window.GameState = (function () {
         return affixes;
     }
 
-    function xpForLevel(level) {
-        if (level >= 30) return 0; // [优化] 等级上限根据用户需求提升至 30
-        return Math.ceil(30 * Math.pow(1.6, level - 1));
-    }
+    function xpForLevel(level) { return CFG().xpForLevel(level); }
 
     function gainXp(amount) {
         var gs = getState(); if (!gs) return null; var p = gs.player;
@@ -573,22 +570,8 @@ window.GameState = (function () {
     }
 
     function getState() { return window._activeGameState; }
-    function getMapLevelScaling(gs) {
-        var ml = (gs.mapState.mapLevel || 1) - 1;
-        var loop = gs.mapState.loop || 1;
-        // [优化] 基础倍率随楼层增长，且二周目怪物强度大幅提升
-        var loopMult = 1 + (loop - 1) * 0.3; // 每多一周目，基础属性提升 30%
-
-        if (ml <= 0 && loop === 1) return { hpMul: 1, atkMul: 1, defMul: 1, bpMul: 1, xpMul: 1 };
-        return {
-            hpMul: (1 + ml * 0.08) * loopMult,
-            atkMul: (1 + ml * 0.06) * loopMult,
-            defMul: (1 + ml * 0.05) * loopMult,
-            bpMul: (1 + ml * 0.20) * (1 + (loop-1)*0.2),
-            xpMul: (1 + ml * 0.15)
-        };
-    }
-    function calcDamageReduction(def) { return def / (def + 40); }
+    function getMapLevelScaling(gs) { return CFG().getMapLevelScaling(gs); }
+    function calcDamageReduction(def) { return CFG().calcDamageReduction(def); }
     function exportSaveText() {
         var state = getState(); if (!state) return '';
         try {
