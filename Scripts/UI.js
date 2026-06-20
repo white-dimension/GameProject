@@ -1567,13 +1567,17 @@ window.UISystem = (function () {
                 if (known && m.image) {
                     imgLayer = '<div style="position:absolute;inset:0;background:url(' + m.image + ') center/cover no-repeat;filter:brightness(0.5);z-index:0;"></div>';
                 }
+                var cardTip = known ? '<b style=color:' + rclr + '>' + m.name + '</b>&#10;' +
+                    'HP: ' + m.hp + ' | ATK: ' + m.atk + ' | DEF: ' + m.def + (m.physicalResist ? '&#10;物理抗性: ' + Math.round(m.physicalResist*100) + '%' : '') + (m.shieldPerTurn ? '&#10;每回合护盾: ' + m.shieldPerTurn : '') + (m.bleedImmune ? '&#10;流血免疫' : '') + (m.dodgeChance ? '&#10;闪避率: ' + Math.round(m.dodgeChance*100) + '%' : '') + (m.drugResist ? '&#10;耐药性: ' + Math.round(m.drugResist*100) + '%' : '') + (m.recoilDamage ? '&#10;反噬伤害: ' + m.recoilDamage : '') +
+                    '&#10;&#10;<b>弱点:</b> ' + (m.weakness || '无特殊弱点') : '';
+                item.className = known ? 'help-tip' : '';
+                if (known) item.setAttribute('data-tip', cardTip);
                 item.innerHTML = imgLayer +
                     '<div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.92) 0%,rgba(0,0,0,0.3) 55%,rgba(0,0,0,0.4) 100%);z-index:1;"></div>' +
                     '<div style="position:relative;z-index:2;display:flex;flex-direction:column;justify-content:flex-end;height:100%;padding:10px;">' +
                         (known ? '<div style="margin-bottom:3px;">' + tierBadge + '</div>' : '') +
                         '<div class="txt-sm txt-bold" style="color:' + (known ? rclr : 'var(--text-disabled)') + ';margin-bottom:2px;line-height:1.2;">' + (known ? m.name : '???') + '</div>' +
                         '<div class="txt-xs txt-dim" style="margin-bottom:3px;">' + (known ? '击杀:' + kc : '未遭遇') + '</div>' +
-                        (known ? '<div class="txt-xs txt-dim" style="margin-bottom:4px;line-height:1.3;">HP ' + m.hp + ' / ATK ' + m.atk + ' / DEF ' + m.def + '</div>' : '') +
                         researchRow +
                     '</div>';
 
