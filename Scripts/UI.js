@@ -1765,6 +1765,14 @@ window.UISystem = (function () {
         var el = document.getElementById(id); if (!el) return;
         el.style.transform = 'translateX(10px)'; setTimeout(function(){ el.style.transform = 'translateX(-10px)'; }, 50); setTimeout(function(){ el.style.transform = 'translateX(5px)'; }, 100); setTimeout(function(){ el.style.transform = 'translateX(0)'; }, 150);
     }
+    var _cardShaking = {};
+    function shakeMonsterCard(idx) {
+        var card = document.querySelector('.monster-card[data-monster-idx=\"' + idx + '\"]');
+        if (!card || _cardShaking[idx]) return;
+        _cardShaking[idx] = true;
+        card.classList.add('card-shake');
+        setTimeout(function() { card.classList.remove('card-shake'); _cardShaking[idx] = false; }, 360);
+    }
 
     function showDamageFloat(val, color, targetId) {
         var el = _ce('div', 'damage-float'); el.style.cssText = 'position:fixed;font-weight:bold;font-size:28px;color:' + color + ';z-index:4000;pointer-events:none;transition:all 0.8s ease-out;text-shadow:0 0 8px rgba(0,0,0,0.8);'; el.innerHTML = val;
@@ -2916,6 +2924,6 @@ window.UISystem = (function () {
         }, 20);
     }
 
-    return { init: init, render: render, _foldSection: _foldSection, showStatusModal: showStatusModal, showReorganizeModal: showReorganizeModal, showBestiaryModal: showBestiaryModal, showDungeonWarning: showDungeonWarning, showSaveModal: showSaveModal, closeModal: closeModal, closeIntro: closeIntro, resetGame: resetGame, triggerShake: triggerShake, showDamageFloat: showDamageFloat, showNotification: showNotification, showHelpPanel: showHelpPanel, toggleSound: toggleSound, _claimReward: _claimReward, _claimAllTasks: _claimAllTasks, _showSynthesizeModal: _showSynthesizeModal, _showSocketPicker: _showSocketPicker, _showOrganPicker: _showOrganPicker, _showOrganUpgradePicker: _showOrganUpgradePicker, _showComponentSelectModal: _showComponentSelectModal, showEventModal: showEventModal };
+    return { init: init, render: render, _foldSection: _foldSection, showStatusModal: showStatusModal, showReorganizeModal: showReorganizeModal, showBestiaryModal: showBestiaryModal, showDungeonWarning: showDungeonWarning, showSaveModal: showSaveModal, closeModal: closeModal, closeIntro: closeIntro, resetGame: resetGame, triggerShake: triggerShake, shakeMonsterCard: shakeMonsterCard, showDamageFloat: showDamageFloat, showNotification: showNotification, showHelpPanel: showHelpPanel, toggleSound: toggleSound, _claimReward: _claimReward, _claimAllTasks: _claimAllTasks, _showSynthesizeModal: _showSynthesizeModal, _showSocketPicker: _showSocketPicker, _showOrganPicker: _showOrganPicker, _showOrganUpgradePicker: _showOrganUpgradePicker, _showComponentSelectModal: _showComponentSelectModal, showEventModal: showEventModal };
 }
 )();

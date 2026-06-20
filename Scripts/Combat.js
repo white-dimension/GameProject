@@ -513,6 +513,7 @@ window.CombatSystem = (function () {
         }
         _log('<span style="color:var(--accent-red)">>> 发起攻击：造成 ' + damage + breakdown + ' 点伤害。</span>');
         window.UISystem.showDamageFloat('-' + damage, 'var(--accent-red)', 'monster');
+        window.UISystem.shakeMonsterCard(_battleState.currentTarget);
         if (curMon.hp <= 0) {
             selectTarget(0);
             _log('<span style="color:var(--accent-red)">' + curMon.name + ' 已融毁。</span>');
