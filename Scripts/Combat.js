@@ -179,6 +179,9 @@ window.CombatSystem = (function () {
 
         // --- 2. 技能逻辑 ---
         var baseCost = (slot === 'predatory_organ' ? 2 : 3);
+        // Boss器官可能修改技能消耗
+        var eqOrg = GD().BOSS_ORGANS && GD().BOSS_ORGANS[gs.player[slot].equipped];
+        if (eqOrg && eqOrg.skillCost) baseCost = eqOrg.skillCost;
         if (_battleState.dungeonEnv && _battleState.dungeonEnv.effect.ramPenalty) {
             baseCost += _battleState.dungeonEnv.effect.ramPenalty;
         }
