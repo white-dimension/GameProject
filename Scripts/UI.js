@@ -231,7 +231,7 @@ window.UISystem = (function () {
 
         var actionBar = _ce('div', 'action-bar');
         actionBar.id = 'ui-action-bar';
-        actionBar.style.cssText = 'position:relative;min-height:60px;padding:8px 25px;background:rgba(5,5,8,0.75);border-top:1px solid var(--border-dim);box-shadow: 0 -4px 20px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;gap:20px;z-index:500;';
+        actionBar.style.cssText = 'position:relative;width:100%;min-height:60px;padding:8px 25px;background:rgba(5,5,8,0.75);border-top:1px solid var(--border-dim);box-shadow:0 -4px 20px rgba(0,0,0,0.5);display:flex;flex-direction:row;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;z-index:500;';
         _root.appendChild(actionBar);
 
         _modalOverlay = _ce('div', 'modal-overlay');
