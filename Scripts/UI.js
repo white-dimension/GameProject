@@ -1256,39 +1256,51 @@ window.UISystem = (function () {
         var raceClrs = { mutant: '#ff6b4a', swarm: '#9acd32', ember: '#4ab8ff' };
         var _filterRace = 'all';
 
-        // 种族筛选标签栏
+        // 种族筛选标签栏（遵循设计规范按钮样式）
         var _tabBar = _ce('div');
         _tabBar.style.cssText = 'display:flex;gap:8px;padding:0 0 12px 0;border-bottom:1px solid var(--border-dim);';
-        var _updateTabs = function() {
-            _tabBar.innerHTML = '';
-            var tabs = [{ r: 'all', l: '全部', c: 'var(--text-main)' },
-                        { r: 'mutant', l: '异变者', c: raceClrs.mutant },
-                        { r: 'swarm', l: '寄生群落', c: raceClrs.swarm },
-                        { r: 'ember', l: '机械余烬', c: raceClrs.ember }];
-            tabs.forEach(function(t) {
-                var tb = _ce('div');
-                var isActive = _filterRace === t.r;
-                tb.style.cssText = 'padding:5px 14px;border-radius:15px;cursor:pointer;font-size:13px;' +
-                    (isActive ? 'background:' + t.c + ';color:#000;font-weight:bold;' : 'background:var(--bg-card);color:' + t.c + ';border:1px solid ' + t.c + ';');
-                tb.textContent = t.l;
-                tb.onclick = function() { _filterRace = t.r; _updateTabs(); _renderBestiaryItems(); };
-                _tabBar.appendChild(tb);
-            });
-        };
-        _updateTabs();
+        var _tabBtns = {};
+        var tabs = [{ r: 'all', l: '全部', cls: 'btn-blue' },
+                    { r: 'mutant', l: '异变者', cls: 'btn-red' },
+                    { r: 'swarm', l: '寄生群落', cls: 'btn-green' },
+                    { r: 'ember', l: '机械余烬', cls: 'btn-blue' }];
+        tabs.forEach(function(t) {
+            var tb = _ce('button', 'btn btn-sm ' + t.cls);
+            tb.style.cssText = 'padding:4px 12px;font-size:13px;';
+            tb.textContent = t.l;
+            tb.onclick = function() { _filterRace = t.r; _filterDisplay(); };
+            _tabBtns[t.r] = tb;
+            _tabBar.appendChild(tb);
+        });
         body.appendChild(_tabBar);
 
         var _bestiaryWrap = _ce('div');
         body.appendChild(_bestiaryWrap);
 
-        var _renderBestiaryItems = function() {
-            _bestiaryWrap.innerHTML = '';
-            ['mutant','swarm','ember'].forEach(function(race) {
-            if (_filterRace !== 'all' && _filterRace !== race) return;
+        var _filterDisplay = function() {
+            // 更新按钮激活态
+            tabs.forEach(function(t) {
+                _tabBtns[t.r].style.opacity = (_filterRace === t.r) ? '1' : '0.5';
+                _tabBtns[t.r].style.filter = (_filterRace === t.r) ? 'brightness(1.2)' : 'brightness(1)';
+            });
+            // 切换显示
+            var races = ['mutant','swarm','ember'];
+            races.forEach(function(race) {
+                var els = _bestiaryWrap.querySelectorAll('[data-bestiary-race=\"' + race + '\"]');
+                for (var ei = 0; ei < els.length; ei++) {
+                    els[ei].style.display = (_filterRace === 'all' || _filterRace === race) ? '' : 'none';
+                }
+            });
+        };
+
+        ['mutant','swarm','ember'].forEach(function(race) {
             var raceHeaderClrs = { mutant: '#ff6b4a', swarm: '#9acd32', ember: '#4ab8ff' };
-            _bestiaryWrap.innerHTML += '<div class="txt-sm txt-bold" style="margin-top:8px;color:' + (raceHeaderClrs[race] || '#ffd54f') + ';"><span class="icon ' + raceIcons[race] + '"></span> ' + raceNames[race] + '</div>';
-            var raceHeaderClrs = { mutant: '#ff6b4a', swarm: '#9acd32', ember: '#4ab8ff' };
-            body.innerHTML += '<div class="txt-sm txt-bold" style="margin-top:8px;color:' + (raceHeaderClrs[race] || '#ffd54f') + ';"><span class="icon ' + raceIcons[race] + '"></span> ' + raceNames[race] + '</div>';
+            var headerDiv = _ce('div');
+            headerDiv.setAttribute('data-bestiary-race', race);
+            headerDiv.className = 'txt-sm txt-bold';
+            headerDiv.style.cssText = 'margin-top:8px;color:' + (raceHeaderClrs[race] || '#ffd54f') + ';';
+            headerDiv.innerHTML = '<span class="icon ' + raceIcons[race] + '"></span> ' + raceNames[race];
+            _bestiaryWrap.appendChild(headerDiv);
 
             Object.keys(allMonsters).forEach(function(id) {
                 var m = allMonsters[id];
@@ -1301,6 +1313,7 @@ window.UISystem = (function () {
                 var bgClr = known ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.01)';
 
                 var item = _ce('div');
+                item.setAttribute('data-bestiary-race', race);
                 item.style.cssText = 'padding:15px 18px;background:' + bgClr + ';border-radius:4px;border-left:3px solid ' + (known ? rclr : '#333') + ';display:flex;flex-direction:column;gap:10px;';
 
                 var topRow = '<div style="display:flex;justify-content:space-between;align-items:center;">' +
@@ -1330,8 +1343,6 @@ window.UISystem = (function () {
                 _bestiaryWrap.appendChild(item);
             });
         });
-        };
-        _renderBestiaryItems();
         box.appendChild(body);
         _modalOverlay.appendChild(box);
     }
