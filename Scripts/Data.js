@@ -37,6 +37,7 @@ window.GameData = (function () {
             hp: 30,
             atk: 8,
             def: 2,
+            bleedImmune: true,
             intents: [
                 { type: 'physical', label: '<span class="icon icon-sword-clash"></span> 物理撕裂', value: 8, desc: '造成 8 点物理撕裂' }
             ],
@@ -55,6 +56,7 @@ window.GameData = (function () {
             hp: 55,
             atk: 12,
             def: 4,
+            bleedImmune: true,
             intents: [
                 { type: 'physical', label: '<span class="icon icon-dripping-blade"></span> 物理+流血', value: 12, desc: '造成 12 点物理伤害并施加 3 回合流血', bleed: { duration: 3, damage: 4 } }
             ],
@@ -73,6 +75,7 @@ window.GameData = (function () {
             hp: 90,
             atk: 24,
             def: 8,
+            bleedImmune: true,
             intents: [
                 { type: 'charge', label: '<span class="icon icon-flanged-mace"></span> 蓄力横扫', value: 24, desc: '蓄力横扫，下回合造成 24 点物理重砸', chargeTurns: 1 }
             ],
@@ -91,6 +94,7 @@ window.GameData = (function () {
             hp: 140,
             atk: 16,
             def: 20,
+            bleedImmune: true,
             intents: [
                 { type: 'shield', label: '<span class="icon icon-energy-shield"></span> 生物硬壳护盾', value: 20, desc: '自身获得 20 点生物硬壳护盾' }
             ],
@@ -109,6 +113,7 @@ window.GameData = (function () {
             hp: 400,
             atk: 45,
             def: 30,
+            bleedImmune: true,
             physicalResist: 0.5,
             intents: [
                 { type: 'physical', label: '<span class="icon icon-sword-clash"></span> 物理重击', value: 45, desc: '造成 45 点物理伤害' },
@@ -264,6 +269,7 @@ window.GameData = (function () {
             hp: 45,
             atk: 14,
             def: 3,
+            bleedImmune: true,
             intents: [
                 { type: 'physical', label: '<span class="icon icon-sword-clash"></span> 多重撕裂', value: 14, desc: '造成 14 点物理撕裂伤害' }
             ],
@@ -426,6 +432,7 @@ window.GameData = (function () {
             image: '../Assets/Monsters/骨骼增生体.png',
             race: RACE.MUTANT, tier: 'common', level: 3,
             hp: 60, atk: 10, def: 8,
+            bleedImmune: true,
             intents: [
                 { type: 'shield', label: '<span class="icon icon-magic-shield"></span> 骨甲再生', value: 8, desc: '增生骨板，获得 8 点额外防御' }
             ],
@@ -481,6 +488,7 @@ window.GameData = (function () {
             image: '../Assets/Monsters/毒雾巨兽.png',
             race: RACE.MUTANT, tier: 'elite', level: 7,
             hp: 180, atk: 22, def: 12,
+            bleedImmune: true,
             intents: [
                 { type: 'physical', label: '<span class="icon icon-fanged-skull"></span> 剧毒撕咬', value: 22, desc: '注入高浓度毒液，造成 22 点伤害 + 3 回合猛毒', poison: { duration: 3, damage: 6 } },
                 { type: 'physical', label: '<span class="icon icon-hazard-sign"></span> 毒雾喷吐', value: 14, desc: '全场 AOE，对所有目标造成 14 点毒素伤害', aoe: true }
