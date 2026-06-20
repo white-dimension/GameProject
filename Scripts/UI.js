@@ -1976,6 +1976,9 @@ window.UISystem = (function () {
         _introActive = true;
         _hideBgVideo(_bgVideo);
         _hideBgVideo(_bgBattleVideo);
+        // 显示标题视频第一帧作为背景
+        _bgTitleVideo.currentTime = 0;
+        _bgTitleVideo.style.display = 'block';
         _root.className = '';
         // 隐藏界面元素
         var logWrap = document.querySelector('.log-wrap'); if (logWrap) logWrap.style.display = 'none';
