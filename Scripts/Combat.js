@@ -170,7 +170,7 @@ window.CombatSystem = (function () {
             if (potTpl && potTpl.effect) { potTpl.effect(_battleState, p, decayFactor, _getMonster, _getMonsterData, _log);
                 if (pot.id === 'POT_HEAL') { _log('<span style="color:var(--accent-green)">凝血再生！防御暂时下降。</span>'); window.UISystem.showDamageFloat('+' + Math.ceil(p.hp_max * 0.4 * decayFactor), 'var(--accent-green)', 'player'); }
                 else if (pot.id === 'POT_DEFENSE') { _log('<span style="color:var(--accent-blue)">表皮硬化！防御提升，攻击下降。</span>'); }
-                else if (pot.id === 'POT_RAM') { _log('<span style="color:var(--accent-green)">进程回复 5 点，毒性 +10。</span>'); }
+                else if (pot.id === 'POT_RAM') { _log('<span style="color:var(--accent-green)">进程回复 8 点，毒性 +5。</span>'); }
             }
 
             window.UISystem.render();
@@ -246,7 +246,7 @@ window.CombatSystem = (function () {
         var coatingMultiplier = 1, coatingIgnoreDef = false, coatingShieldStrip = 0;
         if (p.activeCoating === 'COAT_ANTI_MUTANT' && m && m.race === 'mutant') { coatingMultiplier = 1.5; coatingIgnoreDef = true; }
         else if (p.activeCoating === 'COAT_ANTI_SWARM' && m && m.race === 'swarm') { coatingMultiplier = 1.6; }
-        else if (p.activeCoating === 'COAT_ANTI_EMBER' && m && m.race === 'ember') { coatingMultiplier = 1.3; coatingShieldStrip = 50; }
+        else if (p.activeCoating === 'COAT_ANTI_EMBER' && m && m.race === 'ember') { coatingMultiplier = 1.3; coatingShieldStrip = 100; }
         var organMultiplier = 1, organIgnoreDef = false;
         if (sData.equipped === '暴君核心') { organMultiplier = 2.5; organIgnoreDef = true; }
         else if (sData.equipped === '蜂后毒牙') { organMultiplier = 1.5; }
