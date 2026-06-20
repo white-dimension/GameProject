@@ -2438,6 +2438,8 @@ window.UISystem = (function () {
     }
     function _showSynthesizeModal() {
         var gs = GS(); if (!gs) return;
+        // 移除已有合成面板防重复
+        var oldPanel = document.getElementById('sub-panel-picker'); if (oldPanel) oldPanel.remove();
         var inv = gs.inventory.components;
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         var box = _ce('div');
@@ -2596,6 +2598,7 @@ window.UISystem = (function () {
 
     function _showSocketPicker(slot, socketIndex) {
         var gs = GS(); if (!gs) return;
+        var oldPanel = document.getElementById('sub-panel-picker'); if (oldPanel) oldPanel.remove();
         _modalOverlay._returnToLab = true;
         var inv = gs.inventory.components;
         var comps = GD().COMPONENTS || {};
@@ -2657,6 +2660,7 @@ window.UISystem = (function () {
 
     function _showOrganUpgradePicker(slot) {
         var gs = GS(); if (!gs || !gs.player[slot]) return;
+        var oldPanel = document.getElementById('sub-panel-picker'); if (oldPanel) oldPanel.remove();
         var d = gs.player[slot];
         var cost = Math.ceil(5 * Math.pow(1.6, d.tier));
         var inv = gs.inventory.components;
@@ -2729,6 +2733,7 @@ window.UISystem = (function () {
     // 通用组件选择弹窗（魔药炼制/涂层涂抹共用）
     var _showComponentSelectModal = function(title, count, onConfirm, costMap) {
         var gs = GS(); if (!gs) return;
+        var oldPanel = document.getElementById('sub-panel-picker'); if (oldPanel) oldPanel.remove();
         var inv = gs.inventory.components;
         // costMap: 限定可选材料，如{'变异组织':2} 只显示变异组织
         document.querySelectorAll('.help-popup').forEach(function(el){ el.remove(); });
@@ -2791,6 +2796,7 @@ window.UISystem = (function () {
 
     function _showOrganPicker(slot) {
         var gs = GS(); if (!gs) return;
+        var oldPanel = document.getElementById('organ-picker-panel'); if (oldPanel) oldPanel.remove();
         _modalOverlay._returnToLab = true;
         var organs = gs.inventory.organs || [];
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
