@@ -1981,6 +1981,9 @@ window.UISystem = (function () {
         _bgTitleVideo.style.display = 'block';
         _root.className = '';
         // 隐藏界面元素
+        var hud = document.querySelector('.hud-top'); if (hud) hud.style.display = 'none';
+        var actionBar = document.getElementById('ui-action-bar'); if (actionBar) actionBar.style.display = 'none';
+        var leftCol = document.querySelector('.left-panel-col'); if (leftCol) leftCol.style.display = 'none';
         var logWrap = document.querySelector('.log-wrap'); if (logWrap) logWrap.style.display = 'none';
         var taskPanel = document.getElementById('ui-task-panel'); if (taskPanel) taskPanel.style.display = 'none';
         var roomInfo = document.getElementById('ui-room-info'); if (roomInfo) roomInfo.style.display = 'none';
@@ -2062,6 +2065,9 @@ window.UISystem = (function () {
         _showBgVideo(_bgVideo);
         _root.className = '';
         // 恢复界面元素
+        var hud2 = document.querySelector('.hud-top'); if (hud2) hud2.style.display = '';
+        var actionBar2 = document.getElementById('ui-action-bar'); if (actionBar2) actionBar2.style.display = '';
+        var leftCol2 = document.querySelector('.left-panel-col'); if (leftCol2) leftCol2.style.display = '';
         var logWrap2 = document.querySelector('.log-wrap'); if (logWrap2) logWrap2.style.display = '';
         var taskPanel2 = document.getElementById('ui-task-panel'); if (taskPanel2) taskPanel2.style.display = '';
         var roomInfo2 = document.getElementById('ui-room-info'); if (roomInfo2) roomInfo2.style.display = '';
