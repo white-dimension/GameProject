@@ -1253,8 +1253,40 @@ window.UISystem = (function () {
         var tierNames = { common: '普通', elite: '精英', world_boss: '世界首领' };
         var raceNames = _RACE_NAMES;
         var raceIcons = { mutant: 'icon-mutant', swarm: 'icon-swarm', ember: 'icon-ember' };
+        var raceClrs = { mutant: '#ff6b4a', swarm: '#9acd32', ember: '#4ab8ff' };
+        var _filterRace = 'all';
 
-        ['mutant','swarm','ember'].forEach(function(race) {
+        // 种族筛选标签栏
+        var _tabBar = _ce('div');
+        _tabBar.style.cssText = 'display:flex;gap:8px;padding:0 0 12px 0;border-bottom:1px solid var(--border-dim);';
+        var _updateTabs = function() {
+            _tabBar.innerHTML = '';
+            var tabs = [{ r: 'all', l: '全部', c: 'var(--text-main)' },
+                        { r: 'mutant', l: '异变者', c: raceClrs.mutant },
+                        { r: 'swarm', l: '寄生群落', c: raceClrs.swarm },
+                        { r: 'ember', l: '机械余烬', c: raceClrs.ember }];
+            tabs.forEach(function(t) {
+                var tb = _ce('div');
+                var isActive = _filterRace === t.r;
+                tb.style.cssText = 'padding:5px 14px;border-radius:15px;cursor:pointer;font-size:13px;' +
+                    (isActive ? 'background:' + t.c + ';color:#000;font-weight:bold;' : 'background:var(--bg-card);color:' + t.c + ';border:1px solid ' + t.c + ';');
+                tb.textContent = t.l;
+                tb.onclick = function() { _filterRace = t.r; _updateTabs(); _renderBestiaryItems(); };
+                _tabBar.appendChild(tb);
+            });
+        };
+        _updateTabs();
+        body.appendChild(_tabBar);
+
+        var _bestiaryWrap = _ce('div');
+        body.appendChild(_bestiaryWrap);
+
+        var _renderBestiaryItems = function() {
+            _bestiaryWrap.innerHTML = '';
+            ['mutant','swarm','ember'].forEach(function(race) {
+            if (_filterRace !== 'all' && _filterRace !== race) return;
+            var raceHeaderClrs = { mutant: '#ff6b4a', swarm: '#9acd32', ember: '#4ab8ff' };
+            _bestiaryWrap.innerHTML += '<div class="txt-sm txt-bold" style="margin-top:8px;color:' + (raceHeaderClrs[race] || '#ffd54f') + ';"><span class="icon ' + raceIcons[race] + '"></span> ' + raceNames[race] + '</div>';
             var raceHeaderClrs = { mutant: '#ff6b4a', swarm: '#9acd32', ember: '#4ab8ff' };
             body.innerHTML += '<div class="txt-sm txt-bold" style="margin-top:8px;color:' + (raceHeaderClrs[race] || '#ffd54f') + ';"><span class="icon ' + raceIcons[race] + '"></span> ' + raceNames[race] + '</div>';
 
@@ -1295,9 +1327,11 @@ window.UISystem = (function () {
                     (known ? '<div class="txt-xs txt-dim">生命:' + m.hp + ' 攻击:' + m.atk + ' 防御:' + m.def + ' | 击杀: ' + kc + ' | ' + m.weakness + '</div>' : '') +
                     researchRow;
 
-                body.appendChild(item);
+                _bestiaryWrap.appendChild(item);
             });
         });
+        };
+        _renderBestiaryItems();
         box.appendChild(body);
         _modalOverlay.appendChild(box);
     }
