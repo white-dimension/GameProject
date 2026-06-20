@@ -3,8 +3,15 @@
   "version": "1.0.0",
   "description": "Black Horizon: Progenitor Awakening",
   "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "package": "electron-packager . BlackHorizon --platform=win32 --arch=x64 --out=release --overwrite --icon=Launcher/game_icon.ico"
+  },
   "author": "GameProject",
   "dependencies": {
     "electron": "^25.0.0"
+  },
+  "devDependencies": {
+    "electron-packager": "^17.1.1"
   }
 }
