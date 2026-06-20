@@ -2498,9 +2498,10 @@ window.UISystem = (function () {
     }
 
     // 通用组件选择弹窗（魔药炼制/涂层涂抹共用）
-    var _showComponentSelectModal = function(title, count, onConfirm) {
+    var _showComponentSelectModal = function(title, count, onConfirm, costMap) {
         var gs = GS(); if (!gs) return;
         var inv = gs.inventory.components;
+        // costMap: 限定可选材料，如{'变异组织':2} 只显示变异组织
         document.querySelectorAll('.help-popup').forEach(function(el){ el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
         _modalOverlay._returnToLab = true;
@@ -2524,7 +2525,7 @@ window.UISystem = (function () {
 
         var chipRow = _ce('div');
         chipRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;';
-        var items = []; Object.keys(inv).forEach(function(k) { if (inv[k] > 0) items.push({ id: k, count: inv[k] }); });
+        var items = []; Object.keys(inv).forEach(function(k) { if (inv[k] > 0 && (!costMap || costMap[k])) items.push({ id: k, count: inv[k] }); });
         items.sort(function(a,b){ return a.id.localeCompare(b.id); });
         items.forEach(function(item) {
             var chip = _ce('div');
@@ -2960,7 +2961,9 @@ window.UISystem = (function () {
             var ac = coatings[gs.player.activeCoating];
             coatHTML += '<div class="txt-xs" style="margin-bottom:8px;color:' + (ac ? (raceClrs2[ac.targetRace]||{}).hex || 'var(--accent-yellow)' : 'var(--text-dim)') + ';">已涂抹: ' + (ac ? ac.name : gs.player.activeCoating) + ' · 剩余 ' + gs.player.coatingTurnsLeft + ' 回合</div>';
         }
-        coatHTML += '<div style="display:flex;flex-wrap:wrap;gap:8px;">';
+        coatSection.innerHTML = coatHTML;
+        var coatBtnRow = _ce('div');
+        coatBtnRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;';
         var hasCoatings = false;
         Object.keys(coatings).forEach(function(coatId) {
             var ct = coatings[coatId];
@@ -2975,12 +2978,17 @@ window.UISystem = (function () {
             if (ct.effect.shieldStrip) effectParts.push('剥离' + ct.effect.shieldStrip + '护盾');
             var tip = '<b>' + ct.name + '</b>&#10;目标种族：' + (raceNames2[ct.targetRace]||ct.targetRace) + '&#10;效果：' + effectParts.join(' · ') + '&#10;持续 ' + ct.duration + ' 回合&#10;消耗：' + costParts.join(' + ');
             var totalCost = 0; Object.keys(ct.cost).forEach(function(m){ totalCost += ct.cost[m]; });
-            coatHTML += '<button class="btn btn-sm help-tip" style="padding:6px 14px;font-size:13px;background:' + rc.bg + ';border:1px solid ' + rc.bd + ';color:' + rc.hex + ';' + (canAfford ? '' : 'opacity:0.4;') + '" data-tip="' + tip + '" ' + (canAfford ? 'onclick="UISystem._showComponentSelectModal(\'' + ct.name + '\',' + totalCost + ',function(items){GameState.applyCoatingWithSelection(\'' + coatId + '\',items);UISystem.showReorganizeModal();});"' : 'disabled') + '>' + ct.name + '</button>';
+            var _costMap = ct.cost;
+            var btn = _ce('button', 'btn btn-sm help-tip');
+            btn.style.cssText = 'padding:6px 14px;font-size:13px;background:' + rc.bg + ';border:1px solid ' + rc.bd + ';color:' + rc.hex + ';' + (canAfford ? '' : 'opacity:0.4;');
+            btn.setAttribute('data-tip', tip);
+            if (!canAfford) btn.disabled = true;
+            else btn.onclick = function() { UISystem._showComponentSelectModal(ct.name, totalCost, function(items){ GameState.applyCoatingWithSelection(coatId, items); UISystem.showReorganizeModal(); }, _costMap); };
+            coatBtnRow.appendChild(btn);
             hasCoatings = true;
         });
-        if (!hasCoatings) coatHTML += '<span class="txt-xs txt-dim">暂无可用涂层配方</span>';
-        coatHTML += '</div>';
-        coatSection.innerHTML = coatHTML;
+        if (!hasCoatings) coatBtnRow.innerHTML = '<span class="txt-xs txt-dim">暂无可用涂层配方</span>';
+        coatSection.appendChild(coatBtnRow);
         body.appendChild(coatSection);
 
         // --- [新增] 器官深度同调 (消耗同名器官提升 Lv) ---
