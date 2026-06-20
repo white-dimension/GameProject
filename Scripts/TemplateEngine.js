@@ -8,13 +8,20 @@ window.TemplateEngine = (function () {
     var GS = function () { return window.GameState.getState(); };
 
     // ===== 公式评估器 =====
+    var _formulaCache = {};
+
     function evaluateFormula(formulaStr, context) {
         if (typeof formulaStr === 'number') return formulaStr;
         if (!formulaStr || typeof formulaStr !== 'string') return 0;
         try {
             var keys = Object.keys(context);
-            var fn = new Function('{' + keys.join(',') + '}', 'Math',
-                'var ceil=Math.ceil,floor=Math.floor,max=Math.max,min=Math.min,round=Math.round,random=Math.random,abs=Math.abs; return (' + formulaStr + ');');
+            var cacheKey = formulaStr + '|' + keys.join(',');
+            var fn = _formulaCache[cacheKey];
+            if (!fn) {
+                fn = new Function('{' + keys.join(',') + '}', 'Math',
+                    'var ceil=Math.ceil,floor=Math.floor,max=Math.max,min=Math.min,round=Math.round,random=Math.random,abs=Math.abs; return (' + formulaStr + ');');
+                _formulaCache[cacheKey] = fn;
+            }
             return fn(context, Math);
         } catch (e) { console.warn('[TE] Formula eval failed:', formulaStr, e); return 0; }
     }
