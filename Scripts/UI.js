@@ -1481,13 +1481,35 @@ window.UISystem = (function () {
                 var rclr = raceHeaderClrs[m.race] || '#ffd54f';
                 var bgClr = known ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.01)';
 
+                // 精英/Boss 差异化样式
+                var isElite = m.tier === 'elite';
+                var isBoss = m.tier === 'world_boss';
+                var tierBadge = '';
+                var tierBorderClr = known ? rclr : '#333';
+                var tierBg = bgClr;
+                var tierPadding = '15px 18px';
+                var tierFontSize = 'txt-sm';
+                if (isBoss && known) {
+                    tierBadge = '<span style="display:inline-block;padding:2px 10px;background:rgba(255,68,85,0.2);border:1px solid var(--accent-red);border-radius:3px;font-size:12px;color:var(--accent-red);margin-left:8px;">首领</span>';
+                    tierBorderClr = 'var(--accent-red)';
+                    tierBg = 'rgba(255,68,85,0.03)';
+                    tierPadding = '20px 22px';
+                    tierFontSize = 'txt-md';
+                } else if (isElite && known) {
+                    tierBadge = '<span style="display:inline-block;padding:2px 8px;background:rgba(255,213,79,0.12);border:1px solid var(--accent-yellow);border-radius:3px;font-size:12px;color:var(--accent-yellow);margin-left:8px;">精英</span>';
+                    tierBorderClr = 'var(--accent-yellow)';
+                    tierBg = 'rgba(255,213,79,0.02)';
+                    tierPadding = '18px 20px';
+                    tierFontSize = 'txt-sm';
+                }
+
                 var item = _ce('div');
                 item.setAttribute('data-bestiary-race', race);
-                item.style.cssText = 'padding:15px 18px;background:' + bgClr + ';border-radius:4px;border-left:3px solid ' + (known ? rclr : '#333') + ';display:flex;flex-direction:column;gap:10px;';
+                item.style.cssText = 'padding:' + tierPadding + ';background:' + tierBg + ';border-radius:6px;border-left:4px solid ' + tierBorderClr + ';display:flex;flex-direction:column;gap:10px;' + (isBoss && known ? 'box-shadow:0 0 20px rgba(255,68,85,0.1);' : '') + (isElite && known ? 'box-shadow:0 0 10px rgba(255,213,79,0.05);' : '');
 
                 var topRow = '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-                    '<span class="txt-sm txt-bold" style="color:' + (known ? rclr : 'var(--text-disabled)') + ';">' + (known ? m.name : '???') + '</span>' +
-                    '<span class="txt-xs txt-dim">' + (known ? tierNames[m.tier] + ' · Lv.' + m.level : '未遭遇') + '</span>' +
+                    '<span class="' + tierFontSize + ' txt-bold" style="color:' + (known ? rclr : 'var(--text-disabled)') + ';">' + (known ? m.name : '???') + tierBadge + '</span>' +
+                    '<span class="txt-xs txt-dim">' + (known ? 'Lv.' + m.level : '未遭遇') + '</span>' +
                     '</div>';
 
                 var researchRow = '';
@@ -1505,7 +1527,13 @@ window.UISystem = (function () {
                         '</div>';
                 }
 
+                // Boss/精英显示缩略图
+                var thumbHTML = '';
+                if (known && m.image && (isBoss || isElite)) {
+                    thumbHTML = '<div style="width:100%;height:80px;border-radius:4px;margin-bottom:4px;background:url(' + m.image + ') center/cover no-repeat;opacity:0.6;filter:grayscale(0.3);"></div>';
+                }
                 item.innerHTML = topRow +
+                    thumbHTML +
                     (known ? '<div class="txt-xs txt-dim">生命:' + m.hp + ' 攻击:' + m.atk + ' 防御:' + m.def + ' | 击杀: ' + kc + ' | ' + m.weakness + '</div>' : '') +
                     researchRow;
 
