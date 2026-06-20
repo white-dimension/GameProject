@@ -1572,7 +1572,7 @@ window.UISystem = (function () {
                     '<div style="position:relative;z-index:2;display:flex;flex-direction:column;justify-content:flex-end;height:100%;padding:10px;">' +
                         (known ? '<div style="margin-bottom:3px;">' + tierBadge + '</div>' : '') +
                         '<div class="txt-sm txt-bold" style="color:' + (known ? rclr : 'var(--text-disabled)') + ';margin-bottom:2px;line-height:1.2;">' + (known ? m.name : '???') + '</div>' +
-                        '<div class="txt-xs txt-dim" style="margin-bottom:3px;">' + (known ? 'Lv.' + m.level + ' · 击杀:' + kc : '未遭遇') + '</div>' +
+                        '<div class="txt-xs txt-dim" style="margin-bottom:3px;">' + (known ? '击杀:' + kc : '未遭遇') + '</div>' +
                         (known ? '<div class="txt-xs txt-dim" style="margin-bottom:4px;line-height:1.3;">HP ' + m.hp + ' / ATK ' + m.atk + ' / DEF ' + m.def + '</div>' : '') +
                         researchRow +
                     '</div>';
