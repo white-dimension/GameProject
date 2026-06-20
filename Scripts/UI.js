@@ -1674,7 +1674,7 @@ window.UISystem = (function () {
                     var _bg3 = 'rgba(255,213,79,0.08)'; var _bd3 = 'rgba(255,213,79,0.2)'; var _cl3 = 'var(--accent-yellow)';
                     organHTML += '<span class="txt-xs txt-dim"> 组件: </span><span class="help-tip" style="padding:6px 10px;font-size:13px;background:' + _bg3 + ';border:1px solid ' + _bd3 + ';border-radius:4px;color:' + _cl3 + ';" data-tip="' + tipText + '">' + _fmtRoman(cid) + '</span>';
                 } else if (!cid) {
-                    organHTML += '<span class="txt-xs txt-dim"> 组件: </span><span style="padding:6px 10px;font-size:13px;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.15);border-radius:4px;color:var(--text-dim);">空槽·未嵌入</span>';
+                    organHTML += '<span class="txt-xs txt-dim"> 组件: </span><span style="padding:6px 10px;font-size:13px;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.15);border-radius:4px;color:var(--text-dim);">空槽</span>';
                 }
             });
             organHTML += '</div>';
