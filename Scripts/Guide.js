@@ -52,8 +52,10 @@ window.GuideSystem = (function () {
 
             var cw = 240, gap = 10;
             var l;
-            if (item.align === 'left') l = Math.max(10, rect.left);
-            else if (item.align === 'right') l = Math.max(10, rect.right - cw);
+            if (item.align === 'left') {
+                var leftPanel = document.querySelector('.left-panel-col');
+                l = leftPanel ? Math.max(10, leftPanel.getBoundingClientRect().left) : Math.max(10, rect.left);
+            } else if (item.align === 'right') l = Math.max(10, rect.right - cw);
             else l = Math.max(10, rect.left + rect.width / 2 - cw / 2);
 
             card.style.left = l + 'px';
