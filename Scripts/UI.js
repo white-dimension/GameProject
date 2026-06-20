@@ -1079,17 +1079,24 @@ window.UISystem = (function () {
                         '<div class="txt-xs txt-white" style="margin-top:4px;">' + curMon.name + ' 准备执行：<span style="color:var(--accent-red)">' + curMon.intent.label + valStr + '</span></div></div>';
                 }
 
+                // 实时读取器官技能名
+                var _bos2 = GD().BOSS_ORGANS || {};
+                var _sk = { predatory_organ: '打击', chitin_epidermis: '防御', gland_core: '脉冲' };
+                ['predatory_organ','chitin_epidermis','gland_core'].forEach(function(s){
+                    var eq2 = gs.player[s].equipped; if (eq2 && _bos2[eq2] && _bos2[eq2].skillName) _sk[s] = _bos2[eq2].skillName;
+                });
+
                 skillInfo.innerHTML = '<div class="txt-xs txt-green txt-bold" style="margin-bottom:10px;">> 动态战术预测</div>' +
                     intentHTML +
                     '<div style="display:flex;flex-direction:column;gap:6px;">' +
                     '<div data-key="1" class="help-tip" style="background:var(--bg-card);border:1px solid ' + (c1 && curMonIon ? 'rgba(0,212,255,0.8)' : 'var(--border-dim)') + ';border-radius:4px;padding:6px 14px;' + (c1 ? '' : 'opacity:0.5;') + (c1 && curMonIon ? 'box-shadow:0 0 10px rgba(0,212,255,0.4);' : '') + '" data-tip="<b style=color:var(--accent-red)>捕食打击 · 物理伤害技能</b>&#10;&#10;<b>公式：</b>最终伤害 = (攻击力 + 器官加成) × 克制倍率 - 目标防御&#10;<b>特殊：</b>对机械族施加 [电离标记]，第二次命中引爆：剥离全部护盾 + 全场 50% 溅射&#10;<b>特殊：</b>对寄生族连续命中触发 [生物崩解] 标记&#10;<b>概率：</b>30% 挂毒 3 回合&#10;&#10;当前预估净伤害 = <b style=color:var(--accent-red)>' + f1.dmg + '</b>（已扣防御/护盾）">' +
-                    '<span class="txt-xs txt-bold" style="color:' + gc(c1, 'var(--accent-red)') + ';">[1] 打击</span> <span class="txt-xs txt-dim">' + s1Cost + '进程 · <b style="color:var(--accent-red)">' + f1.dmg + '</b>伤害' + f1.tag + '</span></div>' +
+                    '<span class="txt-xs txt-bold" style="color:' + gc(c1, 'var(--accent-red)') + ';">[1] ' + _sk.predatory_organ + '</span> <span class="txt-xs txt-dim">' + s1Cost + '进程 · <b style="color:var(--accent-red)">' + f1.dmg + '</b>伤害' + f1.tag + '</span></div>' +
                     '<div data-key="2" class="help-tip" style="background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;padding:6px 14px;' + (c2 ? '' : 'opacity:0.5;') + '" data-tip="<b style=color:var(--accent-green)>生物防御 · 护盾技能</b>&#10;&#10;<b>公式：</b>护盾值 = 当前攻击力 × 0.6 = <b style=color:var(--accent-blue)>' + Math.ceil(atk * 0.6) + '</b>&#10;<b>效果：</b>护盾存在期间吸收物理伤害&#10;<b>策略：</b>开局套盾防猝死，或在怪物蓄力/狂怒前预判使用">' +
-                    '<span class="txt-xs txt-bold" style="color:' + gc(c2, 'var(--accent-green)') + ';">[2] 防御</span> <span class="txt-xs txt-dim">' + s2Cost + '进程 · <b style="color:var(--accent-blue)">+' + Math.ceil(atk * 0.6) + '</b>护盾</span></div>' +
+                    '<span class="txt-xs txt-bold" style="color:' + gc(c2, 'var(--accent-green)') + ';">[2] ' + _sk.chitin_epidermis + '</span> <span class="txt-xs txt-dim">' + s2Cost + '进程 · <b style="color:var(--accent-blue)">+' + Math.ceil(atk * 0.6) + '</b>护盾</span></div>' +
                     '<div data-key="3" class="help-tip" style="background:var(--bg-card);border:1px solid ' + (c3 && (curMonStatus || curMonComp) ? 'rgba(255,213,79,0.8)' : 'var(--border-dim)') + ';border-radius:4px;padding:6px 14px;' + (c3 ? '' : 'opacity:0.5;') + (c3 && (curMonStatus || curMonComp) ? 'box-shadow:0 0 10px rgba(255,213,79,0.4);' : '') + '" data-tip="<b style=color:var(--accent-yellow)>腺体脉冲 · 连招引爆技能</b>&#10;&#10;<b>中毒目标：</b>引爆造成 攻击力 × 3 伤害 + <b style=color:var(--accent-green)>全额吸血</b>&#10;<b>崩解目标：</b>引爆清除闪避 + 易伤 2 回合&#10;<b>无标记：</b>仅造成 50% 微弱酸蚀伤害&#10;&#10;<b>核心思路：</b>先用 [1] 打击 挂标记，再用 [3] 脉冲 引爆。单体高爆发 + 自回复。">' +
-                    '<span class="txt-xs txt-bold" style="color:' + gc(c3, 'var(--accent-yellow)') + ';">[3] 脉冲</span> <span class="txt-xs txt-dim">' + s3Cost + '进程 · <b style="color:var(--accent-yellow)">' + f3.dmg + '</b>爆破' + (f3.heal > 0 ? ' <b style="color:var(--accent-green)">+' + f3.heal + '吸血</b>' : '') + f3.tag + '</span></div>' +
+                    '<span class="txt-xs txt-bold" style="color:' + gc(c3, 'var(--accent-yellow)') + ';">[3] ' + _sk.gland_core + '</span> <span class="txt-xs txt-dim">' + s3Cost + '进程 · <b style="color:var(--accent-yellow)">' + f3.dmg + '</b>爆破' + (f3.heal > 0 ? ' <b style="color:var(--accent-green)">+' + f3.heal + '吸血</b>' : '') + f3.tag + '</span></div>' +
                     '<div data-key="Space" style="background:var(--bg-card);border:1px solid ' + (isVictory ? 'rgba(0,255,136,0.3)' : 'var(--border-dim)') + ';border-radius:4px;padding:6px 14px;">' +
-                    '<span class="txt-xs txt-bold" style="color:' + 'var(--accent-orange)' + ';">[空格] ' + (isVictory ? '退出战斗' : '回合结束 · 回复 3 进程') + '</span></div>' +
+                    '<span class="txt-xs txt-bold" style="color:' + 'var(--accent-orange)' + ';">[空格] ' + (isVictory ? '退出战斗' : '回合结束 · 回复 ' + (gs.player.process_recovery || 3) + ' 进程') + '</span></div>' +
                     (isVictory ? '' : '<div data-key="E" style="background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;padding:6px 14px;' + (proc >= 4 ? '' : 'opacity:0.5;') + '">' +
                     '<span class="txt-xs txt-bold" style="color:' + gc(proc >= 4, 'var(--accent-red)') + ';">[E] 紧急切断</span> <span class="txt-xs txt-dim">· 消耗 4 进程 · 脱离战斗</span></div>') +
                     (isVictory && bsv && bsv.isDungeon && (bsv._dungeonFloor || 0) < 3 ? '<div data-key="0" style="background:var(--bg-card);border:1px solid var(--accent-green);border-radius:4px;padding:6px 14px;margin-bottom:4px;box-shadow:0 0 10px rgba(0,255,136,0.2);">' +
