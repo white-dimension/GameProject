@@ -1986,6 +1986,7 @@ window.UISystem = (function () {
         var roomInfo = document.getElementById('ui-room-info'); if (roomInfo) roomInfo.style.display = 'none';
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
+        _modalOverlay.style.background = 'transparent';
         // 开始按钮 — 点击后触发视频（绕过浏览器自动播放限制）
         var startBox = _ce('div');
         startBox.style.cssText = 'text-align:center;';
@@ -2045,6 +2046,7 @@ window.UISystem = (function () {
         _introActive = false;
         var gs = GS(); if (gs) { gs.player.introSeen = true; GameState.save(); }
         _modalOverlay.style.display = 'none';
+        _modalOverlay.style.background = '';
         _wakingUp = true;
         _bgTitleVideo.style.display = 'none';
         _bgTitleVideo._fadeOverlay.style.opacity = '0';
