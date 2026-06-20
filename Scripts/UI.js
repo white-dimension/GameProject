@@ -1408,22 +1408,52 @@ window.UISystem = (function () {
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
         var box = _ce('div', 'modal-box status-modal');
-        box.style.cssText = 'width:min(1050px,95vw);max-height:calc(100vh - 200px);background:var(--bg-modal);border:1px solid #f57f17;padding:0;display:flex;flex-direction:column;overflow:hidden;';
+        box.style.cssText = 'flex:1;max-height:calc(100vh - 200px);background:var(--bg-modal);border:1px solid #f57f17;display:flex;flex-direction:column;overflow:hidden;';
 
         var killedCount = 0; Object.keys(gs.bestiary.killCount || {}).forEach(function(id) { killedCount += (gs.bestiary.killCount[id] || 0); });
-        var infoBar = _ce('div');
-        infoBar.style.cssText = 'margin-bottom:20px;padding:12px 16px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;width:min(1050px,95vw);text-align:left;';
-        infoBar.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
-            '<span><span class="txt-xs txt-gold">已击杀 ' + killedCount + ' 只</span><span class="txt-xs txt-dim"> · 共收录 ' + Object.keys(allMonsters).length + ' 种</span></span>' +
-            '<span class="txt-xs txt-gold">当前基因点数: ' + gs.player.bp + '</span></div>' +
-            '<div class="txt-xs txt-dim"><b>研究奖励：</b> Lv.1 <span style="color:var(--accent-blue)">数值透明</span> | Lv.2 <span style="color:var(--accent-red)">伤害+10%</span> | Lv.3 <span style="color:var(--accent-yellow)">掉落+25%</span></div>';
-        _modalOverlay.appendChild(infoBar);
 
         var head = _ce('div');
         head.style.cssText = 'padding:20px 30px;background:rgba(245,124,0,0.08);border-bottom:1px solid #f57f17;display:flex;justify-content:space-between;align-items:center;';
         head.innerHTML = '<div class="txt-md txt-gold txt-bold">[ 变异体图鉴 & 基因深度研究 ]</div>' +
             '<button class="btn btn-blue btn-sm" onclick="UISystem.closeModal()">关闭</button>';
         box.appendChild(head);
+
+        // 左侧信息栏
+        var infoBar = _ce('div');
+        infoBar.style.cssText = 'flex:0 0 220px;padding:20px 16px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:6px;text-align:left;align-self:flex-start;';
+        infoBar.innerHTML = '<div style="margin-bottom:12px;"><span class="txt-xs txt-gold">已击杀 ' + killedCount + ' 只</span></div>' +
+            '<div style="margin-bottom:12px;"><span class="txt-xs txt-gold">基因点数: ' + gs.player.bp + '</span></div>' +
+            '<div style="margin-bottom:14px;border-top:1px solid var(--border-dim);padding-top:10px;">' +
+            '<div class="txt-xs txt-bold" style="color:var(--accent-yellow);margin-bottom:6px;">> 研究等级</div>' +
+            '<div class="txt-xs txt-dim" style="margin-bottom:4px;">Lv.1 <span style="color:var(--accent-blue)">数值透明</span> · 500BP</div>' +
+            '<div class="txt-xs txt-dim" style="margin-bottom:4px;">Lv.2 <span style="color:var(--accent-red)">伤害+10%</span> · 1500BP</div>' +
+            '<div class="txt-xs txt-dim">Lv.3 <span style="color:var(--accent-yellow)">掉落+25%</span> · 3000BP</div></div>' +
+            '<div style="border-top:1px solid var(--border-dim);padding-top:10px;">' +
+            '<div class="txt-xs txt-bold" style="color:var(--accent-yellow);margin-bottom:6px;">> 种族克制</div>' +
+            '<div class="txt-xs txt-dim" style="line-height:1.6;">异变 → 寄生 → 机械 → 异变<br>克制伤害 +50% 无视防御</div></div>';
+
+        // 种族筛选标签栏
+        var _tabBar = _ce('div');
+        _tabBar.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:14px;border-top:1px solid var(--border-dim);padding-top:10px;';
+        var _tabBtns = {};
+        var tabs = [{ r: 'mutant', l: '异变者', cls: 'btn-red' },
+                    { r: 'swarm', l: '寄生群落', cls: 'btn-green' },
+                    { r: 'ember', l: '机械余烬', cls: 'btn-blue' }];
+        tabs.forEach(function(t) {
+            var tb = _ce('button', 'btn btn-sm ' + t.cls);
+            tb.style.cssText = 'width:100%;padding:4px 12px;font-size:13px;';
+            tb.textContent = t.l;
+            tb.onclick = function() { _filterRace = t.r; _filterDisplay(); };
+            _tabBtns[t.r] = tb;
+            _tabBar.appendChild(tb);
+        });
+
+        // 左右布局容器
+        var wrapper = _ce('div');
+        wrapper.style.cssText = 'display:flex;gap:20px;align-items:flex-start;width:min(1050px,95vw);';
+        wrapper.appendChild(infoBar);
+        wrapper.appendChild(box);
+        _modalOverlay.appendChild(wrapper);
 
         var body = _ce('div');
         body.style.cssText = 'padding:25px 30px;display:flex;flex-direction:column;gap:15px;overflow-y:auto;flex:1;';
@@ -1435,22 +1465,7 @@ window.UISystem = (function () {
         var raceClrs = { mutant: '#ff6b4a', swarm: '#9acd32', ember: '#4ab8ff' };
         var _filterRace = 'mutant';
 
-        // 种族筛选标签栏（遵循设计规范按钮样式）
-        var _tabBar = _ce('div');
-        _tabBar.style.cssText = 'display:flex;gap:8px;padding:0 0 8px 0;';
-        var _tabBtns = {};
-        var tabs = [{ r: 'mutant', l: '异变者', cls: 'btn-red' },
-                    { r: 'swarm', l: '寄生群落', cls: 'btn-green' },
-                    { r: 'ember', l: '机械余烬', cls: 'btn-blue' }];
-        tabs.forEach(function(t) {
-            var tb = _ce('button', 'btn btn-sm ' + t.cls);
-            tb.style.cssText = 'padding:4px 12px;font-size:13px;';
-            tb.textContent = t.l;
-            tb.onclick = function() { _filterRace = t.r; _filterDisplay(); };
-            _tabBtns[t.r] = tb;
-            _tabBar.appendChild(tb);
-        });
-        body.appendChild(_tabBar);
+        // 种族标签已移至左侧栏
 
         var _bestiaryWrap = _ce('div');
         _bestiaryWrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;';
