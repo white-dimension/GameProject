@@ -1389,11 +1389,11 @@ window.UISystem = (function () {
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
         var box = _ce('div', 'modal-box status-modal');
-        box.style.cssText = 'width:min(700px,90vw);max-height:calc(100vh - 200px);background:var(--bg-modal);border:1px solid #f57f17;padding:0;display:flex;flex-direction:column;overflow:hidden;';
+        box.style.cssText = 'width:min(900px,95vw);max-height:calc(100vh - 200px);background:var(--bg-modal);border:1px solid #f57f17;padding:0;display:flex;flex-direction:column;overflow:hidden;';
 
         var killedCount = 0; Object.keys(gs.bestiary.killCount || {}).forEach(function(id) { killedCount += (gs.bestiary.killCount[id] || 0); });
         var infoBar = _ce('div');
-        infoBar.style.cssText = 'margin-bottom:20px;padding:12px 16px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;width:min(700px,90vw);text-align:left;';
+        infoBar.style.cssText = 'margin-bottom:20px;padding:12px 16px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;width:min(900px,95vw);text-align:left;';
         infoBar.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
             '<span><span class="txt-xs txt-gold">已击杀 ' + killedCount + ' 只</span><span class="txt-xs txt-dim"> · 共收录 ' + Object.keys(allMonsters).length + ' 种</span></span>' +
             '<span class="txt-xs txt-gold">当前基因点数: ' + gs.player.bp + '</span></div>' +
@@ -1434,7 +1434,7 @@ window.UISystem = (function () {
         body.appendChild(_tabBar);
 
         var _bestiaryWrap = _ce('div');
-        _bestiaryWrap.style.cssText = 'display:flex;flex-direction:column;gap:12px;';
+        _bestiaryWrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;';
         body.appendChild(_bestiaryWrap);
 
         var _filterDisplay = function() {
@@ -1458,7 +1458,7 @@ window.UISystem = (function () {
             var headerDiv = _ce('div');
             headerDiv.setAttribute('data-bestiary-race', race);
             headerDiv.className = 'txt-sm txt-bold';
-            headerDiv.style.cssText = 'margin-top:8px;margin-bottom:4px;color:' + (raceHeaderClrs[race] || '#ffd54f') + ';';
+            headerDiv.style.cssText = 'width:100%;margin-top:8px;margin-bottom:4px;color:' + (raceHeaderClrs[race] || '#ffd54f') + ';';
             headerDiv.innerHTML = '<span class="icon ' + raceIcons[race] + '"></span> ' + raceNames[race];
             _bestiaryWrap.appendChild(headerDiv);
             // 种族背景故事
@@ -1467,7 +1467,7 @@ window.UISystem = (function () {
                 var loreDiv = _ce('div');
                 loreDiv.setAttribute('data-bestiary-race', race);
                 loreDiv.className = 'txt-xs';
-                loreDiv.style.cssText = 'color:' + (raceHeaderClrs[race] || '#ffd54f') + ';opacity:0.7;margin-bottom:12px;line-height:1.6;padding-left:2px;';
+                loreDiv.style.cssText = 'width:100%;color:' + (raceHeaderClrs[race] || '#ffd54f') + ';opacity:0.7;margin-bottom:12px;line-height:1.6;padding-left:2px;';
                 loreDiv.textContent = loreText;
                 _bestiaryWrap.appendChild(loreDiv);
             }
@@ -1518,21 +1518,22 @@ window.UISystem = (function () {
                 }
 
                 if (isSpecial) {
-                    // 精英/首领：战斗卡片样式 — 全图背景 + 文字叠层
-                    item.style.cssText = 'position:relative;min-height:200px;border-radius:8px;overflow:hidden;border:2px solid ' + tierBorderClr + ';' + (isBoss ? 'box-shadow:0 0 20px rgba(255,68,85,0.2);' : 'box-shadow:0 0 12px rgba(255,213,79,0.1);');
-                    item.innerHTML = '<div style="position:absolute;inset:0;background:url(' + m.image + ') center/cover no-repeat;filter:brightness(0.4);z-index:0;"></div>' +
-                        '<div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.85) 0%,rgba(0,0,0,0.2) 50%,rgba(0,0,0,0.4) 100%);z-index:1;"></div>' +
-                        '<div style="position:relative;z-index:2;display:flex;flex-direction:column;justify-content:flex-end;min-height:200px;padding:16px;">' +
-                            '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">' +
-                                '<span class="' + tierFontSize + ' txt-bold" style="color:' + rclr + ';">' + m.name + '</span>' + tierBadge +
-                                '<span class="txt-xs txt-dim" style="margin-left:auto;">Lv.' + m.level + '</span>' +
-                            '</div>' +
-                            '<div class="txt-xs txt-dim" style="margin-bottom:8px;">生命:' + m.hp + ' 攻击:' + m.atk + ' 防御:' + m.def + ' | 击杀: ' + kc + '</div>' +
+                    // 精英/首领：战斗卡片式竖方块 — 8:9比例全图背景
+                    var cardW = 180, cardH = 260;
+                    if (isBoss) { cardW = 220; cardH = 310; }
+                    item.style.cssText = 'position:relative;width:' + cardW + 'px;height:' + cardH + 'px;border-radius:8px;overflow:hidden;border:2px solid ' + tierBorderClr + ';flex-shrink:0;' + (isBoss ? 'box-shadow:0 0 20px rgba(255,68,85,0.2);' : 'box-shadow:0 0 10px rgba(255,213,79,0.1);');
+                    item.innerHTML = '<div style="position:absolute;inset:0;background:url(' + m.image + ') center/cover no-repeat;filter:brightness(0.5);z-index:0;"></div>' +
+                        '<div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0.1) 50%,rgba(0,0,0,0.3) 100%);z-index:1;"></div>' +
+                        '<div style="position:relative;z-index:2;display:flex;flex-direction:column;justify-content:flex-end;height:100%;padding:12px;">' +
+                            '<div style="margin-bottom:2px;">' + tierBadge + '</div>' +
+                            '<div class="' + tierFontSize + ' txt-bold" style="color:' + rclr + ';margin-bottom:2px;">' + m.name + '</div>' +
+                            '<div class="txt-xs txt-dim" style="margin-bottom:4px;">Lv.' + m.level + ' · 击杀: ' + kc + '</div>' +
+                            '<div class="txt-xs txt-dim" style="margin-bottom:6px;line-height:1.4;">HP:' + m.hp + ' ATK:' + m.atk + ' DEF:' + m.def + '</div>' +
                             researchRow +
                         '</div>';
                 } else {
                     // 普通：横条样式
-                    item.style.cssText = 'padding:' + tierPadding + ';background:' + tierBg + ';border-radius:6px;border-left:4px solid ' + tierBorderClr + ';display:flex;flex-direction:column;gap:10px;';
+                    item.style.cssText = 'width:280px;padding:' + tierPadding + ';background:' + tierBg + ';border-radius:6px;border-left:4px solid ' + tierBorderClr + ';display:flex;flex-direction:column;gap:10px;flex-shrink:0;';
                     var topRow = '<div style="display:flex;justify-content:space-between;align-items:center;">' +
                         '<span class="' + tierFontSize + ' txt-bold" style="color:' + (known ? rclr : 'var(--text-disabled)') + ';">' + (known ? m.name : '???') + tierBadge + '</span>' +
                         '<span class="txt-xs txt-dim">' + (known ? 'Lv.' + m.level : '未遭遇') + '</span>' +
