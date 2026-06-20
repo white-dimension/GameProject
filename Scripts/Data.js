@@ -1178,6 +1178,64 @@ window.GameData = (function () {
     };
 
     // =========================================================================
+    // 14. 魔药执行模板 (Potion Execution Templates)
+    // =========================================================================
+    var POTION_TEMPLATES = {
+        POT_BERSERK: { effect: function(bs,p,decay){ bs.playerStatus['berserk']=99; if(decay<1)bs.playerStatus['berserkMult']=decay; } },
+        POT_ANTIDOTE: { effect: function(bs,p,decay,getMon,getMonData,_log){
+            var cm=getMon(),md2=getMonData();
+            if(cm){ if(md2&&md2.immuneToPhysicalCC)_log(cm.name+' 免疫物理控制。');
+            else{ var sc=(md2&&md2.tier==='world_boss'?0.6:1.0)*decay; if(md2&&md2.drugResist)sc*=(1-md2.drugResist);
+            if(Math.random()<sc){ cm.intent={label:'<span class=\"icon icon-time-trap\"></span> 行动延后',type:'stun'}; _log('<span style=\"color:var(--accent-purple);\">神经抑制生效：'+cm.name+' 行动被延后。</span>'); }
+            else _log('<span style=\"color:var(--text-dim);\">'+cm.name+' 判定抗性通过，神经抑制失败。</span>'); } }
+            bs._noProcessRecovery=true;
+        }},
+        POT_SHIELD_CORE: { effect: function(bs,p,decay){ bs.shieldAmount=(bs.shieldAmount||0)+Math.ceil(p.hp_max*0.4*decay); bs._toxResistDebuff=true; } },
+        POT_HEAL: { effect: function(bs,p,decay){ p.hp=Math.min(p.hp_max,p.hp+Math.ceil(p.hp_max*0.4*decay)); bs.playerStatus['defDebuff']=3; } },
+        POT_DEFENSE: { effect: function(bs,p,decay){ bs.playerStatus['defBoost']=3; bs.playerStatus['atkDebuff']=3; } },
+        POT_RAM: { effect: function(bs,p,decay){ bs.playerProcess=Math.min(window.GameState.getState().player.process_max,bs.playerProcess+5); window.GameState.getState().player.process=bs.playerProcess; window.GameState.getState().player.toxicity+=10; } }
+    };
+
+    // =========================================================================
+    // 15. 维度词缀模板 (Dimension Affix Templates) — Loop 2+
+    // =========================================================================
+    var AFFIX_TEMPLATES = [
+        { id:'thorns',name:'反馈',desc:'反弹 10% 伤害',color:'var(--accent-red)',onApply:function(mon){}},
+        { id:'regen',name:'再生',desc:'每回合恢复 5% HP',color:'var(--accent-green)',onApply:function(mon){}},
+        { id:'berserk',name:'死誓',desc:'伤害+50%，每回合扣 5% HP',color:'var(--accent-orange)',onApply:function(mon){ mon._atkMult=(mon._atkMult||1)*1.5; }},
+        { id:'jammer',name:'扰频',desc:'玩家每回合进程回复 -1',color:'var(--accent-blue)',onApply:function(mon){}}
+    ];
+
+    // =========================================================================
+    // 16. 路径词缀模板 (Path Synapse Affix Templates)
+    // =========================================================================
+    var PATH_AFFIX_TEMPLATES = [
+        { id:'high_process',name:'高能反应',desc:'开局额外获得 2 点进程',color:'var(--accent-green)',onBattleStart:function(bs,gs){ bs.playerProcess=Math.min(gs.player.process_max,bs.playerProcess+2); }},
+        { id:'weak_bio',name:'生物辐射',desc:'全场敌人初始降低 20% HP',color:'var(--accent-red)',onBattleStart:function(bs,gs){ bs.monsters.forEach(function(m){ var loss=Math.ceil(m.hp*0.2); m.hp-=loss; }); }},
+        { id:'data_rich',name:'信号富集',desc:'击败后获得的经验提升 50%',color:'var(--accent-blue)',onBattleStart:function(){}, xpMult:1.5 },
+        { id:'scrap_rich',name:'金属堆积',desc:'击败后额外获得 1 个组件碎片',color:'var(--accent-yellow)',onBattleStart:function(){}, extraDrop:1 },
+        { id:'corrosive',name:'酸蚀环境',desc:'进入后敌人获得 3 层中毒',color:'var(--accent-purple)',onBattleStart:function(bs){ bs.monsters.forEach(function(m){ m.status['poison']=3; }); }}
+    ];
+
+    // =========================================================================
+    // 17. 研究等级增益配置 (Research Perks)
+    // =========================================================================
+    var RESEARCH_PERKS = {
+        1: { showExactHP: true, desc: '显示精确HP' },
+        2: { damageBonus: 0.1, desc: '伤害永久+10%' },
+        3: { dropRateBonus: 0.25, desc: '组件掉落率+25%' }
+    };
+
+    // =========================================================================
+    // 18. 难度缩放配置 (Difficulty Scaling Config)
+    // =========================================================================
+    var DIFFICULTY_CONFIG = {
+        loopScale: { hpMul: 1.5, atkMul: 1.5, defMul: 1.0, bpMul: 1.2, xpMul: 1.0 },
+        dungeonFloors: { bossFloor: 3, monsterPool: ['MON_CH1_CLEANER','MON_CH1_GUARD','MON_CH1_SPORE','MON_CH1_HIVE','MON_CH1_BEE','MON_CH1_SENTINEL'], bossPool: ['MON_CH1_TYRANT','MON_CH1_QUEEN','MON_CH1_CORE'], monstersPerFloor: 2 },
+        floorNames: ['','地下一层','地下二层','地下三层','地下四层','地下五层','地下六层','地下七层','地下八层','地下九层','地下十层']
+    };
+
+    // =========================================================================
     // 公开 API
     // =========================================================================
     return {
@@ -1195,6 +1253,11 @@ window.GameData = (function () {
         RANDOM_EVENTS: RANDOM_EVENTS,
         STATUS_TEMPLATES: STATUS_TEMPLATES,
         PASSIVE_TEMPLATES: PASSIVE_TEMPLATES,
+        POTION_TEMPLATES: POTION_TEMPLATES,
+        AFFIX_TEMPLATES: AFFIX_TEMPLATES,
+        PATH_AFFIX_TEMPLATES: PATH_AFFIX_TEMPLATES,
+        RESEARCH_PERKS: RESEARCH_PERKS,
+        DIFFICULTY_CONFIG: DIFFICULTY_CONFIG,
         calcTierUpgradeCost: calcTierUpgradeCost,
         getRandomBossOrgan: _getRandomBossOrgan
     };

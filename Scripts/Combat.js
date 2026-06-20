@@ -29,22 +29,19 @@ window.CombatSystem = (function () {
         }
         if (monsters.length === 0) return;
 
-        // [新增] Loop 2+ 怪物词缀分配
+        // Loop 2+ 怪物词缀分配 — 数据驱动
         if (gs.mapState.loop >= 2) {
-            var affixPool = [
-                { id: 'thorns', name: '反馈', desc: '反弹 10% 伤害', color: 'var(--accent-red)' },
-                { id: 'regen', name: '再生', desc: '每回合恢复 5% HP', color: 'var(--accent-green)' },
-                { id: 'berserk', name: '死誓', desc: '伤害+50%，但每回合扣 5% HP', color: 'var(--accent-orange)' },
-                { id: 'jammer', name: '扰频', desc: '玩家每回合进程回复 -1', color: 'var(--accent-blue)' }
-            ];
-            monsters.forEach(function(mon) {
-                var mData = GD().MONSTERS[mon.id];
-                if (mData.tier === 'elite' || mData.tier === 'world_boss') {
-                    var aff = affixPool[Math.floor(Math.random() * affixPool.length)];
-                    mon.affixes.push(aff);
-                    if (aff.id === 'berserk') mon._atkMult = (mon._atkMult || 1) * 1.5;
-                }
-            });
+            var affixPool = GD().AFFIX_TEMPLATES || [];
+            if (affixPool.length > 0) {
+                monsters.forEach(function(mon) {
+                    var mData = GD().MONSTERS[mon.id];
+                    if (mData.tier === 'elite' || mData.tier === 'world_boss') {
+                        var aff = affixPool[Math.floor(Math.random() * affixPool.length)];
+                        mon.affixes.push({ id: aff.id, name: aff.name, desc: aff.desc, color: aff.color });
+                        if (aff.onApply) aff.onApply(mon);
+                    }
+                });
+            }
         }
 
         _battleState = {
@@ -63,28 +60,12 @@ window.CombatSystem = (function () {
             playerRaces: [gs.player.masteries[0], gs.player.masteries[1], gs.player.masteries[2]].filter(function(r) { return r; })
         };
 
-        // [新增] 应用路径感官词缀效果
+        // 应用路径感官词缀效果 — 数据驱动
         if (_battleState.pathAffix) {
             var af = _battleState.pathAffix;
             _log('<span style="color:' + af.color + '">【感官共鸣】' + af.name + '：' + af.desc + '</span>');
-
-            if (af.id === 'high_process') {
-                _battleState.playerProcess = Math.min(gs.player.process_max, _battleState.playerProcess + 2);
-                _log('<span style="color:var(--accent-green)">神经突触激活，初始进程 +2。</span>');
-            }
-            else if (af.id === 'weak_bio') {
-                _battleState.monsters.forEach(function(m) {
-                    var loss = Math.ceil(m.hp * 0.2);
-                    m.hp -= loss;
-                    _log('<span style="color:var(--accent-red)">辐射削弱了 ' + m.name + '，生命损失 ' + loss + '。</span>');
-                });
-            }
-            else if (af.id === 'corrosive') {
-                _battleState.monsters.forEach(function(m) {
-                    m.status['poison'] = 3;
-                    _log('<span style="color:var(--accent-purple)">酸蚀蔓延，' + m.name + ' 已处于中毒状态。</span>');
-                });
-            }
+            var patTpl = (GD().PATH_AFFIX_TEMPLATES || []).find(function(t){ return t.id === af.id; });
+            if (patTpl && patTpl.onBattleStart) patTpl.onBattleStart(_battleState, gs);
         }
 
         if (_battleState.dungeonEnv && _battleState.dungeonEnv.effect.startTox) {
@@ -180,34 +161,12 @@ window.CombatSystem = (function () {
 
             window.UISystem.showDamageFloat('<span class="icon icon-biohazard"></span>', 'var(--accent-purple)', 'player');
 
-            if (pot.id === 'POT_BERSERK') { _battleState.playerStatus['berserk'] = 99; if (consec > 0) _battleState.playerStatus['berserkMult'] = decayFactor; }
-            else if (pot.id === 'POT_ANTIDOTE') {
-                var curM2 = _getMonster();
-                var md2 = _getMonsterData();
-                if (curM2) {
-                    // 哨兵蓄力期免疫物理控制
-                    if (md2 && md2.immuneToPhysicalCC) { _log(curM2.name + ' 免疫物理控制。'); }
-                    else {
-                        // 神经阻断剂：普通/精英100%成功率，Boss 60%
-                        var stunChance = (md2 && md2.tier === 'world_boss') ? 0.6 : 1.0;
-                        stunChance *= decayFactor;
-                        if (md2 && md2.drugResist) { stunChance *= (1 - md2.drugResist); }
-
-                        if (Math.random() < stunChance) {
-                            curM2.intent = { label: '<span class="icon icon-time-trap"></span> 行动延后', type: 'stun' };
-                            _log('<span style="color:var(--accent-purple);">神经抑制生效：' + curM2.name + ' 行动被延后。</span>');
-                        }
-                        else {
-                            _log('<span style="color:var(--text-dim);">' + curM2.name + ' 判定抗性通过，神经抑制失败。</span>');
-                        }
-                    }
-                }
-                _battleState._noProcessRecovery = true;
+            var potTpl = (GD().POTION_TEMPLATES || {})[pot.id];
+            if (potTpl && potTpl.effect) { potTpl.effect(_battleState, p, decayFactor, _getMonster, _getMonsterData, _log);
+                if (pot.id === 'POT_HEAL') { _log('<span style="color:var(--accent-green)">凝血再生！防御暂时下降。</span>'); window.UISystem.showDamageFloat('+' + Math.ceil(p.hp_max * 0.4 * decayFactor), 'var(--accent-green)', 'player'); }
+                else if (pot.id === 'POT_DEFENSE') { _log('<span style="color:var(--accent-blue)">表皮硬化！防御提升，攻击下降。</span>'); }
+                else if (pot.id === 'POT_RAM') { _log('<span style="color:var(--accent-green)">进程回复 5 点，毒性 +10。</span>'); }
             }
-            else if (pot.id === 'POT_SHIELD_CORE') { _battleState.shieldAmount = (_battleState.shieldAmount || 0) + Math.ceil(p.hp_max * 0.4 * decayFactor); _battleState._toxResistDebuff = true; }
-            else if (pot.id === 'POT_HEAL') { p.hp = Math.min(p.hp_max, p.hp + Math.ceil(p.hp_max * 0.4 * decayFactor)); _battleState.playerStatus['defDebuff'] = 3; _log('<span style="color:var(--accent-green)">凝血再生！防御暂时下降。</span>'); window.UISystem.showDamageFloat('+' + Math.ceil(p.hp_max * 0.4), 'var(--accent-green)', 'player'); }
-            else if (pot.id === 'POT_DEFENSE') { _battleState.playerStatus['defBoost'] = 3; _battleState.playerStatus['atkDebuff'] = 3; _log('<span style="color:var(--accent-blue)">表皮硬化！防御提升，攻击下降。</span>'); }
-            else if (pot.id === 'POT_RAM') { _battleState.playerProcess = Math.min(GS().player.process_max, _battleState.playerProcess + 5); GS().player.process = _battleState.playerProcess; p.toxicity += 10; _log('<span style="color:var(--accent-green)">进程回复 5 点，毒性 +10。</span>'); }
 
             window.UISystem.render();
             return;
@@ -484,97 +443,53 @@ window.CombatSystem = (function () {
 
     function _monsterAction() {
         if (!_battleState || _battleState.phase !== 'monster_turn') return;
-        // 训练模式：人偶不行动，直接切回玩家回合
         if (_battleState._isTraining) { _log('<span class="txt-dim">训练人偶待命中...</span>'); _finishMonsterTurn(); return; }
         var p = GS().player;
-
         var alive = _getAliveMonsters();
         if (alive.length === 0) { _winBattle(); return; }
 
-        // 处理毒性（跳过第1回合，World.js 已扣过步进伤害）
-        // 跳过第1回合：World.js 已扣过步进伤害（_battleState.turn 已增至2，故 > 1 才扣）
         if (p.toxicity > 50 && _battleState.turn > 1) {
             var od = Math.ceil(p.hp_max * 0.02 * (_battleState._toxResistDebuff ? 1.2 : 1.0));
             p.hp = Math.max(0, p.hp - od);
             _log('<span style="color:var(--accent-purple)">[基因自溶] 体内毒素爆发，损失 ' + od + ' HP。' + (_battleState._toxResistDebuff ? '（毒素抗性削弱）' : '') + '</span>');
         }
-
         _log('<span style="color:var(--accent-orange)">>>> 第 ' + _battleState.turn + ' 回合开始。</span>');
 
         var processMonster = function(idx) {
-            if (idx >= alive.length) {
-                // 所有怪物行动完毕
-                _finishMonsterTurn();
-                return;
-            }
+            if (idx >= alive.length) { _finishMonsterTurn(); return; }
             var mon = alive[idx];
-            // 反伤/反噬可能导致怪物在轮到它行动前死亡，跳过
             if (mon.hp <= 0) { processMonster(idx + 1); return; }
             var md = GD().MONSTERS[mon.id];
             if (!md) { _log('<span style="color:var(--accent-red);">[错误] 未知怪物数据: ' + mon.id + '，已跳过。</span>'); processMonster(idx + 1); return; }
             var intent = mon.intent;
 
+            // stun check
             if (intent.type === 'stun' || mon.status['stunned']) {
-                if (mon.status['stunned']) { mon.status['stunned'] = 0; }
+                if (mon.status['stunned']) mon.status['stunned'] = 0;
                 _log('<span style="color:var(--text-dim);">' + mon.name + ' 眩晕，跳过回合。</span>');
                 mon.intent = _generateIntent(md);
                 window.UISystem.render();
                 setTimeout(function() { processMonster(idx + 1); }, 400);
-            } else if (intent.type === 'shield') {
-                mon._shield = (mon._shield || 0) + (intent.value || 0);
-                _log('<span style="color:var(--accent-blue);">' + mon.name + ' 获得 ' + intent.value + ' 护盾。</span>');
-                mon.intent = _generateIntent(md);
-                window.UISystem.render();
-                setTimeout(function() { processMonster(idx + 1); }, 300);
-            } else if (intent.type === 'drain') {
-                var drainAmt = Math.ceil((intent.value || 0) * (mon._scaleAtk || 1));
-                p.hp = Math.max(0, p.hp - drainAmt);
-                _log('<span style="color:var(--accent-purple);">' + mon.name + ' 吸取 ' + drainAmt + ' 生命。</span>');
-                mon.intent = _generateIntent(md);
-                window.UISystem.render();
-                if (p.hp <= 0) { _doDefeat(); } else { setTimeout(function() { processMonster(idx + 1); }, 300); }
-            } else if (intent.type === 'summon' || intent.type === 'spawn') {
-                var summonDmg = Math.ceil((intent.summonCount || 0) * (intent.summonDamage || 0) * (mon._scaleAtk || 1));
-                if (summonDmg > 0) { p.hp = Math.max(0, p.hp - summonDmg); _log('<span style="color:var(--accent-yellow);">' + mon.name + ' 召唤集群造成 ' + summonDmg + ' 点伤害。</span>'); }
-                else { _log('<span style="color:var(--accent-yellow);">' + mon.name + ' 正在集结力量...</span>'); }
-                mon.intent = _generateIntent(md);
-                window.UISystem.render();
-                if (p.hp <= 0) { _doDefeat(); } else { setTimeout(function() { processMonster(idx + 1); }, 300); }
-            } else if (intent.type === 'charge') {
-                if (!mon._charged) {
-                    mon._charged = true;
-                    _log('<span style="color:var(--accent-orange);">' + mon.name + ' 正在蓄力，下回合释放！</span>');
-                } else {
-                    mon._charged = false;
-                    var rawDmgC = Math.ceil((intent.value || 0) * (mon._scaleAtk || 1));
-                    var playerRedC = window.GameState.calcDamageReduction(p.def || 0);
-                    var dmgC = Math.ceil(rawDmgC * (1 - playerRedC));
-                    var finalDmgC = Math.max(0, dmgC - (_battleState.shieldAmount || 0));
-                    _battleState.shieldAmount = Math.max(0, (_battleState.shieldAmount || 0) - dmgC);
-                    p.hp = Math.max(0, p.hp - finalDmgC);
-                    _log('<span style="color:var(--accent-orange);">' + mon.name + ' 蓄力释放！造成 ' + finalDmgC + ' 点伤害。</span>');
-                    window.UISystem.triggerShake('app');
-                    if (finalDmgC > 0) window.UISystem.showDamageFloat('-' + finalDmgC, 'var(--accent-red)', 'player');
-                }
-                mon.intent = _generateIntent(md);
-                window.UISystem.render();
-                if (p.hp <= 0) { _doDefeat(); } else { setTimeout(function() { processMonster(idx + 1); }, 300); }
-            } else if (intent.type === 'scan') {
-                _battleState._processPenalty = (_battleState._processPenalty || 0) + (intent.ramPenalty || 1);
-                _log('<span style="color:var(--accent-blue);">' + mon.name + ' 扫描干扰！下回合卡牌费用 +' + (intent.ramPenalty || 1) + '。</span>');
-                mon.intent = _generateIntent(md);
-                window.UISystem.render();
-                if (p.hp <= 0) { _doDefeat(); } else { setTimeout(function() { processMonster(idx + 1); }, 300); }
-            } else {
-                // 伤害类意图：physical / toxin / electric / enrage
-                var rawDmg = Math.ceil((intent.value || 0) * (mon._atkMult || 1) * (mon._scaleAtk || 1));
-                var origDmg = rawDmg;
+                return;
+            }
 
-                // 游荡 Boss 脱离惩罚：非地下城中的游荡遭遇每回合 ×3 倍伤害
-                if (md.tier === 'world_boss' && _battleState.isWandering && _battleState.turn > 1) {
-                    rawDmg *= 3;
-                    origDmg = rawDmg;
-                }
+            // Use IntentExecutor for handling
+            var result = window.TemplateEngine.IntentExecutor.execute(mon, _battleState, p, idx);
+            if (result.type === 'shield') {
+                _log(result.msg || (mon.name + ' 获得 ' + result.value + ' 护盾。'));
+            } else if (result.type === 'summon' || result.type === 'spawn') {
+                if (result.value > 0) { p.hp = Math.max(0, p.hp - result.value); _log(result.msg); }
+                else _log(result.msg || (mon.name + ' 正在集结力量...'));
+            } else if (result.type === 'charge') {
+                _log(result.msg);
+            } else if (result.type === 'processPenalty') {
+                _log(result.msg);
+            } else if (result.type === 'damage' || !result.type || result.type === 'none') {
+                var rawDmg = result.rawDamage || Math.ceil((intent.value || 0) * (mon._atkMult || 1) * (mon._scaleAtk || 1));
+                rawDmg = Math.ceil(rawDmg * (mon._atkMult || 1));
+
+                if (md.tier === 'world_boss' && _battleState.isWandering && _battleState.turn > 1) rawDmg *= 3;
+                var origDmg = rawDmg;
 
                 var effDef = p.def || 0;
                 if (_battleState.playerStatus['defBoost']) effDef = Math.ceil(effDef * 1.5);
@@ -582,22 +497,16 @@ window.CombatSystem = (function () {
                 var playerReduction = window.GameState.calcDamageReduction(effDef);
                 var afterDef = Math.ceil(rawDmg * (1 - playerReduction));
                 var defReduced = Math.floor(rawDmg * playerReduction);
+                var finalDmg, breakdown = '';
 
-                var finalDmg;
-                var breakdown = '';
-
-                if (intent.type === 'toxin') {
-                    // 解毒酶结晶 / 涂层抗毒免疫
+                if (result.element === 'toxin' || intent.type === 'toxin') {
                     var poisonImmuneFlag = _getComponentEffects().poisonImmune;
                     if ((p.activeCoating === 'COAT_ANTI_SWARM' && md && md.race === 'swarm') || poisonImmuneFlag) {
                         finalDmg = 0;
                         _log('<span style="color:var(--accent-green);">毒素被' + (poisonImmuneFlag ? '解毒酶结晶' : '涂层') + '中和。</span>');
                     } else {
-                        // 毒素无视护盾
-                        finalDmg = afterDef;
-                        p.hp = Math.max(0, p.hp - finalDmg);
-                        breakdown = finalDmg + ' (' + origDmg + '原始 - ' + defReduced + '防御)';
-                        _log('<span style="color:var(--accent-purple);">' + mon.name + ' 喷射毒素造成 ' + breakdown + ' 点伤害。（无视护盾）</span>');
+                        finalDmg = afterDef; p.hp = Math.max(0, p.hp - finalDmg);
+                        _log('<span style="color:var(--accent-purple);">' + mon.name + ' 喷射毒素造成 ' + (finalDmg + ' (' + origDmg + '原始 - ' + defReduced + '防御)') + ' 点伤害。（无视护盾）</span>');
                     }
                 } else {
                     var absorbed = Math.min(_battleState.shieldAmount || 0, afterDef);
@@ -605,22 +514,14 @@ window.CombatSystem = (function () {
                     _battleState.shieldAmount = Math.max(0, (_battleState.shieldAmount || 0) - afterDef);
 
                     if (_battleState.dualKey === 'ember+mutant') {
-                        var shieldGain = Math.ceil(p.def * 0.3);
-                        _battleState.shieldAmount = (_battleState.shieldAmount || 0) + shieldGain;
+                        _battleState.shieldAmount = (_battleState.shieldAmount || 0) + Math.ceil(p.def * 0.3);
                         _battleState.playerProcess = Math.min(GS().player.process_max, _battleState.playerProcess + 1);
                         GS().player.process = _battleState.playerProcess;
                     }
-
-                    // 战败补偿减伤：每层 10%
                     var adaptBonus = Math.min(0.3, (p.bossFailCount || 0) * 0.1);
                     var afterAdapt = Math.ceil(finalDmg * (1 - adaptBonus));
-                    var adaptReduced = finalDmg - afterAdapt;
+                    if (afterAdapt < finalDmg) _log('<span style="color:var(--accent-green)">【基因自适应】减免了 ' + (finalDmg - afterAdapt) + ' 点伤害。</span>');
                     finalDmg = afterAdapt;
-                    if (adaptReduced > 0) {
-                        breakdown = breakdown.replace(')', ' - ' + adaptReduced + '自适应)');
-                        _log('<span style="color:var(--accent-green)">【基因自适应】减免了 ' + adaptReduced + ' 点伤害。</span>');
-                    }
-
                     p.hp = Math.max(0, p.hp - finalDmg);
                     breakdown = finalDmg + ' (' + origDmg + '原始 - ' + defReduced + '防御' + (absorbed > 0 ? ' - ' + absorbed + '护盾' : '') + ')';
                     _log('<span style="color:var(--accent-red);">' + mon.name + ' 对你造成 ' + breakdown + ' 点伤害。</span>');
@@ -628,47 +529,32 @@ window.CombatSystem = (function () {
                 window.UISystem.triggerShake('app');
                 if (window.Sound) window.Sound.hit();
                 if (finalDmg > 0) window.UISystem.showDamageFloat('-' + finalDmg, 'var(--accent-red)', 'player');
-                // 神经突触结：受击回复进程
-                var cfx3 = _getComponentEffects();
-                if (cfx3.processOnHit > 0 && finalDmg > 0) {
-                    _battleState.playerProcess = Math.min(GS().player.process_max, _battleState.playerProcess + cfx3.processOnHit);
-                    GS().player.process = _battleState.playerProcess;
-                    _log('<span style="color:var(--accent-green)">神经突触激活，受击回复 ' + cfx3.processOnHit + ' 进程。</span>');
-                }
-                // 组件反伤
-                var cfx2 = _getComponentEffects();
-                if (cfx2.thornsPct > 0 && rawDmg > 0) {
-                    var thornDmg = Math.ceil(rawDmg * cfx2.thornsPct);
-                    mon.hp = Math.max(0, mon.hp - thornDmg);
-                    _log('<span style="color:var(--accent-blue)">电磁反伤！' + mon.name + ' 受到 ' + thornDmg + ' 点反击伤害。</span>');
-                    window.UISystem.showDamageFloat('<span class="icon icon-lightning-arc"></span>-' + thornDmg, 'var(--accent-blue)', 'monster');
-                    if (_allMonstersDead()) { _winBattle(); return; }
-                }
-                // Boss器官：暴君甲壳反伤
-                if (_battleState._chitinThorns && rawDmg > 0) {
-                    var boneThorn = Math.ceil(rawDmg * _battleState._chitinThorns);
-                    mon.hp = Math.max(0, mon.hp - boneThorn);
-                    _log('<span style="color:var(--race-mutant)">骨板反伤！' + mon.name + ' 受到 ' + boneThorn + ' 点反伤。</span>');
-                    window.UISystem.showDamageFloat('-' + boneThorn, 'var(--accent-red)', 'monster');
-                    if (_allMonstersDead()) { _winBattle(); return; }
-                }
-                // 流血（机械余烬免疫）
-                if (intent.bleed && !md.bleedImmune) { _battleState.playerStatus['bleed'] = intent.bleed.duration || 3; _log('<span style="color:var(--accent-red);">施加流血 ' + intent.bleed.duration + ' 回合。</span>'); }
-                // 自防buff
-                if (intent.selfDefBuff) { mon._defBuff = (mon._defBuff || 0) + intent.selfDefBuff; }
-                // 反噬
-                if (md.recoilDamage && finalDmg > 0) { mon.hp = Math.max(0, mon.hp - md.recoilDamage); _log('<span style="color:var(--accent-blue)">' + mon.name + ' 受到 ' + md.recoilDamage + ' 反噬伤害。</span>'); window.UISystem.showDamageFloat('<span class="icon icon-lightning-arc"></span>-' + md.recoilDamage, 'var(--accent-blue)', 'monster'); }
-                // 酸蚀肉山被动
-                if (_battleState.dualKey === 'mutant+swarm' && Math.random() < 0.55) {
-                    mon.status['poison'] = 3;
-                    _log('<span style="color:var(--accent-purple);">【骨疽自溶】毒雾反击！</span>');
-                }
-                mon.intent = _generateIntent(md);
-                window.UISystem.render();
-                if (p.hp <= 0) { _doDefeat(); } else { setTimeout(function() { processMonster(idx + 1); }, 300); }
-            }
-        };
 
+                var cfx3 = _getComponentEffects();
+                if (cfx3.processOnHit > 0 && finalDmg > 0) { _battleState.playerProcess = Math.min(GS().player.process_max, _battleState.playerProcess + cfx3.processOnHit); GS().player.process = _battleState.playerProcess; _log('<span style="color:var(--accent-green)">神经突触激活，受击回复 ' + cfx3.processOnHit + ' 进程。</span>'); }
+                var cfx2 = _getComponentEffects();
+                if (cfx2.thornsPct > 0 && rawDmg > 0) { var thornDmg = Math.ceil(rawDmg * cfx2.thornsPct); mon.hp = Math.max(0, mon.hp - thornDmg); _log('<span style="color:var(--accent-blue)">电磁反伤！' + mon.name + ' 受到 ' + thornDmg + ' 点反击伤害。</span>'); window.UISystem.showDamageFloat('<span class="icon icon-lightning-arc"></span>-' + thornDmg, 'var(--accent-blue)', 'monster'); if (_allMonstersDead()) { _winBattle(); return; } }
+                if (_battleState._chitinThorns && rawDmg > 0) { var boneThorn = Math.ceil(rawDmg * _battleState._chitinThorns); mon.hp = Math.max(0, mon.hp - boneThorn); _log('<span style="color:var(--race-mutant)">骨板反伤！' + mon.name + ' 受到 ' + boneThorn + ' 点反伤。</span>'); window.UISystem.showDamageFloat('-' + boneThorn, 'var(--accent-red)', 'monster'); if (_allMonstersDead()) { _winBattle(); return; } }
+                if (intent.bleed && !md.bleedImmune) { _battleState.playerStatus['bleed'] = intent.bleed.duration || 3; _log('<span style="color:var(--accent-red);">施加流血 ' + intent.bleed.duration + ' 回合。</span>'); }
+                if (intent.selfDefBuff) mon._defBuff = (mon._defBuff || 0) + intent.selfDefBuff;
+                if (md.recoilDamage && finalDmg > 0) { mon.hp = Math.max(0, mon.hp - md.recoilDamage); _log('<span style="color:var(--accent-blue)">' + mon.name + ' 受到 ' + md.recoilDamage + ' 反噬伤害。</span>'); window.UISystem.showDamageFloat('<span class="icon icon-lightning-arc"></span>-' + md.recoilDamage, 'var(--accent-blue)', 'monster'); }
+                if (_battleState.dualKey === 'mutant+swarm' && Math.random() < 0.55) { mon.status['poison'] = 3; _log('<span style="color:var(--accent-purple);">【骨疽自溶】毒雾反击！</span>'); }
+
+                if (result.healSelf) { mon.hp = Math.min(mon.hpMax, mon.hp + result.healSelf); _log(mon.name + ' 吸取了 ' + result.healSelf + ' 点生命。'); }
+            } else if (result.type === 'enrage') {
+                _log(result.msg);
+            } else if (result.type === 'dodge') {
+                _log(result.msg);
+            } else if (result.msg) {
+                _log(result.msg);
+            }
+
+            mon.intent = _generateIntent(md);
+            window.UISystem.render();
+            if (p.hp <= 0) { _doDefeat(); return; }
+            var delay = (intent.type === 'stun' || mon.status['stunned']) ? 400 : 300;
+            setTimeout(function() { processMonster(idx + 1); }, delay);
+        };
         processMonster(0);
     }
 
@@ -771,35 +657,30 @@ window.CombatSystem = (function () {
             _log('<span style="color:var(--accent-blue)">纳米修复场回复 ' + _battleState._chitinRegen + ' 进程。</span>');
         }
         if (p.coatingTurnsLeft > 0) { p.coatingTurnsLeft--; if (p.coatingTurnsLeft <= 0) { p.activeCoating = null; _log('<span class="txt-dim">涂层活性耗尽。</span>'); } }
-        // 狂暴状态递减
+        // 玩家状态递减 — StatusEngine + PassiveEngine
+        var TE = window.TemplateEngine;
         if (_battleState.playerStatus['berserk']) {
             _battleState.playerStatus['berserk']--;
             p.hp = Math.max(0, p.hp - Math.ceil(p.hp_max * 0.005));
             if (_battleState.playerStatus['berserk'] <= 0) { delete _battleState.playerStatus['berserk']; _log('<span class="txt-dim">狂暴效果消退。</span>'); }
         }
-        // 防御/攻击临时效果递减
+        // 状态递减 — StatusEngine
+        var pTargets = [{ target: { status: _battleState.playerStatus, hp: p.hp, hpMax: p.hp_max }, battleState: _battleState, playerHpMax: p.hp_max }];
+        TE.StatusEngine.tickTurnEnd(pTargets);
+        // 清理过期状态
         ['defBoost','defDebuff','atkDebuff'].forEach(function(s) {
             if (_battleState.playerStatus[s]) { _battleState.playerStatus[s]--; if (_battleState.playerStatus[s] <= 0) delete _battleState.playerStatus[s]; }
         });
         p.toxicity = Math.max(0, p.toxicity - 1);
-        // 终焉母核：连锁闪电
-        if (_battleState.dualKey === 'ember+ember') {
+
+        // 终焉母核 — PassiveEngine 触发 onTurnStart
+        var alive2 = _getAliveMonsters();
+        var psvCtx = { player: p, battleState: _battleState, allEnemies: alive2, target: alive2[0] };
+        var psvResults = TE.PassiveEngine.trigger('onTurnStart', psvCtx);
+        if (psvResults.length > 0) {
             if (window.Sound) window.Sound.electric();
-            var alive2 = _getAliveMonsters();
-            // 清除所有怪物闪避状态
-            for (var i2 = 0; i2 < alive2.length; i2++) {
-                if (alive2[i2].status && alive2[i2].status['dodging']) {
-                    delete alive2[i2].status['dodging'];
-                    _log('<span style="color:var(--accent-blue)">【格式化电弧】清除' + alive2[i2].name + '闪避防御。</span>');
-                }
-            }
-            // 连锁闪电（最多2个目标）
-            for (var i2 = 0; i2 < alive2.length && i2 < 2; i2++) {
-                var lDmg = Math.ceil(GS().player.def * 1.2);
-                alive2[i2].hp = Math.max(0, alive2[i2].hp - lDmg);
-                _log('<span style="color:var(--accent-blue)">【格式化电弧】' + alive2[i2].name + ' 受到 ' + lDmg + ' 点电离伤害。</span>');
-                window.UISystem.showDamageFloat('<span class="icon icon-lightning-arc"></span>-' + lDmg, 'var(--accent-blue)', 'monster');
-            }
+            var psvLogs = TE.PassiveEngine.applyResults(psvResults, psvCtx, _battleState);
+            psvLogs.forEach(function(l){ _log('<span style="color:' + (l.color||'var(--accent-blue)') + '">' + l.msg + '</span>'); });
             if (_allMonstersDead()) { _winBattle(); return; }
         }
         window.UISystem.render();
@@ -917,23 +798,16 @@ window.CombatSystem = (function () {
             gs.bestiary.killCount[mon.id] = (gs.bestiary.killCount[mon.id] || 0) + 1;
             totalBp += Math.ceil((Math.floor(Math.random() * (m.bpReward[1] - m.bpReward[0] + 1)) + m.bpReward[0]) * scale.bpMul);
             var xpGain = Math.ceil(m.level * 15 * scale.xpMul);
-
-            // [新增] 路径词缀：信号富集 (经验 +50%)
-            if (_battleState.pathAffix && _battleState.pathAffix.id === 'data_rich') {
-                xpGain = Math.ceil(xpGain * 1.5);
-            }
+            // 路径词缀 — 数据驱动
+            var patAff = _battleState.pathAffix;
+            var patTpl = patAff ? (GD().PATH_AFFIX_TEMPLATES || []).find(function(t){ return t.id === patAff.id; }) : null;
+            if (patTpl && patTpl.xpMult) xpGain = Math.ceil(xpGain * patTpl.xpMult);
             totalXp += xpGain;
-
-            // [新增] 研究等级 3 奖励：组件掉落率提升 25% (乘法叠加)
+            // 研究等级3：掉落率+25%
             var dropChance = m.drop ? m.drop.chance : 0;
-            if (gs.bestiary.researchLevels && gs.bestiary.researchLevels[mon.id] >= 3) {
-                dropChance *= 1.25;
-            }
-
+            if (gs.bestiary.researchLevels && gs.bestiary.researchLevels[mon.id] >= 3) dropChance *= 1.25;
             if (m.drop && Math.random() < dropChance) {
-                // [新增] 路径词缀：金属堆积 (额外掉落 1)
-                var extraDrop = (_battleState.pathAffix && _battleState.pathAffix.id === 'scrap_rich') ? 1 : 0;
-
+                var extraDrop = (patTpl && patTpl.extraDrop) ? patTpl.extraDrop : 0;
                 if (m.tier !== 'world_boss') {
                     var dropId = m.drop.pool ? GD().getRandomBossOrgan(m.drop.pool) : m.drop.id;
                     if (m.drop.type === 'organ') { gs.inventory.organs.push(dropId); }
@@ -1085,17 +959,18 @@ window.CombatSystem = (function () {
     function dungeonDeep() {
         if (!_battleState || !_battleState.isDungeon) return;
         var floor = (_battleState._dungeonFloor || 0) + 1;
-        var gs = GS(); var p = gs.player;
-        var _df = (function(f){ var cn = ['','一','二','三','四','五','六','七','八','九','十']; return '地下' + (cn[f]||f) + '层'; })(floor);
-        _log('>> 深入地下城 ' + _df + '... HP 继承。');
-        var pool2 = ['MON_CH1_CLEANER','MON_CH1_GUARD','MON_CH1_SPORE','MON_CH1_HIVE','MON_CH1_BEE','MON_CH1_SENTINEL'];
+        var cfg = GD().DIFFICULTY_CONFIG || {};
+        var fn = (cfg.floorNames && cfg.floorNames[floor]) ? cfg.floorNames[floor] : ('地下' + floor + '层');
+        _log('>> 深入地下城 ' + fn + '... HP 继承。');
         var ids;
-        if (floor >= 3) {
-            // 最终层：Boss
-            var bosses = ['MON_CH1_TYRANT', 'MON_CH1_QUEEN', 'MON_CH1_CORE'];
-            ids = [bosses[Math.floor(Math.random() * bosses.length)]];
+        if (floor >= (cfg.dungeonFloors ? cfg.dungeonFloors.bossFloor : 3)) {
+            var bossPool = (cfg.dungeonFloors && cfg.dungeonFloors.bossPool) || ['MON_CH1_TYRANT','MON_CH1_QUEEN','MON_CH1_CORE'];
+            ids = [bossPool[Math.floor(Math.random() * bossPool.length)]];
         } else {
-            ids = [pool2[Math.floor(Math.random() * pool2.length)], pool2[Math.floor(Math.random() * pool2.length)]];
+            var monPool = (cfg.dungeonFloors && cfg.dungeonFloors.monsterPool) || ['MON_CH1_CLEANER','MON_CH1_GUARD'];
+            var cnt = (cfg.dungeonFloors && cfg.dungeonFloors.monstersPerFloor) || 2;
+            ids = [];
+            for (var i = 0; i < cnt; i++) ids.push(monPool[Math.floor(Math.random() * monPool.length)]);
         }
         _battleState = null;
         startBattle(ids, { isDungeon: true });

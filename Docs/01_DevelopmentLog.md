@@ -1,5 +1,29 @@
 # 01 — 开发日志
 
+## v2.1.2 — 2026-06-20 🔧 模板引擎全覆盖 — 意图/魔药/词缀/掉落/地下城全部数据驱动
+
+### Data.js 新增模板
+- **POTION_TEMPLATES**：6种魔药执行逻辑模板化，每种一个 effect 函数
+- **AFFIX_TEMPLATES**：4种维度词缀（反馈/再生/死誓/扰频），含 onApply 钩子
+- **PATH_AFFIX_TEMPLATES**：5种路径词缀（高能反应/生物辐射/信号富集/金属堆积/酸蚀环境），含 onBattleStart 钩子 + xpMult/extraDrop 属性
+- **RESEARCH_PERKS**：3级研究增益配置（showExactHP/damageBonus/dropRateBonus）
+- **DIFFICULTY_CONFIG**：难度缩放 + 地下城配置（bossFloor/monsterPool/monstersPerFloor/floorNames）
+
+### Combat.js 7大硬编码区域全部模板化
+1. `startBattle` — 维度词缀从硬编码数组 → AFFIX_TEMPLATES 数据驱动
+2. `startBattle` — 路径词缀 if/else → PATH_AFFIX_TEMPLATES.find() + onBattleStart 钩子
+3. `playCard` — 6种魔药 if/else 链 → POTION_TEMPLATES[pot.id].effect() 模板调用
+4. `_monsterAction` — 8种意图类型 if/else（175行）→ IntentExecutor.execute() 统一分发
+5. `_winBattle` — 掉落/词缀/研究硬编码 → 数据驱动配置读取
+6. `_finishMonsterTurn` — 终焉母核硬编码 → PassiveEngine.trigger('onTurnStart')；状态递减 → StatusEngine.tickTurnEnd
+7. `dungeonDeep` — 第3层Boss/怪物池/中文层名硬编码 → DIFFICULTY_CONFIG 配置驱动
+
+### 代码量变化
+- Combat.js：1317 → 1075 行（-242行，-18%）
+- 加新词缀：AFFIX_TEMPLATES 加一条 + onApply
+- 加新魔药：POTION_TEMPLATES 加一个 effect 函数
+- 改地下城深度：DIFFICULTY_CONFIG.bossFloor 改一个数字
+
 ## v2.1.1 — 2026-06-20 🔧 模板引擎重构 — 伤害管道 + 状态引擎 + 被动系统
 
 ### 新增 TemplateEngine.js (289行)
