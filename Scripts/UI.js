@@ -697,7 +697,7 @@ window.UISystem = (function () {
             card.setAttribute('data-monster-idx', idx);
             var cardBorder = dead ? 'var(--border-dim)' : mclr;
             var cardGlow = (isTarget && !dead && !isVictory) ? 'box-shadow:0 0 20px ' + (raceCardClrs[md.race] || '#ff4455') + ';' : '';
-            card.style.cssText = 'position:relative;background:' + (hasBgImage && !dead ? 'transparent' : 'var(--bg-card)') + ';border:2px solid ' + cardBorder + ';border-radius:8px;padding:24px;text-align:center;min-width:280px;max-width:380px;min-height:320px;display:flex;flex-direction:column;justify-content:flex-start;overflow:hidden;' + cardGlow +
+            card.style.cssText = 'position:relative;background:' + (hasBgImage && !dead ? 'transparent' : 'var(--bg-card)') + ';border:1px solid ' + cardBorder + ';border-radius:8px;padding:24px;text-align:center;min-width:280px;max-width:380px;min-height:320px;display:flex;flex-direction:column;justify-content:flex-start;overflow:hidden;' + cardGlow +
                 (dead ? 'opacity:0.4;filter:grayscale(0.5);' : '') + 'cursor:' + (isVictory || dead ? 'default' : 'pointer') + ';';
 
             // 背景图层（独立呼吸，不影响卡片大小）
@@ -1146,7 +1146,7 @@ window.UISystem = (function () {
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
         var box = _ce('div', 'modal-box');
-        box.style.cssText = 'width:min(700px,90vw);max-height:55vh;background:var(--bg-modal);border:2px solid var(--accent-blue);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
+        box.style.cssText = 'width:min(700px,90vw);max-height:55vh;background:var(--bg-modal);border:1px solid var(--accent-blue);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
         var head = _ce('div');
         head.style.cssText = 'padding:20px 30px;background:rgba(0,212,255,0.05);border-bottom:1px solid var(--accent-blue);display:flex;justify-content:space-between;align-items:center;';
         var tabNames = { stats: '基础', fight: '战斗', lab: '实验室', craft: '配方' };
@@ -1196,7 +1196,7 @@ window.UISystem = (function () {
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
         var box = _ce('div', 'modal-box');
-        box.style.cssText = 'width:min(700px,90vw);max-height:85vh;background:var(--bg-modal);border:2px solid #9c27b0;border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
+        box.style.cssText = 'width:min(700px,90vw);max-height:85vh;background:var(--bg-modal);border:1px solid #9c27b0;border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
         var head = _ce('div');
         head.style.cssText = 'padding:20px 30px;background:rgba(156,39,176,0.08);border-bottom:1px solid #9c27b0;display:flex;justify-content:space-between;align-items:center;';
         head.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;width:100%;">' +
@@ -1244,7 +1244,7 @@ window.UISystem = (function () {
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
         var box = _ce('div', 'modal-box status-modal');
-        box.style.cssText = 'width:min(700px,90vw);max-height:85vh;background:var(--bg-modal);border:2px solid #f57f17;padding:0;display:flex;flex-direction:column;overflow:hidden;';
+        box.style.cssText = 'width:min(700px,90vw);max-height:85vh;background:var(--bg-modal);border:1px solid #f57f17;padding:0;display:flex;flex-direction:column;overflow:hidden;';
 
         var killedCount = 0; Object.keys(gs.bestiary.killCount || {}).forEach(function(id) { killedCount += (gs.bestiary.killCount[id] || 0); });
         var infoBar = _ce('div');
@@ -1383,7 +1383,7 @@ window.UISystem = (function () {
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
         var box = _ce('div', 'modal-box');
-        box.style.cssText = 'width:min(500px,90vw);background:var(--bg-modal);border:2px solid var(--accent-red);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
+        box.style.cssText = 'width:min(500px,90vw);background:var(--bg-modal);border:1px solid var(--accent-red);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
         var head = _ce('div');
         head.style.cssText = 'padding:20px 30px;background:rgba(255,68,85,0.08);border-bottom:1px solid var(--accent-red);';
         head.innerHTML = '<div class="txt-md txt-red txt-bold">[ 地下城准入环境预警 ]</div>';
@@ -2071,7 +2071,7 @@ window.UISystem = (function () {
         _modalOverlay.innerHTML = '';
         _modalOverlay.style.display = 'flex';
         var box = _ce('div', 'modal-box');
-        box.style.cssText = 'width:min(500px,90vw);background:var(--bg-modal);border:2px solid #f57f17;border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
+        box.style.cssText = 'width:min(500px,90vw);background:var(--bg-modal);border:1px solid #f57f17;border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
         var head = _ce('div');
         head.style.cssText = 'padding:16px 24px;background:rgba(245,124,0,0.08);border-bottom:1px solid #f57f17;display:flex;justify-content:space-between;align-items:center;';
         head.innerHTML = '<div class="txt-md txt-gold txt-bold">[ 组件合成 ]</div><button class="btn btn-blue btn-sm" onclick="UISystem.closeModal();UISystem.showReorganizeModal();">取消</button>';
@@ -2232,7 +2232,7 @@ window.UISystem = (function () {
         _modalOverlay.innerHTML = '';
         _modalOverlay.style.display = 'flex';
         var box = _ce('div', 'modal-box');
-        box.style.cssText = 'width:min(500px,90vw);background:var(--bg-modal);border:2px solid var(--accent-green);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
+        box.style.cssText = 'width:min(500px,90vw);background:var(--bg-modal);border:1px solid var(--accent-green);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
         var head = _ce('div');
         head.style.cssText = 'padding:14px 20px;background:rgba(0,255,136,0.05);border-bottom:1px solid var(--accent-green);display:flex;justify-content:space-between;align-items:center;';
         var slotNames = _ORGAN_NAMES;
@@ -2299,7 +2299,7 @@ window.UISystem = (function () {
         document.querySelectorAll('.help-popup').forEach(function(el){ el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
         var box = _ce('div', 'modal-box');
-        box.style.cssText = 'width:min(500px,90vw);background:var(--bg-modal);border:2px solid var(--accent-green);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
+        box.style.cssText = 'width:min(500px,90vw);background:var(--bg-modal);border:1px solid var(--accent-green);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
         var head = _ce('div');
         head.style.cssText = 'padding:14px 20px;background:rgba(0,255,136,0.05);border-bottom:1px solid var(--accent-green);display:flex;justify-content:space-between;align-items:center;';
         var slotNames = { predatory_organ: '捕食器官', chitin_epidermis: '几丁表皮', gland_core: '腺体核心' };
@@ -2422,7 +2422,7 @@ window.UISystem = (function () {
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
         var box = _ce('div', 'modal-box');
-        box.style.cssText = 'width:min(450px,90vw);background:var(--bg-modal);border:2px solid var(--accent-green);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
+        box.style.cssText = 'width:min(450px,90vw);background:var(--bg-modal);border:1px solid var(--accent-green);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
         var head = _ce('div');
         head.style.cssText = 'padding:14px 20px;background:rgba(0,255,136,0.05);border-bottom:1px solid var(--accent-green);display:flex;justify-content:space-between;align-items:center;';
         head.innerHTML = '<div class="txt-md txt-green txt-bold">[ 器官挂载 ]</div><button class="btn btn-blue btn-sm" onclick="UISystem.closeModal();UISystem.showReorganizeModal();">取消</button>';
