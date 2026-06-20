@@ -704,13 +704,13 @@ window.UISystem = (function () {
             // 背景图层（独立呼吸，不影响卡片大小）
             if (hasBgImage && !dead) {
                 var bgLayer = _ce('div');
-                bgLayer.style.cssText = 'position:absolute;inset:0;z-index:-1;background:url(' + md.image + ') center/100% auto no-repeat;border-radius:8px;';
+                bgLayer.style.cssText = 'position:absolute;inset:0;z-index:-2;background:url(' + md.image + ') center/100% auto no-repeat;border-radius:8px;';
                 bgLayer.className = 'boss-breathe';
                 bgLayer.style.animationDelay = '-' + (Math.random() * 4).toFixed(2) + 's';
                 card.appendChild(bgLayer);
                 // 遮罩层（在背景图上方，内容下方）
                 var overlayLayer = _ce('div');
-                overlayLayer.style.cssText = 'position:absolute;inset:0;z-index:0;background:linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.1) 100%), linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4));border-radius:8px;pointer-events:none;';
+                overlayLayer.style.cssText = 'position:absolute;inset:0;z-index:-1;background:linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.1) 100%), linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4));border-radius:8px;pointer-events:none;';
                 card.appendChild(overlayLayer);
             }
 
