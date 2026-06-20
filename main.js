@@ -13,14 +13,11 @@ function createWindow() {
   });
 
   win.setMenuBarVisibility(false);
-  // 隐藏系统光标 — 原生+CSS双重保障
-  const empty = require('electron').nativeImage.createFromDataURL('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
-  win.setCursor(empty);
-  win.webContents.on('dom-ready', function() {
-    win.setCursor(empty);
-    win.webContents.insertCSS('html,body,body *,body *::before,body *::after,#app,#app *{cursor:none!important}');
-  });
   win.loadFile('HTML/index.html');
+  win.webContents.on('dom-ready', function() {
+    // 注入cursor:none到renderer进程
+    win.webContents.executeJavaScript('document.documentElement.style.setProperty("cursor","none","important");document.body.style.setProperty("cursor","none","important");');
+  });
 }
 
 app.whenReady().then(() => {
