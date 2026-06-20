@@ -253,6 +253,25 @@ window.UISystem = (function () {
             if (t && window.Sound) window.Sound.click();
         });
         document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+
+        // —— 自定义 JS 光标（彻底隐藏系统光标）——
+        var _cursorEl = _ce('div');
+        _cursorEl.id = 'custom-cursor';
+        _cursorEl.style.cssText = 'position:fixed;pointer-events:none;z-index:99999;width:24px;height:24px;transform:translate(-12px,-12px);transition:width 0.15s,height 0.15s;';
+        _cursorEl.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" style="display:block;"><circle cx="12" cy="12" r="10" fill="none" stroke="#00ff88" stroke-width="1" opacity="0.8"/><circle cx="12" cy="12" r="3" fill="none" stroke="#00ff88" stroke-width="1.2" opacity="0.6"/><line x1="12" y1="2" x2="12" y2="6" stroke="#00ff88" stroke-width="1" opacity="0.7"/><line x1="12" y1="18" x2="12" y2="22" stroke="#00ff88" stroke-width="1" opacity="0.7"/><line x1="2" y1="12" x2="6" y2="12" stroke="#00ff88" stroke-width="1" opacity="0.7"/><line x1="18" y1="12" x2="22" y2="12" stroke="#00ff88" stroke-width="1" opacity="0.7"/></svg>';
+        document.body.appendChild(_cursorEl);
+        var _cursorClickSVG = '<svg width="24" height="24" viewBox="0 0 24 24" style="display:block;"><circle cx="12" cy="12" r="10" fill="#00ff88" fill-opacity="0.12" stroke="#00ff88" stroke-width="1.5"/><circle cx="12" cy="12" r="2.5" fill="#00ff88" fill-opacity="0.9"/></svg>';
+        var _cursorDefaultSVG = '<svg width="24" height="24" viewBox="0 0 24 24" style="display:block;"><circle cx="12" cy="12" r="10" fill="none" stroke="#00ff88" stroke-width="1" opacity="0.8"/><circle cx="12" cy="12" r="3" fill="none" stroke="#00ff88" stroke-width="1.2" opacity="0.6"/><line x1="12" y1="2" x2="12" y2="6" stroke="#00ff88" stroke-width="1" opacity="0.7"/><line x1="12" y1="18" x2="12" y2="22" stroke="#00ff88" stroke-width="1" opacity="0.7"/><line x1="2" y1="12" x2="6" y2="12" stroke="#00ff88" stroke-width="1" opacity="0.7"/><line x1="18" y1="12" x2="22" y2="12" stroke="#00ff88" stroke-width="1" opacity="0.7"/></svg>';
+        document.addEventListener('mousemove', function(e) {
+            _cursorEl.style.left = e.clientX + 'px';
+            _cursorEl.style.top = e.clientY + 'px';
+            // 检测是否在可点击元素上
+            var t = e.target.closest && e.target.closest('button:not(:disabled), .btn:not(:disabled), a, .path-card, .monster-card, [onclick], [data-clickable], .btn-organ, .btn-unload, .slot-ready, .mastery-btn');
+            var isClickable = !!t;
+            _cursorEl.innerHTML = isClickable ? _cursorClickSVG : _cursorDefaultSVG;
+            _cursorEl.style.width = isClickable ? '24px' : '24px';
+            _cursorEl.style.height = isClickable ? '24px' : '24px';
+        });
         // 统一详情浮窗
         document.addEventListener('mouseover', function(e) {
             var t = e.target.closest && e.target.closest('.help-tip');
