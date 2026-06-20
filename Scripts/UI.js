@@ -693,17 +693,26 @@ window.UISystem = (function () {
 
             // 怪物卡片
             var card = _ce('div');
-            card.className = 'monster-card' + (hasBgImage && !dead ? ' boss-breathe' : '');
-            // 每个卡片随机动画相位，避免切换目标时齐步重启
-            if (hasBgImage && !dead) card.style.animationDelay = '-' + (Math.random() * 4).toFixed(2) + 's';
+            card.className = 'monster-card';
             card.setAttribute('data-monster-idx', idx);
             var cardBorder = dead ? 'var(--border-dim)' : mclr;
             var cardGlow = (isTarget && !dead && !isVictory) ? 'box-shadow:0 0 20px ' + (raceCardClrs[md.race] || '#ff4455') + ';' : '';
-            var cardBg = (hasBgImage && !dead)
-                ? 'linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.1) 100%), linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url(' + md.image + ') center/100% auto no-repeat'
-                : 'var(--bg-card)';
-            card.style.cssText = 'position:relative;background:' + cardBg + ';border:2px solid ' + cardBorder + ';border-radius:8px;padding:24px;text-align:center;min-width:280px;max-width:380px;min-height:320px;display:flex;flex-direction:column;justify-content:flex-start;' + cardGlow +
+            var overlayGrad = 'linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.1) 100%), linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4))';
+            card.style.cssText = 'position:relative;background:' + (hasBgImage && !dead ? overlayGrad : 'var(--bg-card)') + ';border:2px solid ' + cardBorder + ';border-radius:8px;padding:24px;text-align:center;min-width:280px;max-width:380px;min-height:320px;display:flex;flex-direction:column;justify-content:flex-start;overflow:hidden;' + cardGlow +
                 (dead ? 'opacity:0.4;filter:grayscale(0.5);' : '') + 'cursor:' + (isVictory || dead ? 'default' : 'pointer') + ';';
+
+            // 背景图层（独立呼吸，不影响卡片大小）
+            if (hasBgImage && !dead) {
+                var bgLayer = _ce('div');
+                bgLayer.style.cssText = 'position:absolute;inset:0;z-index:-1;background:url(' + md.image + ') center/100% auto no-repeat;border-radius:8px;';
+                bgLayer.className = 'boss-breathe';
+                bgLayer.style.animationDelay = '-' + (Math.random() * 4).toFixed(2) + 's';
+                card.appendChild(bgLayer);
+                // 遮罩层（在背景图上方，内容下方）
+                var overlayLayer = _ce('div');
+                overlayLayer.style.cssText = 'position:absolute;inset:0;z-index:0;background:linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.1) 100%), linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4));border-radius:8px;pointer-events:none;';
+                card.appendChild(overlayLayer);
+            }
 
             // [新增] 种族克制标记 (方案 A：右上角弱点锁定)
             var pRaces = gs.player.masteries.filter(function(r) { return r; });
