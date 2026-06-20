@@ -1577,10 +1577,10 @@ window.UISystem = (function () {
                     if (m.shieldPerTurn) traits.push('护盾 +' + m.shieldPerTurn + '/回合');
                     if (m.recoilDamage) traits.push('反噬 ' + m.recoilDamage + '点');
                     cardTip = '<b style=color:' + rclr + ';font-size:15px;>' + m.name + '</b>' +
-                        '&#10;<span style=color:var(--text-dim)>━━━━━━━━━━━━━━━</span>' +
-                        '&#10;<b>生命</b> ' + m.hp + '　<b>攻击</b> ' + m.atk + '　<b>防御</b> ' + m.def +
-                        (traits.length > 0 ? '&#10;&#10;<b style=color:var(--accent-yellow)>特质</b>&#10;  ' + traits.join('&#10;  ') : '') +
-                        '&#10;&#10;<b>弱点</b>&#10;  ' + (m.weakness || '无特殊弱点');
+                        '\n<span style=color:var(--text-dim)>━━━━━━</span>' +
+                        '\n<b>生命</b> ' + m.hp + '　<b>攻击</b> ' + m.atk + '　<b>防御</b> ' + m.def +
+                        (traits.length > 0 ? '\n\n<b style=color:var(--accent-yellow)>特质</b>\n  ' + traits.join('\n  ') : '') +
+                        '\n\n<b>弱点</b>\n  ' + (m.weakness || '无特殊弱点');
                 }
                 item.className = known ? 'help-tip' : '';
                 if (known) item.setAttribute('data-tip', cardTip);
