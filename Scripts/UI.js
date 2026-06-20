@@ -1482,22 +1482,20 @@ window.UISystem = (function () {
                 var rclr = raceHeaderClrs[m.race] || '#ffd54f';
                 var bgClr = known ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.01)';
 
-                // 精英/Boss 差异化样式
+                // 统一卡片样式 — 全部竖卡180×240
                 var isElite = m.tier === 'elite';
                 var isBoss = m.tier === 'world_boss';
-                var isSpecial = (isElite || isBoss) && known && m.image;
                 var tierBadge = '';
                 var tierBorderClr = known ? rclr : '#333';
-                var tierBg = bgClr;
-                var tierPadding = '15px 18px';
-                var tierFontSize = 'txt-sm';
+                var tierGlow = '';
                 if (isBoss && known) {
-                    tierBadge = '<span style="display:inline-block;padding:2px 10px;background:rgba(255,68,85,0.2);border:1px solid var(--accent-red);border-radius:3px;font-size:12px;color:var(--accent-red);">首领</span>';
+                    tierBadge = '<span style="display:inline-block;padding:1px 8px;background:rgba(255,68,85,0.2);border:1px solid var(--accent-red);border-radius:3px;font-size:11px;color:var(--accent-red);">首领</span>';
                     tierBorderClr = 'var(--accent-red)';
-                    tierFontSize = 'txt-md';
+                    tierGlow = 'box-shadow:0 0 16px rgba(255,68,85,0.2);';
                 } else if (isElite && known) {
-                    tierBadge = '<span style="display:inline-block;padding:2px 8px;background:rgba(255,213,79,0.12);border:1px solid var(--accent-yellow);border-radius:3px;font-size:12px;color:var(--accent-yellow);">精英</span>';
+                    tierBadge = '<span style="display:inline-block;padding:1px 6px;background:rgba(255,213,79,0.12);border:1px solid var(--accent-yellow);border-radius:3px;font-size:11px;color:var(--accent-yellow);">精英</span>';
                     tierBorderClr = 'var(--accent-yellow)';
+                    tierGlow = 'box-shadow:0 0 10px rgba(255,213,79,0.08);';
                 }
 
                 var item = _ce('div');
@@ -1507,41 +1505,38 @@ window.UISystem = (function () {
                 if (known) {
                     var nextCost = [500, 1500, 3000][rl] || null;
                     var canAfford = nextCost !== null && gs.player.bp >= nextCost;
-                    researchRow = '<div style="display:flex;align-items:center;gap:15px;margin-top:4px;padding:10px;background:rgba(0,0,0,0.3);border-radius:4px;">' +
-                        '<div style="flex:1;">' +
-                            '<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span class="txt-xs txt-gold">研究等级 ' + rl + '/3</span>' +
-                            (rl >= 3 ? '<span class="txt-xs txt-green">研究已饱和</span>' : '<span class="txt-xs txt-dim">下级需 ' + nextCost + ' BP</span>') + '</div>' +
-                            '<div class="progress-container" style="height:6px;background:#111;"><div class="progress-fill xp-fill" style="width:' + (rl/3*100) + '%; transition:width 0.5s;"></div></div>' +
+                    researchRow = '<div style="padding:6px 8px;background:rgba(0,0,0,0.3);border-radius:3px;">' +
+                        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">' +
+                            '<span class="txt-xs txt-gold">研究 ' + rl + '/3</span>' +
+                            (rl < 3 ? '<button class="btn ' + (canAfford ? 'btn-gold' : 'btn-gray') + ' btn-sm" style="padding:1px 6px;font-size:11px;" onclick="var r=GameState.researchMonster(\'' + id + '\'); if(r.success){UISystem.showBestiaryModal();UISystem.showNotification(\'研究突破！\',\'' + m.name + '\',\'var(--accent-yellow)\');}">' + (canAfford ? '研究' : 'BP不足') + '</button>' : '<span class="txt-xs txt-green">饱和</span>') +
                         '</div>' +
-                        (rl < 3 ? '<button class="btn ' + (canAfford ? 'btn-gold' : 'btn-gray') + ' btn-sm" onclick="var r=GameState.researchMonster(\'' + id + '\'); if(r.success){UISystem.showBestiaryModal();UISystem.showNotification(\'研究突破！\', \'' + m.name + ' 等级提升至 \' + r.newLevel, \'var(--accent-yellow)\');}" style="padding:6px 15px;">' + (canAfford ? '投入研究' : 'BP不足') + '</button>' : '') +
+                        '<div class="progress-container" style="height:4px;background:#111;"><div class="progress-fill xp-fill" style="width:' + (rl/3*100) + '%; transition:width 0.5s;"></div></div>' +
                         '</div>';
                 }
 
-                if (isSpecial) {
-                    // 精英/首领：战斗卡片式竖方块 — 8:9比例全图背景
-                    var cardW = 180, cardH = 260;
-                    if (isBoss) { cardW = 220; cardH = 310; }
-                    item.style.cssText = 'position:relative;width:' + cardW + 'px;height:' + cardH + 'px;border-radius:8px;overflow:hidden;border:2px solid ' + tierBorderClr + ';flex-shrink:0;' + (isBoss ? 'box-shadow:0 0 20px rgba(255,68,85,0.2);' : 'box-shadow:0 0 10px rgba(255,213,79,0.1);');
-                    item.innerHTML = '<div style="position:absolute;inset:0;background:url(' + m.image + ') center/cover no-repeat;filter:brightness(0.5);z-index:0;"></div>' +
-                        '<div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0.1) 50%,rgba(0,0,0,0.3) 100%);z-index:1;"></div>' +
-                        '<div style="position:relative;z-index:2;display:flex;flex-direction:column;justify-content:flex-end;height:100%;padding:12px;">' +
-                            '<div style="margin-bottom:2px;">' + tierBadge + '</div>' +
-                            '<div class="' + tierFontSize + ' txt-bold" style="color:' + rclr + ';margin-bottom:2px;">' + m.name + '</div>' +
-                            '<div class="txt-xs txt-dim" style="margin-bottom:4px;">Lv.' + m.level + ' · 击杀: ' + kc + '</div>' +
-                            '<div class="txt-xs txt-dim" style="margin-bottom:6px;line-height:1.4;">HP:' + m.hp + ' ATK:' + m.atk + ' DEF:' + m.def + '</div>' +
-                            researchRow +
-                        '</div>';
+                // 背景：有图用图，无图用种族色渐变
+                var bgStyle = '';
+                if (known && m.image) {
+                    bgStyle = 'background:url(' + m.image + ') center/cover no-repeat;';
                 } else {
-                    // 普通：横条样式
-                    item.style.cssText = 'width:280px;padding:' + tierPadding + ';background:' + tierBg + ';border-radius:6px;border-left:4px solid ' + tierBorderClr + ';display:flex;flex-direction:column;gap:10px;flex-shrink:0;';
-                    var topRow = '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-                        '<span class="' + tierFontSize + ' txt-bold" style="color:' + (known ? rclr : 'var(--text-disabled)') + ';">' + (known ? m.name : '???') + tierBadge + '</span>' +
-                        '<span class="txt-xs txt-dim">' + (known ? 'Lv.' + m.level : '未遭遇') + '</span>' +
-                        '</div>';
-                    item.innerHTML = topRow +
-                        (known ? '<div class="txt-xs txt-dim">生命:' + m.hp + ' 攻击:' + m.atk + ' 防御:' + m.def + ' | 击杀: ' + kc + ' | ' + m.weakness + '</div>' : '') +
-                        researchRow;
+                    var rcBg = { mutant: '#1a0a08', swarm: '#0a1a08', ember: '#080a1a' }[m.race] || '#0a0a0a';
+                    bgStyle = 'background:linear-gradient(135deg,' + rcBg + ',rgba(0,0,0,0.8));';
                 }
+                item.style.cssText = 'position:relative;width:180px;height:240px;border-radius:8px;overflow:hidden;border:1px solid ' + tierBorderClr + ';flex-shrink:0;' + tierGlow + bgStyle;
+
+                var imgLayer = '';
+                if (known && m.image) {
+                    imgLayer = '<div style="position:absolute;inset:0;background:url(' + m.image + ') center/cover no-repeat;filter:brightness(0.5);z-index:0;"></div>';
+                }
+                item.innerHTML = imgLayer +
+                    '<div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.92) 0%,rgba(0,0,0,0.3) 55%,rgba(0,0,0,0.4) 100%);z-index:1;"></div>' +
+                    '<div style="position:relative;z-index:2;display:flex;flex-direction:column;justify-content:flex-end;height:100%;padding:10px;">' +
+                        (known ? '<div style="margin-bottom:3px;">' + tierBadge + '</div>' : '') +
+                        '<div class="txt-sm txt-bold" style="color:' + (known ? rclr : 'var(--text-disabled)') + ';margin-bottom:2px;line-height:1.2;">' + (known ? m.name : '???') + '</div>' +
+                        '<div class="txt-xs txt-dim" style="margin-bottom:3px;">' + (known ? 'Lv.' + m.level + ' · 击杀:' + kc : '未遭遇') + '</div>' +
+                        (known ? '<div class="txt-xs txt-dim" style="margin-bottom:4px;line-height:1.3;">HP ' + m.hp + ' / ATK ' + m.atk + ' / DEF ' + m.def + '</div>' : '') +
+                        researchRow +
+                    '</div>';
 
                 _bestiaryWrap.appendChild(item);
             });
