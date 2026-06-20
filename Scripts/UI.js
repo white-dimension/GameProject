@@ -1565,7 +1565,7 @@ window.UISystem = (function () {
 
                 var imgLayer = '';
                 if (known && m.image) {
-                    imgLayer = '<div style="position:absolute;inset:0;background:url(' + m.image + ') center/cover no-repeat;filter:brightness(0.5);z-index:0;"></div>';
+                    imgLayer = '<div style="position:absolute;inset:0;background:url(' + m.image + ') center/cover no-repeat;filter:brightness(0.7);z-index:0;"></div>';
                 }
                 var cardTip = '';
                 if (known) {
@@ -1583,8 +1583,8 @@ window.UISystem = (function () {
                 }
                 item.className = 'bestiary-card' + (known ? ' help-tip' : '');
                 if (known) item.setAttribute('data-tip', cardTip);
-                item.innerHTML = (known && m.image ? '<div class="card-bg" style="position:absolute;inset:0;background:url(' + m.image + ') center/cover no-repeat;filter:brightness(0.5);z-index:0;"></div>' : imgLayer) +
-                    '<div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.92) 0%,rgba(0,0,0,0.3) 55%,rgba(0,0,0,0.4) 100%);z-index:1;"></div>' +
+                item.innerHTML = (known && m.image ? '<div class="card-bg" style="position:absolute;inset:0;background:url(' + m.image + ') center/cover no-repeat;filter:brightness(0.7);z-index:0;"></div>' : imgLayer) +
+                    '<div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.75) 0%,rgba(0,0,0,0.15) 50%,rgba(0,0,0,0.25) 100%);z-index:1;"></div>' +
                     '<div style="position:relative;z-index:2;display:flex;flex-direction:column;justify-content:flex-end;height:100%;padding:10px;">' +
                         (known ? '<div style="margin-bottom:3px;">' + tierBadge + '</div>' : '') +
                         '<div class="txt-sm txt-bold" style="color:' + (known ? rclr : 'var(--text-disabled)') + ';margin-bottom:2px;line-height:1.2;">' + (known ? m.name : '???') + '</div>' +
