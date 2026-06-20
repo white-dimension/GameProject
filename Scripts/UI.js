@@ -288,12 +288,12 @@ window.UISystem = (function () {
             var r = t.getBoundingClientRect();
             var th = tip.offsetHeight;
             tip.style.visibility = 'visible';
-            tip.style.left = Math.min(r.left, window.innerWidth - 310) + 'px';
-            // 上方空间不够时显示在下方
-            if (r.top - th - 6 < 10) {
-                tip.style.top = (r.bottom + 6) + 'px';
+            tip.style.left = Math.max(0, Math.min(r.left, window.innerWidth - 310)) + 'px';
+            // 上方空间不够时显示在下方，间距12px
+            if (r.top - th - 12 < 10) {
+                tip.style.top = (r.bottom + 12) + 'px';
             } else {
-                tip.style.top = (r.top - th - 6) + 'px';
+                tip.style.top = (r.top - th - 12) + 'px';
             }
         });
         document.addEventListener('mouseout', function(e) {
