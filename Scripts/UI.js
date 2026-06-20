@@ -231,7 +231,7 @@ window.UISystem = (function () {
 
         var actionBar = _ce('div', 'action-bar');
         actionBar.id = 'ui-action-bar';
-        actionBar.style.cssText = 'position:relative;width:100%;min-height:60px;padding:8px 25px;background:rgba(5,5,8,0.75);border-top:1px solid var(--border-dim);box-shadow:0 -4px 20px rgba(0,0,0,0.5);display:flex;flex-direction:row;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;z-index:500;';
+        actionBar.style.cssText = 'position:relative;width:100%;min-height:60px;padding:8px 25px;background:rgba(5,5,8,0.75);border-top:1px solid var(--border-dim);box-shadow:0 -4px 20px rgba(0,0,0,0.5);z-index:500;display:flex;justify-content:center;align-items:center;';
         _root.appendChild(actionBar);
 
         _modalOverlay = _ce('div', 'modal-overlay');
@@ -987,6 +987,9 @@ window.UISystem = (function () {
 
     function _renderActions(gs, inBattle) {
         var bar = document.getElementById('ui-action-bar'); if (!bar) return; bar.innerHTML = '';
+        // 内层居中容器 — 确保按钮始终居中
+        var btnWrap = _ce('div');
+        btnWrap.style.cssText = 'display:flex;flex-direction:row;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;max-width:100%;';
         if (inBattle) {
             var bsv = CS().getBattleState();
             var skillInfo = document.getElementById('ui-skill-info');
@@ -1148,6 +1151,7 @@ window.UISystem = (function () {
             }
 
             var bos = GD().BOSS_ORGANS || {};
+            bar.appendChild(btnWrap);
             var defs = _DEFAULT_SKILLS;
             defs.forEach(function (btn) {
                 var eq = gs.player[btn.s].equipped;
@@ -1169,7 +1173,7 @@ window.UISystem = (function () {
                 b.innerHTML = '<span class="txt-sm txt-bold">[' + btn.k + '] ' + btn.l + '</span>' +
                               '<span class="txt-xs">' + costHTML + ' 进程</span>';
                 if (can) b.onclick = function() { this.style.transform = 'translateY(2px)'; this.style.filter = 'brightness(0.8)'; var s = btn.s; setTimeout(function() { CS().playCard(s); }, 80); };
-                bar.appendChild(b);
+                btnWrap.appendChild(b);
             });
             // 魔药按钮
             if (!isVictory) {
@@ -1180,7 +1184,7 @@ window.UISystem = (function () {
                     var pb = _ce('button', 'btn btn-purple btn-battle-card');
                     pb.innerHTML = '<span class="txt-sm txt-bold">[' + pkeys[pidx] + '] ' + pd.name + '</span><span class="txt-xs">毒性+' + pd.toxicity + '</span>';
                     pb.onclick = function() { this.style.transform = 'translateY(2px)'; this.style.filter = 'brightness(0.8)'; setTimeout(function() { CS().playCard(null, pid); }, 80); };
-                    bar.appendChild(pb);
+                    btnWrap.appendChild(pb);
                 });
             }
             // 结束回合 / 逃跑
@@ -1192,12 +1196,12 @@ window.UISystem = (function () {
                     var _df2 = (function(f){ var cn = ['','一','二','三','四','五','六','七','八','九','十']; return '地下' + (cn[f]||f) + '层'; })((bs._dungeonFloor||0)+2);
                     deep.innerHTML = '<span class="txt-sm txt-bold">[0] 深入地下城</span><span class="txt-xs">' + _df2 + '</span>';
                     deep.onclick = function() { this.style.transform = 'translateY(2px)'; setTimeout(function() { CS().dungeonDeep(); }, 80); };
-                    bar.appendChild(deep);
+                    btnWrap.appendChild(deep);
                 }
                 var end = _ce('button', 'btn btn-orange btn-battle-card');
                 end.innerHTML = '<span class="txt-sm txt-bold">[空格] 退出战斗</span><span class="txt-xs">返回探索</span>';
                 end.onclick = function() { this.style.transform = 'translateY(2px)'; setTimeout(function() { CS().exitBattle(); }, 80); };
-                bar.appendChild(end);
+                btnWrap.appendChild(end);
             } else {
                 var end = _ce('button', 'btn btn-orange btn-battle-card');
                 var recoveryVal = gs.player.process_recovery || 3;
@@ -1206,20 +1210,20 @@ window.UISystem = (function () {
                 if (aliveM3.some(function(m){ return m.affixes && m.affixes.some(function(a){return a.id==='jammer';}); })) recoveryVal = Math.max(1, recoveryVal - 1);
                 end.innerHTML = '<span class="txt-sm txt-bold">[空格] 结束回合</span><span class="txt-xs">回复 ' + recoveryVal + ' 进程</span>';
                 end.onclick = function() { this.style.transform = 'translateY(2px)'; this.style.filter = 'brightness(0.8)'; setTimeout(function() { CS().endTurn(); }, 80); };
-                bar.appendChild(end);
+                btnWrap.appendChild(end);
                 // 逃跑按钮（训练模式不显示）
                 if (!bs._isTraining) {
                     var fleeBtn = _ce('button', 'btn btn-red btn-battle-card');
                     fleeBtn.innerHTML = '<span class="txt-sm txt-bold">[E] 紧急切断</span><span class="txt-xs">消耗 4 进程</span>';
                     fleeBtn.onclick = function() { this.style.transform = 'translateY(2px)'; this.style.filter = 'brightness(0.8)'; setTimeout(function() { CS().flee(); }, 80); };
-                    bar.appendChild(fleeBtn);
+                    btnWrap.appendChild(fleeBtn);
                 }
                 // 训练模式：退出按钮
                 if (bs._isTraining) {
                     var quitBtn = _ce('button', 'btn btn-blue btn-battle-card');
                     quitBtn.innerHTML = '<span class="txt-sm txt-bold">[Q] 退出训练</span><span class="txt-xs">返回实验室</span>';
                     quitBtn.onclick = function() { this.style.transform = 'translateY(2px)'; setTimeout(function() { CS().exitBattle(); }, 80); };
-                    bar.appendChild(quitBtn);
+                    btnWrap.appendChild(quitBtn);
                 }
             }
         } else {
