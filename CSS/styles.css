@@ -515,7 +515,7 @@ body::after {
 
 /* 战斗卡牌按钮 */
 .btn-battle-card {
-    width: 175px;
+    width: 200px;
     height: 95px;
     flex-direction: column;
     gap: 5px;
