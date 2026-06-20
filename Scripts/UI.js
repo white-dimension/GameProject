@@ -1,5 +1,15 @@
 /**
- * UI.js — v5.3 沉浸式图标映射版
+ * UI.js — v3.0
+ *
+ * SECTION 1 (L~56):    初始化 & 核心框架 (init, render, boot)
+ * SECTION 2 (L~473):   HUD 渲染 (_renderHUD, _refreshHUDValues, _renderHints)
+ * SECTION 3 (L~638):   探索界面 (_renderDiscovery)
+ * SECTION 4 (L~778):   战斗界面 (_renderBattle, _renderActions)
+ * SECTION 5 (L~1329):  弹窗系统 (帮助/存档/图鉴/地下城/档案)
+ * SECTION 6 (L~2073):  任务面板 (_renderTasks, _getTaskStages)
+ * SECTION 7 (L~2478):  通用工具 (通知/浮动伤害/组件详情/Boss器官/魔药)
+ * SECTION 8 (L~3268):  实验室弹窗 (showReorganizeModal)
+ * SECTION 9 (L~3549):  随机事件弹窗 (showEventModal) + 返回导出
  */
 window.UISystem = (function () {
     'use strict';
@@ -53,6 +63,9 @@ window.UISystem = (function () {
         if (icon) icon.innerHTML = isFolded ? '▼' : '▶';
     }
 
+    // ═══════════════════════════════════════════════════════
+    // SECTION 1: 初始化 & 核心框架
+    // ═══════════════════════════════════════════════════════
     function init() {
         // [修复] 初始化时强制重置所有内部状态标记，确保重置游戏后动画能重新播放
         _wakingUp = true;
@@ -470,7 +483,9 @@ window.UISystem = (function () {
         _renderActions(gs, inBattle); _updateLog();
     }
 
-    // --- HUD（左中右三列） ---
+    // ═══════════════════════════════════════════════════════
+    // SECTION 2: HUD 渲染
+    // ═══════════════════════════════════════════════════════
     function _renderHUD(gs) {
         var p = gs.player;
         var top = document.querySelector('.hud-top');
@@ -635,6 +650,9 @@ window.UISystem = (function () {
         }
     }
 
+    // ═══════════════════════════════════════════════════════
+    // SECTION 3: 探索界面
+    // ═══════════════════════════════════════════════════════
     function _renderDiscovery(gs) {
         var room = gs.mapState.currentRoom;
         var paths = gs.mapState.discoveryPaths || [];
@@ -775,6 +793,9 @@ window.UISystem = (function () {
         });
     }
 
+    // ═══════════════════════════════════════════════════════
+    // SECTION 4: 战斗界面
+    // ═══════════════════════════════════════════════════════
     function _renderBattle(gs) {
         var bs = CS().getBattleState();
         var R = window.TemplateEngine ? window.TemplateEngine.UIRenderers : null;
@@ -1326,6 +1347,9 @@ window.UISystem = (function () {
         }
     }
 
+    // ═══════════════════════════════════════════════════════
+    // SECTION 5: 弹窗系统
+    // ═══════════════════════════════════════════════════════
     function showHelpPanel(initialTab) {
         UISystem._helpTab = initialTab || 'stats';
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
@@ -2070,6 +2094,9 @@ window.UISystem = (function () {
         }
     }
 
+    // ═══════════════════════════════════════════════════════
+    // SECTION 6: 任务面板
+    // ═══════════════════════════════════════════════════════
     function _renderTasks(gs) {
         var el = document.getElementById('ui-task-panel'); if (!el) return;
         // 已完成动态加载，直接静态显示
@@ -2234,6 +2261,9 @@ window.UISystem = (function () {
         setTimeout(function() { card.classList.remove('card-shake'); _cardShaking[idx] = false; }, 360);
     }
 
+    // ═══════════════════════════════════════════════════════
+    // SECTION 7: 通用工具 & 组件/Boss器官/魔药详情
+    // ═══════════════════════════════════════════════════════
     function showDamageFloat(val, color, targetId) {
         var el = _ce('div', 'damage-float'); el.style.cssText = 'position:fixed;font-weight:bold;font-size:28px;color:' + color + ';z-index:4000;pointer-events:none;transition:all 0.8s ease-out;text-shadow:0 0 8px rgba(0,0,0,0.8);'; el.innerHTML = val;
         var startX, startY;
@@ -3265,6 +3295,9 @@ window.UISystem = (function () {
         return tip;
     };
 
+    // ═══════════════════════════════════════════════════════
+    // SECTION 8: 基因重组实验室
+    // ═══════════════════════════════════════════════════════
     function showReorganizeModal() {
         var gs = GS(); var p = gs.player;
         // 首次进入实验室自动弹出引导

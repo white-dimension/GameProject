@@ -5,6 +5,7 @@ window.CombatSystem = (function () {
     'use strict';
     var GS = function () { return window.GameState.getState(); };
     var GD = function () { return window.GameData; };
+    var STR = function () { return window.GameStrings.COMBAT; };
 
     var _battleState = null;
 
@@ -49,7 +50,7 @@ window.CombatSystem = (function () {
             currentTarget: 0,
             turn: 1,
             phase: 'player_turn',
-            log: [{ turn: 1, msg: '第 1 回合开始。' + (monsters.length > 1 ? ' 前方 ' + monsters.length + ' 只变异体！' : '') }],
+            log: [{ turn: 1, msg: STR().startBattle.replace('{turn}', 1).replace('{count}', monsters.length) }],
             isDungeon: !!(options && options.isDungeon),
             isWandering: !!(options && options.wandering),
             dungeonEnv: (options && options.env) || null,
@@ -63,7 +64,7 @@ window.CombatSystem = (function () {
         // 应用路径感官词缀效果 — 数据驱动
         if (_battleState.pathAffix) {
             var af = _battleState.pathAffix;
-            _log('<span style="color:' + af.color + '">【感官共鸣】' + af.name + '：' + af.desc + '</span>');
+            _log('<span style="color:' + af.color + '">' + STR().envAffixActivate.replace('{name}', af.name).replace('{desc}', af.desc) + '</span>');
             _battleState.playerStatus['pathAffix'] = { name: af.name, color: af.color, desc: af.desc };
             var patTpl = (GD().PATH_AFFIX_TEMPLATES || []).find(function(t){ return t.id === af.id; });
             if (patTpl && patTpl.onBattleStart) {
@@ -461,7 +462,7 @@ window.CombatSystem = (function () {
     function endTurn() {
         if (!_battleState || _battleState.phase !== 'player_turn' || _battleState._fleeing) return;
         _battleState.phase = 'monster_turn';
-        _log('<span style="color:var(--accent-orange)">--- 第 ' + _battleState.turn + ' 回合结束 ---</span>');
+        _log('<span style="color:var(--accent-orange)">' + STR().endTurn.replace('{turn}', _battleState.turn) + '</span>');
         _battleState.turn++; // 统一在回合结束时自增，确保玩家和怪物处于同回合
         _processStatusEffects();
         window.EventBus.emit('playerStatsChanged');
@@ -984,7 +985,7 @@ window.CombatSystem = (function () {
             gs.mapState.portalUnlocked = true;
         }
         var wasTraining = _battleState && _battleState._isTraining;
-        _log('<span style="color:var(--accent-green)">神经链路重新校准，脱离战斗模式。</span>'); window.UISystem.render();
+        _log('<span style="color:var(--accent-green)">' + STR().battleWin + '</span>'); window.UISystem.render();
         _battleState = null;
         if (!wasTraining) {
             window.WorldSystem.generateNextPaths(); window.UISystem.render();

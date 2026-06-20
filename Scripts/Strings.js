@@ -152,12 +152,56 @@ window.GameStrings = (function () {
         ]
     };
 
+    // =========================================================================
+    // 5. 战斗日志模板（{0} {1} 等占位符由 Combat.js 运行时填充）
+    // =========================================================================
+    var COMBAT = {
+        startBattle: '第 {turn} 回合开始。前方 {count} 只变异体！',
+        potionUsed: '使用了 {name}。毒性增加至 {tox}' + (consec > 0 ? ' (耐药效能{eff}%)' : ''),
+        potionHeal: '凝血再生！防御暂时下降。',
+        potionDefense: '表皮硬化！防御提升，攻击下降。',
+        potionRam: '进程回复 8 点，毒性 +5。',
+        skillFree: '【触突过载】电荷偏转！本次不消耗 进程。',
+        boneArmor: '骨板硬化！获得 {shield} 护盾，受击反弹{thorns}%伤害。',
+        larvaShield: '幼虫护盾生成！获得 {shield} 护盾+每回合回复{heal}%HP。',
+        nanoField: '纳米修复场启动！获得 {shield} 护盾+每回合+{regen}进程。',
+        standardShield: '生物增殖，获得 {shield} 点防御护盾。',
+        tyrantAwaken: '【暴君觉醒】终极撕裂无视防御！',
+        poisonInject: '【毒液注射】目标陷入猛毒，持续{dur}回合！',
+        overclockCrit: '【超频贯穿】暴击×{mult}！',
+        chainLightning: '>> [电荷传导] 连招触发！剥离 {strip} 护盾，传导造成 {splash} 溅射伤害。',
+        markedIonized: '{skill}造成电荷残留：目标已被【电离标记】。',
+        predatoryStrike: '发起{skill}：{dmg}点伤害，注入毒素标记。',
+        predatoryPhysical: '发起{skill}，造成 {dmg} 点物理伤害。',
+        bioCompromised: '连续打击生效：目标已被【生物崩解标记】。',
+        geneMeltdown: '>> [基因融毁] 触发连招爆破！造成 {dmg} 点伤害，吸取 {heal} HP。',
+        bioCrack: '>> [生物崩解] 连招触发！目标闪避归零，陷入易伤状态。造成 {dmg} 点伤害。',
+        shockwave: '>> [震波咆哮] 造成 {dmg}点伤害。{extra}',
+        summonSwarm: '>> [母体孵化] 召唤集群突袭！造成 {dmg} 点伤害。{healMsg}',
+        chainSplash: '>> [闪电链] 溅射伤害 {dmg} 点。',
+        arcStorm: '>> [电弧过载风暴] 释放高压电弧！造成 {dmg} 点电离伤害。',
+        mildAcid: '{skill}造成 {dmg} 点轻微酸蚀。',
+        monsterSlain: '{name} 已融毁。',
+        killHeal: '肾上腺素晶体：击杀回复 {heal} HP。',
+        endTurn: '--- 第 {turn} 回合结束 ---',
+        playerFled: '你脱离了基因触突链接，撤离战斗。',
+        battleWin: '神经链路重新校准，脱离战斗模式。',
+        envAffixActivate: '【感官共鸣】{name}：{desc}',
+        envHighProcess: '神经突触激活，初始进程 +2。',
+        envWeakBio: '辐射削弱了全场敌人生命。',
+        envCorrosive: '酸蚀环境蔓延，敌人已中毒。',
+        envToxAdded: '环境异变：初始毒性 +{tox}。',
+        envCode: '环境代码：{name}（{desc}）',
+        trainingWait: '训练人偶待命中...'
+    };
+
     return {
         ROOM: ROOM,
         RACE_NAMES: RACE_NAMES,
         RACE_ICONS: RACE_ICONS,
         ORGAN_NAMES: ORGAN_NAMES,
         TASKS: TASKS,
-        STORY: STORY
+        STORY: STORY,
+        COMBAT: COMBAT
     };
 })();
