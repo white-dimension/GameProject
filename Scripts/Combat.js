@@ -961,6 +961,8 @@ window.CombatSystem = (function () {
     function isInBattle() { return _battleState !== null; }
     function exitBattle() {
         if (window.Sound) window.Sound.stopBGM();
+        // Boss宝箱自动开启
+        if (_battleState && _battleState._bossChest) openBossChest();
         var gs = GS();
         // [修复] 战斗结束时将镜像进程同步回全局状态
         if (gs && _battleState) {
