@@ -1590,7 +1590,7 @@ window.UISystem = (function () {
 
         // 2. 左侧说明栏
         var infoBar = _ce('div');
-        infoBar.style.cssText = 'flex:0 0 200px;padding:24px 16px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:6px;text-align:left;align-self:flex-start;';
+        infoBar.style.cssText = 'flex:0 0 240px;padding:24px 16px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:6px;text-align:left;align-self:flex-start;';
         infoBar.innerHTML = '<div style="margin-bottom:12px;"><span class="txt-xs txt-blue txt-bold">核心指标</span><div class="txt-xs txt-dim" style="margin-top:4px;">当前原体的最终属性。悬停数值可查看加成来源（溯源）。</div></div>' +
             '<div style="margin-bottom:12px;"><span class="txt-xs txt-blue txt-bold">器官状态</span><div class="txt-xs txt-dim" style="margin-top:4px;">展示已挂载器官及其同调等级。</div></div>' +
             '<div style="margin-bottom:12px;"><span class="txt-xs txt-blue txt-bold">专精流派</span><div class="txt-xs txt-dim" style="margin-top:4px;">投入专精点提升属性，特定组合激活全局被动。</div></div>' +
@@ -3078,7 +3078,7 @@ window.UISystem = (function () {
         box.appendChild(head);
         // 左侧固定说明栏
         var infoBar = _ce('div');
-        infoBar.style.cssText = 'flex:0 0 200px;padding:24px 16px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:6px;text-align:left;align-self:flex-start;';
+        infoBar.style.cssText = 'flex:0 0 240px;padding:24px 16px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:6px;text-align:left;align-self:flex-start;';
         infoBar.innerHTML = '<div style="margin-bottom:14px;"><span class="txt-xs txt-bold" style="color:var(--accent-green);">> 准备流程</span></div>' +
             '<div style="margin-bottom:10px;"><span class="txt-xs txt-dim">① 击败Boss → 获得器官</span></div>' +
             '<div style="margin-bottom:10px;"><span class="txt-xs txt-dim">② 挂载器官 → 获得技能</span></div>' +
