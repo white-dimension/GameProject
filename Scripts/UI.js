@@ -1615,7 +1615,7 @@ window.UISystem = (function () {
 
         // 1. 创建左右布局容器
         var wrapper = _ce('div');
-        wrapper.style.cssText = 'display:flex;gap:20px;align-items:flex-start;width:min(920px,95vw);';
+        wrapper.style.cssText = 'display:flex;gap:20px;align-items:flex-start;width:min(1050px,95vw);';
 
         // 2. 左侧说明栏
         var infoBar = _ce('div');
@@ -3145,7 +3145,7 @@ window.UISystem = (function () {
             '</div>';
         // 左右布局容器
         var wrapper = _ce('div');
-        wrapper.style.cssText = 'display:flex;gap:20px;align-items:flex-start;width:min(920px,95vw);';
+        wrapper.style.cssText = 'display:flex;gap:20px;align-items:flex-start;width:min(1050px,95vw);';
         wrapper.appendChild(infoBar);
         wrapper.appendChild(box);
         _modalOverlay.appendChild(wrapper);
