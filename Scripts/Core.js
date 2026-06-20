@@ -137,7 +137,8 @@ window.GameState = (function () {
             var mid = _allMonsters[Math.floor(Math.random() * _allMonsters.length)];
             var m = GD().MONSTERS[mid];
             var raceSuffix = { mutant: '异变者', swarm: '寄生群落', ember: '机械余烬' };
-            nodes.push({ id: 'node_' + (id++), type: 'monster', monsterId: mid, raceClr: _raceColors[m.race] || _raceColors._default, label: '<span class="icon icon-infested-mass"></span> ' + m.name + ' <span style="opacity:0.6;">' + (raceSuffix[m.race] || '领地') + '</span>', desc: _pickDesc(_raceDescs[m.race] || _raceDescs.mutant, gs), exhausted: false });
+            var _MONSTER_ICONS = { mutant: 'icon-monster-mutant', swarm: 'icon-monster-swarm', ember: 'icon-monster-ember' };
+            nodes.push({ id: 'node_' + (id++), type: 'monster', monsterId: mid, raceClr: _raceColors[m.race] || _raceColors._default, label: '<span class="icon ' + (_MONSTER_ICONS[m.race] || 'icon-infested-mass') + '"></span> ' + m.name + ' <span style="opacity:0.6;">' + (raceSuffix[m.race] || '领地') + '</span>', desc: _pickDesc(_raceDescs[m.race] || _raceDescs.mutant, gs), exhausted: false });
         }
 
         // 精英
@@ -145,7 +146,8 @@ window.GameState = (function () {
             var eid = _eliteMonsters[Math.floor(Math.random() * _eliteMonsters.length)];
             var em = GD().MONSTERS[eid];
             var raceSuffix2 = { mutant: '异变者', swarm: '寄生群落', ember: '机械余烬' };
-            nodes.push({ id: 'node_' + (id++), type: 'elite', monsterId: eid, raceClr: _raceColors[em.race] || _raceColors._default, label: '<span class="icon icon-fanged-skull"></span> 强敌：' + em.name + ' <span style="opacity:0.6;">' + (raceSuffix2[em.race] || '') + '</span>', desc: _pickDesc(_eliteDescs, gs), exhausted: false });
+            var _ELITE_ICONS = { mutant: 'icon-elite-mutant', swarm: 'icon-elite-swarm', ember: 'icon-elite-ember' };
+            nodes.push({ id: 'node_' + (id++), type: 'elite', monsterId: eid, raceClr: _raceColors[em.race] || _raceColors._default, label: '<span class="icon ' + (_ELITE_ICONS[em.race] || 'icon-fanged-skull') + '"></span> 强敌：' + em.name + ' <span style="opacity:0.6;">' + (raceSuffix2[em.race] || '') + '</span>', desc: _pickDesc(_eliteDescs, gs), exhausted: false });
         }
 
         // 营地（非B1）
@@ -168,7 +170,8 @@ window.GameState = (function () {
         var bossId = cfg.bossId || _bossMonsters[Math.floor(Math.random() * _bossMonsters.length)];
         var bm = GD().MONSTERS[bossId];
         var bossRaceSuffix = { mutant: '异变者', swarm: '寄生群落', ember: '机械余烬' };
-        nodes.push({ id: 'node_' + (id++), type: 'boss', monsterId: bossId, raceClr: _raceColors[bm.race] || _raceColors._default, label: '<span class="icon icon-crown"></span> 领主：' + bm.name + ' <span style="opacity:0.6;">' + (bossRaceSuffix[bm.race] || '') + '</span>', desc: _pickDesc(_bossDescsBase, gs).replace('它', bm.name), exhausted: false, hidden: true });
+        var _BOSS_ICONS = { mutant: 'icon-mutant', swarm: 'icon-swarm', ember: 'icon-ember' };
+        nodes.push({ id: 'node_' + (id++), type: 'boss', monsterId: bossId, raceClr: _raceColors[bm.race] || _raceColors._default, label: '<span class="icon ' + (_BOSS_ICONS[bm.race] || 'icon-crown') + '"></span> 领主：' + bm.name + ' <span style="opacity:0.6;">' + (bossRaceSuffix[bm.race] || '') + '</span>', desc: _pickDesc(_bossDescsBase, gs).replace('它', bm.name), exhausted: false, hidden: true });
 
         // 传送门（预置，portalUnlocked 时启用）
         nodes.push({ id: 'node_' + (id++), type: 'portal', label: '<span class="icon icon-portal"></span> 传送门 [' + (floor + 1) + 'F]', desc: _portalDescs[Math.floor(Math.random() * _portalDescs.length)], exhausted: false, hidden: true });
