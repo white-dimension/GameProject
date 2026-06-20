@@ -689,7 +689,15 @@ window.GameState = (function () {
             var bin = atob(str);
             var encoded = bin.split('').map(function(c) { return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2); }).join('');
             var decoded = JSON.parse(decodeURIComponent(encoded));
-            if (decoded && decoded.player && decoded.mapState) { _migrateOldSave(decoded); window._activeGameState = decoded; save(); return { success: true }; }
+            if (decoded && decoded.player && decoded.mapState) {
+                // [修正] 确保导入旧版存档时也同步 meta.version
+                decoded.meta = decoded.meta || {};
+                decoded.meta.version = '3.0.0';
+                _migrateOldSave(decoded);
+                window._activeGameState = decoded;
+                save();
+                return { success: true };
+            }
             return { success: false, error: '序列残缺' };
         } catch (e) { return { success: false, error: '解码失败' }; }
     }
@@ -789,6 +797,41 @@ window.GameState = (function () {
         ms.mapLevel = validateNum(ms.mapLevel, 1);
         ['predatory_organ', 'chitin_epidermis', 'gland_core'].forEach(function (s) {
             if (!p[s]) p[s] = { equipped: null, tier: 1, component_slots: [null, null] };
+            p[s].tier = validateNum(p[s].tier, 1);
+            if (!Array.isArray(p[s].component_slots)) p[s].component_slots = [null, null];
+            for (var ci = 0; ci < p[s].component_slots.length; ci++) {
+                if (p[s].component_slots[ci] !== null && typeof p[s].component_slots[ci] !== 'string') p[s].component_slots[ci] = null;
+            }
+        });
+
+        // [v3.0] 存档校验层 — 关键数值字段防 NaN/非法值崩溃
+        p.hp = validateNum(p.hp, 100);
+        p.hp_max = validateNum(p.hp_max, 100);
+        p.atk = validateNum(p.atk, 12);
+        p.atk_base = validateNum(p.atk_base, 12);
+        p.def = validateNum(p.def, 5);
+        p.def_base = validateNum(p.def_base, 5);
+        p.toxicity = validateNum(p.toxicity, 0);
+        p.toxicity_max = validateNum(p.toxicity_max, 50);
+        p.bossFailCount = validateNum(p.bossFailCount, 0);
+
+        // 专精数组校验
+        if (!Array.isArray(p.masteries)) p.masteries = [null, null];
+        for (var mi = 0; mi < p.masteries.length; mi++) {
+            if (p.masteries[mi] !== null && typeof p.masteries[mi] !== 'string') p.masteries[mi] = null;
+        }
+
+        // 涂层校验
+        if (p.activeCoating !== null && typeof p.activeCoating !== 'string') p.activeCoating = null;
+        p.coatingTurnsLeft = validateNum(p.coatingTurnsLeft, 0);
+
+        // 数组字段防篡改
+        if (!Array.isArray(p.claimedTaskRewards)) p.claimedTaskRewards = [];
+        if (!Array.isArray(p._potionHistory)) p._potionHistory = [];
+
+        // masteryPoints 逐个校验
+        ['mutant', 'swarm', 'ember'].forEach(function(r) {
+            p.masteryPoints[r] = validateNum(p.masteryPoints[r], 0);
         });
     }
 
