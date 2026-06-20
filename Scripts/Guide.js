@@ -54,7 +54,7 @@ window.GuideSystem = (function () {
         if (_idx >= _steps.length) { finish(); return; }
         var s = _steps[_idx];
         var el = _resolveEl(s);
-        if (!el || el.offsetParent === null) { _idx++; showStep(); return; }
+        if (!el) { _idx++; showStep(); return; }
 
         _card.innerHTML =
             '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
