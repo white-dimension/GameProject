@@ -2273,7 +2273,12 @@ window.UISystem = (function () {
         keys.forEach(function(k) {
             var count = inv[k]; if (count <= 0) return;
             var chip = _ce('div');
-            chip.style.cssText = 'padding:6px 12px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;cursor:pointer;font-size:13px;color:var(--text-main);';
+            // 根据组件等级区分背景色
+            var tierBg = { 'Ⅲ': 'rgba(255,213,79,0.12)', 'Ⅱ': 'rgba(0,212,255,0.08)', 'Ⅰ': 'rgba(0,255,136,0.06)' };
+            var tierBd = { 'Ⅲ': 'rgba(255,213,79,0.35)', 'Ⅱ': 'rgba(0,212,255,0.25)', 'Ⅰ': 'rgba(0,255,136,0.2)' };
+            var tierSuffix = k.match(/[ⅠⅡⅢ]$/); var _tBg = 'var(--bg-card)'; var _tBd = 'var(--border-dim)';
+            if (tierSuffix) { _tBg = tierBg[tierSuffix[0]] || _tBg; _tBd = tierBd[tierSuffix[0]] || _tBd; }
+            chip.style.cssText = 'padding:6px 12px;background:' + _tBg + ';border:1px solid ' + _tBd + ';border-radius:4px;cursor:pointer;font-size:13px;color:var(--text-main);';
             var renderChip = function() {
               chip.innerHTML = '<span>' + _fmtRoman(k) + '</span> <span class=\"txt-xs txt-dim\">×' + count + '</span>' + (selected[k] ? ' <span class=\"txt-xs txt-gold\">已选' + selected[k] + '</span>' : '') + (count >= 3 && selectCount === 0 ? ' <span class=\"txt-xs\" style=\"color:var(--accent-yellow);opacity:0.5;\">右键一键三连</span>' : '');
             };
