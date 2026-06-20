@@ -1006,6 +1006,9 @@ window.UISystem = (function () {
                     if((pr==='mutant' && md.race==='swarm')||(pr==='swarm' && md.race==='ember')||(pr==='ember' && md.race==='mutant')){ isCounter = true; break; }
                 }
                 if (isCounter) { dmg *= 1.5; ignoreDef = true; tag = " (弱点)"; }
+                // 组件种族增伤
+                var compFx = bsv ? (bsv.componentEffects || {}) : {};
+                if (compFx.bonusVsSwarm > 0 && md.race === 'swarm') dmg *= (1 + compFx.bonusVsSwarm);
 
                 // 2. 器官基础倍率（仅对非连招槽; gland_core在步骤6单独处理）
                 var sData = gs.player[slot] || { tier: 1 };
