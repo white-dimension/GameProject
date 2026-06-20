@@ -943,6 +943,21 @@ window.UISystem = (function () {
         });
         _battleView.appendChild(row);
 
+        // 工蜂召唤卡片 — 显示在怪物行下方
+        if (bs._drones && bs._drones.length > 0 && !isVictory) {
+            var droneRow = _ce('div');
+            droneRow.style.cssText = 'display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:4px;';
+            bs._drones.forEach(function(dr, di) {
+                var dc = _ce('div');
+                dc.style.cssText = 'width:90px;padding:6px 8px;background:rgba(255,213,79,0.06);border:1px solid rgba(255,213,79,0.2);border-radius:6px;text-align:center;flex-shrink:0;';
+                dc.innerHTML = '<div class="txt-xs txt-bold" style="color:var(--accent-yellow);margin-bottom:2px;"><span class="icon icon-alien-bug"></span> ' + dr.name + '</div>' +
+                    '<div class="txt-xs txt-dim">ATK ' + dr.atk + '</div>' +
+                    '<div class="txt-xs txt-dim">剩余 ' + dr.duration + ' 回合</div>';
+                droneRow.appendChild(dc);
+            });
+            _battleView.appendChild(droneRow);
+        }
+
         // 玩家状态 — 底部居中，双排显示
         if (bs.phase === 'victory') {
             // [修复] 胜利状态下如果存在 Boss 宝箱，显示宝箱按钮
