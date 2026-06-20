@@ -2472,7 +2472,7 @@ window.UISystem = (function () {
         }
         if (!comp) comp = {};
         var affixes = comp.affixes || {};
-        var detail = { cid: cid, affixes: affixes };
+        var detail = { cid: cid, affixes: affixes, allowedSlots: comp.allowedSlots || [] };
 
         // 属性文本
         detail.affixText = _fmtAffixText(affixes);
