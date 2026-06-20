@@ -1099,8 +1099,14 @@ window.UISystem = (function () {
                         var oc = _getOrganColor(eq);
                         var detail = '';
                         if (eq === '暴君核心') detail = '<b>真实撕裂：</b>无视全部防御力，裸伤直击。&#10;<b>倍率：</b>2.5× 攻击力&#10;<b>觉醒 Lv.3：</b>所有伤害转化为真实伤害';
+                        else if (eq === '蜂后毒牙') detail = '<b>毒液注射：</b>注入高纯度基因毒素。&#10;<b>倍率：</b>1.5× 攻击力&#10;<b>猛毒：</b>施加5回合猛毒（每回合3点）&#10;<b>觉醒 Lv.3：</b>猛毒持续7回合，每回合5点';
+                        else if (eq === '核心钻头') detail = '<b>超频贯穿：</b>高压穿透打击。&#10;<b>倍率：</b>2.0× 攻击力，无视防御&#10;<b>暴击：</b>20%概率造成2×暴击&#10;<b>觉醒 Lv.3：</b>暴击率40%，暴伤×3';
+                        else if (eq === '暴君腺体') detail = '<b>震波咆哮：</b>释放冲击波眩晕目标。&#10;<b>倍率：</b>2.0× 攻击力&#10;<b>眩晕：</b>40%概率跳过目标回合&#10;<b>觉醒 Lv.3：</b>70%概率+追加2回合减速';
                         else if (eq === '蜂后髓核') detail = '<b>母体孵化：</b>召唤工蜂集群撕咬目标。&#10;<b>倍率：</b>3.0× 攻击力，伤害值全额吸血&#10;<b>觉醒 Lv.3：</b>额外吸取 50% 伤害为护盾';
                         else if (eq === '高能电泳核') detail = '<b>电弧风暴：</b>释放高压电离脉冲穿透目标。&#10;<b>倍率：</b>2.0× 攻击力，无视防御&#10;<b>觉醒 Lv.3：</b>闪电链溅射全场，各 50% 伤害';
+                        else if (eq === '暴君甲壳') detail = '<b>骨板硬化：</b>生成生物骨板护盾。&#10;<b>护盾：</b>攻击力 × 1.2&#10;<b>反伤：</b>受击时反弹15%伤害&#10;<b>觉醒 Lv.3：</b>护盾1.8×，反伤25%';
+                        else if (eq === '蜂后甲壳') detail = '<b>幼虫护盾：</b>生成寄生幼虫护盾。&#10;<b>护盾：</b>攻击力 × 0.8&#10;<b>回复：</b>护盾存在时每回合回复10%HP&#10;<b>觉醒 Lv.3：</b>每回合回复20%HP';
+                        else if (eq === '核心护盾') detail = '<b>纳米修复场：</b>激活纳米机器人护盾。&#10;<b>护盾：</b>攻击力 × 0.6&#10;<b>回复：</b>每回合自动回复1进程&#10;<b>觉醒 Lv.3：</b>每回合回复2进程';
                         return { name: bo.skillName, color: oc.hex||'var(--accent-yellow)', detail: detail,
                                  cost: bo.skillCost || 2, multiplier: bo.skillEffect ? bo.skillEffect.baseMultiplier : 1 };
                     }
@@ -1846,6 +1852,12 @@ window.UISystem = (function () {
             boDesc += costStr + fxStr;
             if (syncLvl >= 3) {
                 if (eq === '暴君核心') boDesc += '<br>↳ 觉醒: 攻击转真实伤害(无视防御)';
+                else if (eq === '蜂后毒牙') boDesc += '<br>↳ 觉醒: 猛毒7回合，每回合5点';
+                else if (eq === '核心钻头') boDesc += '<br>↳ 觉醒: 暴击率40%，暴伤×3';
+                else if (eq === '暴君甲壳') boDesc += '<br>↳ 觉醒: 护盾1.8×，反伤25%';
+                else if (eq === '蜂后甲壳') boDesc += '<br>↳ 觉醒: 每回合回复20%HP';
+                else if (eq === '核心护盾') boDesc += '<br>↳ 觉醒: 每回合回复2进程';
+                else if (eq === '暴君腺体') boDesc += '<br>↳ 觉醒: 眩晕70%+减速2回合';
                 else if (eq === '蜂后髓核') boDesc += '<br>↳ 觉醒: 召唤突袭吸取50%伤害为护盾';
                 else if (eq === '高能电泳核') boDesc += '<br>↳ 觉醒: 电弧溅射全场×50%伤害';
             }
