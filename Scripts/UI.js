@@ -749,7 +749,7 @@ window.UISystem = (function () {
             var raceNames = _RACE_NAMES;
             card.innerHTML += '<div class="txt-md txt-bold" style="margin-top:8px;color:' + nameClr + ';display:flex;align-items:center;justify-content:center;">' +
                 (isTarget && !dead && !isVictory ? '<span style="color:var(--accent-red);margin-right:4px;">▸</span> ' : '') + mon.name + affixIcons +
-                ' <span style="opacity:0.55;font-weight:bold;font-size:0.85em;">· ' + (raceNames[md.race] || '') + '</span></div>';
+                ' <span style="font-weight:bold;font-size:0.85em;">· ' + (raceNames[md.race] || '') + '</span></div>';
 
             if (dead) {
                 card.innerHTML += '<div class="txt-xs txt-dim" style="margin-top:6px;">已融毁</div>';
