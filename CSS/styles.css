@@ -339,8 +339,8 @@ body::after {
 
 /* Boss立绘呼吸动画 */
 @keyframes boss-breathe {
-    0%, 100% { filter: brightness(1); }
-    50% { filter: brightness(1.12); }
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.025); }
 }
 .boss-breathe { animation: boss-breathe 4s ease-in-out infinite; }
 
