@@ -359,8 +359,8 @@ window.GameState = (function () {
             }
             if (!slot.component_slots) return;
             slot.component_slots.forEach(function (cid) {
-                if (!cid || !data.COMPONENTS || !data.COMPONENTS[cid]) return;
-                var aff = data.COMPONENTS[cid].affixes; if (!aff) return;
+                if (!cid || !data.COMPONENTS) return;
+                var aff = _resolveCompAffixes(data, cid); if (!aff) return;
                 if (aff.atkBonus) p.atk += aff.atkBonus;
                 if (aff.defBonus) p.def += aff.defBonus;
                 if (aff.flatDefBonus) p.def += aff.flatDefBonus;
@@ -390,6 +390,27 @@ window.GameState = (function () {
             }
         }
         p.hp = Math.min(p.hp, p.hp_max); p.process = Math.min(p.process, p.process_max);
+    }
+
+    // 解析组件属性（支持动态 ⅠⅡⅢ 级）
+    function _resolveCompAffixes(data, cid) {
+        var comp = data.COMPONENTS[cid];
+        if (comp && comp.affixes) return comp.affixes;
+        // 可能为Ⅰ/Ⅱ/Ⅲ动态组件：根据基础组件推算
+        var baseName = cid.replace(/[ⅠⅡⅢ]$/, '');
+        if (baseName === cid) return null;
+        var baseComp = data.COMPONENTS[baseName];
+        if (!baseComp || !baseComp.affixes) return null;
+        var tierIdx = cid.length - baseName.length;
+        var multiplier = Math.pow(2, tierIdx);
+        var affixes = {};
+        Object.keys(baseComp.affixes).forEach(function(ak) {
+            var v = baseComp.affixes[ak];
+            if (typeof v === 'boolean') affixes[ak] = v;
+            else if (ak === 'critMultiplier') affixes[ak] = v + 0.5 * tierIdx;
+            else affixes[ak] = v * multiplier;
+        });
+        return affixes;
     }
 
     function xpForLevel(level) {
@@ -513,8 +534,23 @@ window.GameState = (function () {
     function socketComponent(slot, socketIndex, componentId) {
         var gs = getState(); if (!gs) return { success: false, error: '未初始化' };
         if (socketIndex !== 0 && socketIndex !== 1) return { success: false, error: '无效孔' };
-        var data = GD(); if (!data || !data.COMPONENTS || !data.COMPONENTS[componentId]) return { success: false, error: '未知碎片' };
+        var data = GD(); if (!data || !data.COMPONENTS) return { success: false, error: '数据库未加载' };
         var comp = data.COMPONENTS[componentId];
+        // 动态组件（ⅠⅡⅢ升级版）：根据基础组件重建数据
+        if (!comp) {
+            var baseName = componentId.replace(/[ⅠⅡⅢ]$/, '');
+            var baseComp = data.COMPONENTS[baseName];
+            if (!baseComp) return { success: false, error: '未知碎片' };
+            var tierIdx = componentId.length - baseName.length;
+            var multiplier = Math.pow(2, tierIdx);
+            comp = { allowedSlots: baseComp.allowedSlots, affixes: {} };
+            Object.keys(baseComp.affixes).forEach(function(ak) {
+                var v = baseComp.affixes[ak];
+                if (typeof v === 'boolean') comp.affixes[ak] = v;
+                else if (ak === 'critMultiplier') comp.affixes[ak] = v + 0.5 * tierIdx;
+                else comp.affixes[ak] = v * multiplier;
+            });
+        }
         if (comp.allowedSlots.indexOf(slot) === -1) return { success: false, error: '不匹配此插槽' };
         var inv = gs.inventory.components; if (!inv[componentId] || inv[componentId] <= 0) return { success: false, error: '库存不足' };
         var old = gs.player[slot].component_slots[socketIndex]; if (old) { if (!inv[old]) inv[old] = 0; inv[old] += 1; }

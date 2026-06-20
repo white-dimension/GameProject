@@ -2216,9 +2216,12 @@ window.UISystem = (function () {
         body.style.cssText = 'padding:12px 20px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;max-height:50vh;';
         var hasAny = false;
         Object.keys(inv).forEach(function(ck) {
-            if (inv[ck] <= 0 || !comps[ck] || !comps[ck].allowedSlots || comps[ck].allowedSlots.indexOf(slot) === -1) return;
+            // 动态构建 I/II/III 级组件数据（合成产物不在静态DB中）
+            var sc = comps[ck] || _buildCompDetail(ck);
+            var scAffixes = (sc && sc.affixes) ? sc.affixes : (comps[ck] ? comps[ck].affixes : {});
+            if (inv[ck] <= 0 || !sc || !sc.allowedSlots || sc.allowedSlots.indexOf(slot) === -1) return;
             hasAny = true;
-            var sc = comps[ck]; var sa = sc.affixes || {};
+            var sa = scAffixes;
             var ca = (curComp && curComp.affixes) ? curComp.affixes : {};
 
             var diffParts = [];
