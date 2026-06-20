@@ -1,6 +1,70 @@
 # 01 — 开发日志
 
-## v2.0.1 — 2026-06-20 🎨 图标系统更新 — 种族四组专属
+## v2.0.2 — 2026-06-20 🖼️ AI怪物立绘 + 卡片模板重构 + 全界面统一
+
+### AI 怪物立绘系统
+- 28 张 AI 生成怪物立绘 (1024×1152, 8:9) 全部接入战斗卡片
+- Assets/Monsters/ 统一管理，Data.js 全怪物加 image 字段
+- Boss/精英/普通三层级全部满铺背景图，40% 统一遮罩
+- 训练人偶无图，保留 icon 回退
+
+### 卡片布局重构
+- 名字+种族合并一行 `·` 分割
+- 技能标签移至卡片底部，贴近血条
+- 卡片内容顶部对齐 (flex-start)，HP 条 margin-top:auto 推底
+- 卡片内意图标签移除（详情已在卡片上方横条显示）
+
+### 背景呼吸动画
+- 独立 bgLayer + overlayLayer 双层架构，卡片大小不变
+- GPU 加速 transform:scale(1→1.015)，4s cubic-bezier 缓动
+- 全部怪物卡片（含Boss）统一呼吸动画
+- 随机 animation-delay 避免切换目标齐步重启
+- contain→cover 自适应填满不拉伸
+
+### 地下城修复
+- "我准备好了"死循环修复：直接启动战斗而非重复调用 _handleDiscoveryResult
+
+### 图鉴增强
+- 种族筛选标签栏（按钮样式，hover/active 反馈）
+- 种族标题下方显示背景故事（RACE_LORE）
+- 种族标题与卡片间距优化
+
+### 合成系统优化
+- 右键一键填充三槽（右键一键三连）
+- 合成确认后停留在合成页面不退出
+- 组件名罗马数字衬线体修复（_fmtRoman 全局套用）
+- 按钮文字 "三合一"
+
+### 全界面视觉统一
+- 所有按钮/卡片/弹窗/怪物卡片边框统一为 1px
+- 楼层命名全部中文化 (BxF → 地下X层)
+- 传送门标签去除楼层后缀
+- 主界面竖线分隔符移除
+- 合成页面阿拉伯数字中文化
+
+### 资源清理
+- 删除废弃旧 Boss 图 (tyrant/queen/core.png)
+- 删除无用 bg_pixel.jpg
+- 删除旧版音频
+
+### 文档
+- 新增 Docs/08_AI_Prompts.md（28 怪物 + 2 视频全部提示词归档）
+
+---
+
+## v2.0.1 — 2026-06-20 🎨 图标系统更新 — 种族图标体系
+
+### 种族三级怪物图标体系
+- **普通怪物节点**: 按种族显示专属图标
+  - 异变者 → Lorc evil-minion（邪恶小鬼）
+  - 寄生群落 → Delapouite ants（蚁群）
+  - 机械余烬 → Delapouite spider-bot（机械蜘蛛）
+- **精英怪物节点**: 按种族显示精英图标
+  - 异变者 → Lorc daemon-skull（恶魔颅骨）
+  - 寄生群落 → Delapouite praying-mantis（螳螂）
+  - 机械余烬 → Delapouite battle-mech（战斗机甲）
+- **Boss 房间**: 复用种族身份图标（mutant/swarm/ember）
+- Core.js 动态按 `m.race` 选取对应 CSS class，未知种族回退旧图标
 
 ### Git 基线重建
 - 清理 Backgrounds/.artifacts/.idea 冗余跟踪，建立 v2.0.0 tag
