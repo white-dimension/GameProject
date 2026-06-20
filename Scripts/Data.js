@@ -872,7 +872,7 @@ window.GameData = (function () {
             sections: [
                 { label: '暴君核心 (Sync Lv.3)', desc: '技能进化为「真实伤害」，完美粉碎机械余烬的护盾。', color: 'var(--accent-red)' },
                 { label: '高能电泳核 (Sync Lv.3)', desc: '技能进化为「全场溅射」，瞬间清理怪潮。', color: 'var(--accent-blue)' },
-                { label: '组件 Ⅲ 级', desc: '数值为基础级的 4 倍以上，是通往更高周目的必备武装。', color: 'var(--accent-yellow)' }
+                { label: '组件 ⭐⭐⭐ 级', desc: '数值为基础级的 4 倍以上，是通往更高周目的必备武装。', color: 'var(--accent-yellow)' }
             ],
             tip: '通过地下五~十层的高级任务可以直接获得特定种族的组织碎片奖励。'
         }
