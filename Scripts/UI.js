@@ -459,9 +459,9 @@ window.UISystem = (function () {
         var top = document.querySelector('.hud-top');
         top.innerHTML =
             '<div class="hud-col hud-col-l">' +
-            '<div class="txt-md txt-green txt-bold"><div style="display:flex;justify-content:space-between;align-items:center;width:100%;">' +
+            '<div class="txt-md txt-green txt-bold"><div style="display:flex;justify-content:flex-start;align-items:center;gap:15px;width:100%;">' +
             '<span><span class="icon icon-dna icon-pulse"></span>原体-II</span>' +
-            (gs.mapState.loop >= 2 ? '<span class="txt-xs txt-bold" style="color:var(--accent-orange);animation:mastery-pulse 2s infinite;padding:2px 8px;border:1px solid var(--accent-orange);border-radius:3px;">超越进化 · 第' + gs.mapState.loop + '轮</span>' : '') +
+            (gs.mapState.loop >= 2 ? '<span class="txt-xs txt-bold" style="color:var(--accent-orange);animation:mastery-pulse 2s infinite;padding:2px 8px;border:1px solid var(--accent-orange);border-radius:3px;flex-shrink:0;">超越进化 · 第' + gs.mapState.loop + '轮</span>' : '') +
             '</div></div>' +
             '</div>' +
             '<div class="hud-col hud-col-c">' +
@@ -1432,10 +1432,11 @@ window.UISystem = (function () {
         var _tabBtns = {};
         var tabs = [{ r: 'mutant', l: '异变者', cls: 'btn-red' },{ r: 'swarm', l: '寄生群落', cls: 'btn-green' },{ r: 'ember', l: '机械余烬', cls: 'btn-blue' }];
         var _tabBar2 = _ce('div');
-        _tabBar2.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:14px;border-top:1px solid var(--border-dim);padding-top:10px;';
+        _tabBar2.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:14px;border-top:1px solid var(--border-dim);padding-top:10px;';
         tabs.forEach(function(t) {
             var tb = _ce('button', 'btn btn-sm ' + t.cls);
-            tb.style.cssText = 'width:100%;padding:4px 12px;font-size:13px;';
+            // [修正] 增加宽度至 180px，使按钮向左右扩展
+            tb.style.cssText = 'display:flex;width:180px;margin:0;padding:6px 12px;font-size:13px;justify-content:center;align-items:center;';
             tb.textContent = t.l;
             tb.onclick = function() { _filterRace = t.r; _filterDisplay(); };
             _tabBtns[t.r] = tb;
@@ -1615,7 +1616,6 @@ window.UISystem = (function () {
         });
         _filterDisplay();
         box.appendChild(body);
-        _modalOverlay.appendChild(box);
     }
 
     function showDungeonWarning(pathIndex) {

@@ -1,5 +1,11 @@
 # 01 — 开发日志
 
+## v2.1.5 — 2026-06-20 🐛 图鉴布局修复 + HUD头部对齐
+
+- **showBestiaryModal**: 删除末尾重复的 `_modalOverlay.appendChild(box)`（DOM 移动语义导致 box 从 wrapper flex 容器中被抽走，左右布局崩溃）
+- **图鉴种族筛选按钮**: `width:100%` → 固定 `width:180px`，`display:inline-flex` → `display:flex`，解决按钮边框未左对齐问题
+- **HUD头部**: `justify-content:space-between` → `flex-start` + `gap:15px`，轮回徽章添加 `flex-shrink:0` 防止挤压
+
 ## v2.1.4 — 2026-06-20 🧹 收尾清理 — 弹窗头部/死亡界面/怪物回合效果模板化
 
 - **showSaveModal/showDungeonWarning**: 弹窗头部 → createModal + setModalHead（向后兼容降级）
