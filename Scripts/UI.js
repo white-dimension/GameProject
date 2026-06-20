@@ -306,7 +306,7 @@ window.UISystem = (function () {
         document.addEventListener('keydown', function(e) {
             // ESC 关闭弹窗/遮罩
             if (e.key === 'Escape') {
-                var fp = document.getElementById('organ-picker-panel'); if (fp) { fp.remove(); return; }
+                var fp = document.getElementById('organ-picker-panel') || document.getElementById('sub-panel-picker'); if (fp) { fp.remove(); return; }
                 if (_msgOverlay && _msgOverlay.style.display !== 'none') { _msgOverlay.style.display = 'none'; return; }
                 if (_modalOverlay.style.display !== 'none' && !_introActive) { if (_modalOverlay._returnToLab) { _modalOverlay._returnToLab = false; UISystem.showReorganizeModal(); } else { closeModal(); } return; }
             }
@@ -2432,10 +2432,9 @@ window.UISystem = (function () {
         var gs = GS(); if (!gs) return;
         var inv = gs.inventory.components;
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
-        _modalOverlay.innerHTML = '';
-        _modalOverlay.style.display = 'flex';
-        var box = _ce('div', 'modal-box');
-        box.style.cssText = 'width:min(500px,90vw);background:var(--bg-modal);border:1px solid #f57f17;border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
+        var box = _ce('div');
+        box.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:3500;width:min(500px,90vw);background:var(--bg-modal);border:1px solid #f57f17;border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.8);';
+        box.id = 'sub-panel-picker';
         var head = _ce('div');
         head.style.cssText = 'padding:16px 24px;background:rgba(245,124,0,0.08);border-bottom:1px solid #f57f17;display:flex;justify-content:space-between;align-items:center;';
         head.innerHTML = '<div class="txt-md txt-gold txt-bold">[ 组件合成 ]</div><button class="btn btn-blue btn-sm" onclick="UISystem.closeModal();UISystem.showReorganizeModal();">取消</button>';
@@ -2596,10 +2595,9 @@ window.UISystem = (function () {
         var curComp = curCid ? (comps[curCid] || {}) : null;
 
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
-        _modalOverlay.innerHTML = '';
-        _modalOverlay.style.display = 'flex';
-        var box = _ce('div', 'modal-box');
-        box.style.cssText = 'width:min(500px,90vw);background:var(--bg-modal);border:1px solid var(--accent-green);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
+        var box = _ce('div');
+        box.id = 'sub-panel-picker';
+        box.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:3500;width:min(500px,90vw);background:var(--bg-modal);border:1px solid var(--accent-green);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.8);';
         var head = _ce('div');
         head.style.cssText = 'padding:14px 20px;background:rgba(0,255,136,0.05);border-bottom:1px solid var(--accent-green);display:flex;justify-content:space-between;align-items:center;';
         var slotNames = _ORGAN_NAMES;
@@ -2664,9 +2662,9 @@ window.UISystem = (function () {
 
         _modalOverlay._returnToLab = true;
         document.querySelectorAll('.help-popup').forEach(function(el){ el.remove(); });
-        _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
-        var box = _ce('div', 'modal-box');
-        box.style.cssText = 'width:min(500px,90vw);background:var(--bg-modal);border:1px solid var(--accent-green);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
+        var box = _ce('div');
+        box.id = 'sub-panel-picker';
+        box.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:3500;width:min(500px,90vw);background:var(--bg-modal);border:1px solid var(--accent-green);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
         var head = _ce('div');
         head.style.cssText = 'padding:14px 20px;background:rgba(0,255,136,0.05);border-bottom:1px solid var(--accent-green);display:flex;justify-content:space-between;align-items:center;';
         var slotNames = { predatory_organ: '捕食器官', chitin_epidermis: '几丁表皮', gland_core: '腺体核心' };
