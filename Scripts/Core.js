@@ -6,26 +6,11 @@ window.GameState = (function () {
     'use strict';
 
     const GD = function () { return window.GameData; };
+    const CFG = function () { return window.GameConfig; };
 
-    // =========================================================================
-    // 楼层配置 — 每层节点类型数量 + Boss ID
-    // =========================================================================
-    var FLOOR_CONFIG = {
-        1:  { monster: 2, elite: 1, camp: 0, relic: 1, dungeon: 0, bossId: null, depth: 1 },
-        2:  { monster: 2, elite: 1, camp: 1, relic: 1, dungeon: 1, bossId: null, depth: 2 },
-        3:  { monster: 3, elite: 1, camp: 1, relic: 1, dungeon: 1, bossId: null, depth: 3 },
-        4:  { monster: 3, elite: 2, camp: 1, relic: 1, dungeon: 1, bossId: null, depth: 4 },
-        5:  { monster: 3, elite: 2, camp: 1, relic: 1, dungeon: 1, bossId: null, depth: 5 },
-        6:  { monster: 4, elite: 2, camp: 1, relic: 1, dungeon: 1, bossId: null, depth: 6 },
-        7:  { monster: 4, elite: 2, camp: 1, relic: 1, dungeon: 2, bossId: null, depth: 7 },
-        8:  { monster: 4, elite: 3, camp: 1, relic: 1, dungeon: 2, bossId: null, depth: 8 },
-        9:  { monster: 5, elite: 3, camp: 1, relic: 2, dungeon: 2, bossId: null, depth: 9 },
-        10: { monster: 5, elite: 3, camp: 1, relic: 2, dungeon: 3, bossId: null, depth: 10 }
-    };
-
-    var _allMonsters = ['MON_CH1_ZOMBIE','MON_CH1_RIOT','MON_CH1_RAT','MON_CH1_LARVA','MON_CH1_CLEANER_ROBOT','MON_CH1_WATCHER','MON_CH1_AMALGAM','MON_CH1_MOTH','MON_CH1_DRONE','MON_CH2_WORM','MON_CH2_CAMERA','MON_CH2_GROWTH','MON_CH2_PARASITE','MON_CH2_VULTURE'];
-    var _eliteMonsters = ['MON_CH1_CLEANER','MON_CH1_GUARD','MON_CH1_SPORE','MON_CH1_HIVE','MON_CH1_BEE','MON_CH1_SENTINEL','MON_CH2_GHOST','MON_CH2_BEAST','MON_CH2_BROODMOTHER','MON_CH2_CANNON','MON_CH2_ABOMINATION'];
-    var _bossMonsters = ['MON_CH1_TYRANT', 'MON_CH1_QUEEN', 'MON_CH1_CORE'];
+    var _allMonsters = CFG().MONSTER_POOLS.common;
+    var _eliteMonsters = CFG().MONSTER_POOLS.elite;
+    var _bossMonsters = CFG().MONSTER_POOLS.boss;
 
     var _raceColors = { mutant: 'var(--race-mutant)', swarm: 'var(--race-swarm)', ember: 'var(--race-ember)', _default: 'var(--text-main)' };
     // 描述文案池（按击杀数渐进）
@@ -123,7 +108,7 @@ window.GameState = (function () {
 
     // 生成单层节点池
     function _genFloorNodePool(floor, gs) {
-        var cfg = FLOOR_CONFIG[floor] || FLOOR_CONFIG[1];
+        var cfg = CFG().FLOOR_NODES[floor] || CFG().FLOOR_NODES[1];
         var nodes = [];
         var id = 0;
 
@@ -190,14 +175,7 @@ window.GameState = (function () {
             nodes.splice(nodes.length - 1, 0, bossNode);
         }
 
-        // [新增] 路径词缀系统：为战斗类节点赋予环境加成
-        var envAffixes = [
-            { id: 'high_process', name: '高能反应', desc: '开局额外获得 2 点进程', color: 'var(--accent-green)' },
-            { id: 'weak_bio', name: '生物辐射', desc: '全场敌人初始降低 20% HP', color: 'var(--accent-red)' },
-            { id: 'data_rich', name: '信号富集', desc: '击败后获得的经验提升 50%', color: 'var(--accent-blue)' },
-            { id: 'scrap_rich', name: '金属堆积', desc: '击败后额外获得 1 个组件碎片', color: 'var(--accent-yellow)' },
-            { id: 'corrosive', name: '酸蚀环境', desc: '进入后敌人获得 3 层中毒', color: 'var(--accent-purple)' }
-        ];
+        var envAffixes = CFG().ENV_AFFIXES;
 
         nodes.forEach(function(n) {
             if (['monster', 'elite', 'boss', 'dungeon'].indexOf(n.type) !== -1) {
@@ -302,6 +280,7 @@ window.GameState = (function () {
     }
 
     function createNewGame() {
+        var S = CFG().PLAYER_START;
         var gs = {
             mapState: {
                 currentRoom: { type: 'camp', label: '源初母巢', desc: '半透明的生物膜包裹着整个舱室，营养液在壁面上缓缓流淌。微弱的心跳声从深处传来——那是你自己的脉搏。这是唯一安全的地方。' },
@@ -312,12 +291,12 @@ window.GameState = (function () {
                 stepsTaken: 0,
                 completedTasks: [],
                 mapLevel: 1,
-                loop: 1 // [新增] 周目计数
+                loop: 1
             },
             player: {
-                hp: 100, hp_max: 100, process: 10, process_max: 10, toxicity: 0, toxicity_max: 50,
-                atk: 12, atk_base: 12, def: 5, def_base: 5, bp: 50, process_recovery: 3,
-                level: 1, xp: 0, xpToNext: 30, availableMasteryPoints: 1,
+                hp: S.hp, hp_max: S.hp_max, process: S.process, process_max: S.process_max, toxicity: S.toxicity, toxicity_max: S.toxicity_max,
+                atk: S.atk, atk_base: S.atk_base, def: S.def, def_base: S.def_base, bp: S.bp, process_recovery: S.process_recovery,
+                level: S.level, xp: 0, xpToNext: S.xpToNext, availableMasteryPoints: S.availableMasteryPoints,
                 masteryPoints: { mutant: 0, swarm: 0, ember: 0 },
                 introSeen: false,
                 predatory_organ: { equipped: null, tier: 1, component_slots: [null, null] },
@@ -534,7 +513,7 @@ window.GameState = (function () {
 
     function upgradeOrganTier(slot) {
         var gs = getState(); if (!gs || !gs.player[slot]) return { success: false, error: '无效' };
-        var cost = Math.ceil(5 * Math.pow(1.6, gs.player[slot].tier));
+        var cost = CFG().organUpgradeCost(gs.player[slot].tier);
         var inv = gs.inventory.components;
         var getWeight = function(cid) { if (cid.endsWith('Ⅲ')) return 4; if (cid.endsWith('Ⅱ')) return 3; if (cid.endsWith('Ⅰ')) return 2; return 1; };
         var total = 0; Object.keys(inv).forEach(function (k) { total += (inv[k] || 0) * getWeight(k); });
@@ -550,7 +529,7 @@ window.GameState = (function () {
 
     function upgradeOrganTierWithSelection(slot, selectedComponents) {
         var gs = getState(); if (!gs || !gs.player[slot]) return { success: false, error: '无效' };
-        var cost = Math.ceil(5 * Math.pow(1.6, gs.player[slot].tier));
+        var cost = CFG().organUpgradeCost(gs.player[slot].tier);
         var inv = gs.inventory.components;
         var getWeight = function(cid) { if (cid.endsWith('Ⅲ')) return 4; if (cid.endsWith('Ⅱ')) return 3; if (cid.endsWith('Ⅰ')) return 2; return 1; };
         var totalWeight = 0; selectedComponents.forEach(function(cid) { totalWeight += getWeight(cid); });
@@ -855,7 +834,7 @@ window.GameState = (function () {
 
     function buyComponent(componentId) {
         var gs = getState(); if (!gs) return { success: false, error: '未初始化' };
-        var cost = 150;
+        var cost = CFG().COMPONENT_BUY_COST;
         if (gs.player.bp < cost) return { success: false, error: 'BP不足(需' + cost + ')' };
         gs.player.bp -= cost;
         gs.inventory.components[componentId] = (gs.inventory.components[componentId] || 0) + 1;
@@ -865,7 +844,7 @@ window.GameState = (function () {
 
     function upgradeOrganTierWithBP(slot) {
         var gs = getState(); if (!gs || !gs.player[slot]) return { success: false, error: '无效' };
-        var cost = Math.ceil(5 * Math.pow(1.6, gs.player[slot].tier));
+        var cost = CFG().organUpgradeCost(gs.player[slot].tier);
         var inv = gs.inventory.components;
         var getWeight = function(cid) { if (cid.endsWith('Ⅲ')) return 4; if (cid.endsWith('Ⅱ')) return 3; if (cid.endsWith('Ⅰ')) return 2; return 1; };
         var totalFrags = 0;
@@ -883,7 +862,7 @@ window.GameState = (function () {
 
     function clearToxicity() {
         var gs = getState(); if (!gs) return { success: false };
-        var cost = 50;
+        var cost = CFG().CLEAR_TOXICITY_COST;
         if (gs.player.bp < cost) return { success: false, error: 'BP不足(需' + cost + ')' };
         gs.player.bp -= cost;
         gs.player.toxicity = 0;
@@ -893,7 +872,7 @@ window.GameState = (function () {
 
     function mutateStat(statType) {
         var gs = getState(); if (!gs) return { success: false };
-        var costs = { atk: 800, def: 600, hp: 500 };
+        var costs = CFG().MUTATION_COSTS;
         var cost = costs[statType] || 1500;
         if (gs.player.bp < cost) return { success: false, error: 'BP不足(需' + cost + ')' };
         gs.player.bp -= cost;
@@ -910,7 +889,7 @@ window.GameState = (function () {
         var currentLevel = gs.bestiary.researchLevels[monsterId] || 0;
         if (currentLevel >= 3) return { success: false, error: '已达最高研究等级' };
 
-        var costs = [500, 1500, 3000];
+        var costs = CFG().RESEARCH_COSTS;
         var cost = costs[currentLevel];
         if (gs.player.bp < cost) return { success: false, error: 'BP 不足，需 ' + cost };
 
@@ -933,7 +912,7 @@ window.GameState = (function () {
 
         if (totalCount < 2) return { success: false, error: '同名器官不足 (需2个)' };
 
-        var bpCosts = [0, 2000, 5000]; // 从 Lv.1 升 Lv.2 需 2000，从 Lv.2 升 Lv.3 需 5000
+        var bpCosts = CFG().SYNC_COSTS;
         var cost = bpCosts[currentSync];
         if (gs.player.bp < cost) return { success: false, error: 'BP 不足，需 ' + cost };
 
