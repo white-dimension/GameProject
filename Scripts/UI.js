@@ -3280,7 +3280,6 @@ window.UISystem = (function () {
             '</div>';
         // 左右布局容器
         var wrapper = _ce('div');
-        wrapper.style.cssText = 'display:flex;gap:20px;align-items:flex-start;width:min(1050px,95vw);';
         wrapper.appendChild(infoBar);
         wrapper.appendChild(box);
         _modalOverlay.appendChild(wrapper);
