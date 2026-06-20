@@ -1108,17 +1108,17 @@ window.UISystem = (function () {
                         var bo = _bos2[eq];
                         var oc = _getOrganColor(eq);
                         var detail = '';
-                        if (eq === '暴君核心') detail = '<b>真实撕裂：</b>无视全部防御力，裸伤直击。<br><b>倍率：</b>2.5× 攻击力<br><b>觉醒 Lv.3：</b>所有伤害转化为真实伤害';
-                        else if (eq === '蜂后髓核') detail = '<b>母体孵化：</b>召唤工蜂集群撕咬目标。<br><b>倍率：</b>3.0× 攻击力，伤害值全额吸血<br><b>觉醒 Lv.3：</b>额外吸取 50% 伤害为护盾';
-                        else if (eq === '高能电泳核') detail = '<b>电弧风暴：</b>释放高压电离脉冲穿透目标。<br><b>倍率：</b>2.0× 攻击力，无视防御<br><b>觉醒 Lv.3：</b>闪电链溅射全场，各 50% 伤害';
+                        if (eq === '暴君核心') detail = '<b>真实撕裂：</b>无视全部防御力，裸伤直击。&#10;<b>倍率：</b>2.5× 攻击力&#10;<b>觉醒 Lv.3：</b>所有伤害转化为真实伤害';
+                        else if (eq === '蜂后髓核') detail = '<b>母体孵化：</b>召唤工蜂集群撕咬目标。&#10;<b>倍率：</b>3.0× 攻击力，伤害值全额吸血&#10;<b>觉醒 Lv.3：</b>额外吸取 50% 伤害为护盾';
+                        else if (eq === '高能电泳核') detail = '<b>电弧风暴：</b>释放高压电离脉冲穿透目标。&#10;<b>倍率：</b>2.0× 攻击力，无视防御&#10;<b>觉醒 Lv.3：</b>闪电链溅射全场，各 50% 伤害';
                         return { name: bo.skillName, color: oc.hex||'var(--accent-yellow)', detail: detail,
                                  cost: bo.skillCost || 2, multiplier: bo.skillEffect ? bo.skillEffect.baseMultiplier : 1 };
                     }
                     // 默认技能
                     var defs = {
-                        predatory_organ: { name:'捕食打击', color:'var(--accent-red)', cost:2, detail:'<b>撕裂攻击：</b>基础物理伤害。<br><b>电离标记：</b>对机械族首次命中施加标记，二次命中引爆剥离护盾+溅射。<br><b>生物崩解：</b>对寄生族连续2次命中触发崩解标记+防御归零。<br><b>概率：</b>30% 挂毒 3 回合' },
-                        chitin_epidermis: { name:'生物防御', color:'var(--accent-green)', cost:3, detail:'<b>护盾=</b>攻击力 × 0.6<br><b>效果：</b>吸收物理伤害直至破裂<br><b>策略：</b>开局套盾或敌方蓄力前预判' },
-                        gland_core: { name:'腺体脉冲', color:'var(--accent-yellow)', cost:3, detail:'<b>中毒引爆：</b>造成 3× 攻击力伤害+全额吸血。<br><b>崩解引爆：</b>清除闪避+2回合易伤。<br><b>无标记：</b>仅50%酸蚀伤害。<br><b>核心：</b>先挂标记再引爆' }
+                        predatory_organ: { name:'捕食打击', color:'var(--accent-red)', cost:2, detail:'<b>撕裂攻击：</b>基础物理伤害。&#10;<b>电离标记：</b>对机械族首次命中施加标记，二次引爆剥离护盾+溅射。&#10;<b>生物崩解：</b>对寄生族连续2次命中触发崩解标记+防御归零。&#10;<b>概率：</b>30% 挂毒 3 回合' },
+                        chitin_epidermis: { name:'生物防御', color:'var(--accent-green)', cost:3, detail:'<b>护盾=</b>攻击力 × 0.6&#10;<b>效果：</b>吸收物理伤害直至破裂&#10;<b>策略：</b>开局套盾或敌方蓄力前预判' },
+                        gland_core: { name:'腺体脉冲', color:'var(--accent-yellow)', cost:3, detail:'<b>中毒引爆：</b>造成 3× 攻击力伤害+全额吸血。&#10;<b>崩解引爆：</b>清除闪避+2回合易伤。&#10;<b>无标记：</b>仅50%酸蚀伤害。&#10;<b>核心：</b>先挂标记再引爆' }
                     };
                     return defs[slot] || { name:'攻击', color:'var(--accent-red)', cost:2, detail:'' };
                 };
