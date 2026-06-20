@@ -1485,7 +1485,7 @@ window.UISystem = (function () {
 
         // 左右布局
         var wrapper = _ce('div');
-        wrapper.style.cssText = 'display:flex;gap:20px;align-items:flex-start;width:min(950px,95vw);';
+        wrapper.style.cssText = 'display:flex;gap:20px;align-items:flex-start;width:min(1050px,95vw);';
         wrapper.appendChild(infoBar);
         wrapper.appendChild(box);
         _modalOverlay.appendChild(wrapper);
@@ -1601,7 +1601,7 @@ window.UISystem = (function () {
                     var rcBg = { mutant: '#1a0a08', swarm: '#0a1a08', ember: '#080a1a' }[m.race] || '#0a0a0a';
                     bgStyle = 'background:linear-gradient(135deg,' + rcBg + ',rgba(0,0,0,0.8));';
                 }
-                item.style.cssText = 'position:relative;width:145px;height:193px;border-radius:8px;overflow:hidden;border:1px solid ' + tierBorderClr + ';flex-shrink:0;' + tierGlow + bgStyle;
+                item.style.cssText = 'position:relative;width:150px;height:200px;border-radius:8px;overflow:hidden;border:1px solid ' + tierBorderClr + ';flex-shrink:0;' + tierGlow + bgStyle;
 
                 var imgLayer = '';
                 if (known && m.image) {
