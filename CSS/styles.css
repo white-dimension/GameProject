@@ -49,9 +49,9 @@ body, html { font-family: "Sarasa Mono SC", "Space Mono", RomanSans, sans-serif;
 
 }
 
-/* 彻底隐藏系统光标 — 透明SVG文件兜底，JS自定义光标替代 */
-html, html *, body, body *, body *::before, body *::after, #app, #app * {
-    cursor: url("../Assets/Icons/cursor-none.svg") 1 1, none !important;
+/* 彻底隐藏系统光标 — 1x1透明GIF(兼容所有浏览器) + MutationObserver动态覆盖 */
+html, html *, body, body *, body *::before, body *::after, #app, #app *, #app *::before, #app *::after {
+    cursor: url(data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7) 1 1, none !important;
 }
 
 /* 禁用右键菜单 */

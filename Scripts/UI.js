@@ -255,8 +255,22 @@ window.UISystem = (function () {
         document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
 
         // —— 自定义 JS 光标（彻底隐藏系统光标）——
-        document.documentElement.style.cursor = 'none';
-        document.body.style.cursor = 'none';
+        document.documentElement.style.setProperty('cursor', 'none', 'important');
+        document.body.style.setProperty('cursor', 'none', 'important');
+        // MutationObserver: 动态覆盖所有新元素的cursor
+        var _cursorObs = new MutationObserver(function(mutations) {
+            mutations.forEach(function(m) {
+                m.addedNodes.forEach(function(node) {
+                    if (node.nodeType === 1) {
+                        node.style.setProperty('cursor', 'none', 'important');
+                        if (node.querySelectorAll) {
+                            node.querySelectorAll('*').forEach(function(el) { el.style.setProperty('cursor', 'none', 'important'); });
+                        }
+                    }
+                });
+            });
+        });
+        _cursorObs.observe(document.body, { childList: true, subtree: true });
         var _cursorEl = _ce('div');
         _cursorEl.id = 'custom-cursor';
         _cursorEl.style.cssText = 'position:fixed;pointer-events:none;z-index:99999;width:24px;height:24px;transform:translate(-12px,-12px);';
