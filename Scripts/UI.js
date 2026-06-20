@@ -3169,7 +3169,13 @@ window.UISystem = (function () {
 
                 var syncTips = {
                     '暴君核心': 'Lv.3 觉醒：攻击变为<b style=color:var(--accent-red)>真实伤害</b>，无视防御',
+                    '暴君甲壳': 'Lv.3 觉醒：护盾量提升至<b style=color:var(--accent-red)>1.8×攻击力</b>，反伤提升至25%',
+                    '暴君腺体': 'Lv.3 觉醒：晕眩概率提升至<b style=color:var(--accent-red)>70%</b>，追加1回合减速',
+                    '蜂后毒牙': 'Lv.3 觉醒：猛毒伤害翻倍，<b style=color:var(--race-swarm)>毒爆</b>额外造成目标最大HP15%伤害',
+                    '蜂后甲壳': 'Lv.3 觉醒：每回合回复提升至<b style=color:var(--race-swarm)>20%最大HP</b>',
                     '蜂后髓核': 'Lv.3 觉醒：召唤突袭时额外<b style=color:var(--accent-blue)>吸取 50% 伤害的护盾</b>',
+                    '核心钻头': 'Lv.3 觉醒：暴击率提升至<b style=color:var(--race-ember)>40%</b>，暴伤×3',
+                    '核心护盾': 'Lv.3 觉醒：每回合回复<b style=color:var(--race-ember)>2进程</b>+自动修复护盾',
                     '高能电泳核': 'Lv.3 觉醒：电弧过载将对<b style=color:var(--accent-blue)>全场敌人</b>造成 50% 溅射伤害'
                 };
 
