@@ -2249,7 +2249,7 @@ window.UISystem = (function () {
                 }
 
                 if (currentTier >= 3) {
-                    preview.innerHTML = '<div class="txt-xs txt-red">已达最高级 Ⅲ，无法继续合成</div>';
+                    preview.innerHTML = '<div class="txt-xs txt-red">已达最高级 ⭐⭐⭐，无法继续合成</div>';
                     return;
                 }
 
@@ -2274,13 +2274,7 @@ window.UISystem = (function () {
         keys.forEach(function(k) {
             var count = inv[k]; if (count <= 0) return;
             var chip = _ce('div');
-            // 根据组件等级区分背景色
-            var tierBg = { 'Ⅲ': 'rgba(255,213,79,0.12)', 'Ⅱ': 'rgba(0,212,255,0.08)', 'Ⅰ': 'rgba(0,255,136,0.06)' };
-            var tierBd = { 'Ⅲ': 'rgba(255,213,79,0.35)', 'Ⅱ': 'rgba(0,212,255,0.25)', 'Ⅰ': 'rgba(0,255,136,0.2)' };
-            var tierSuffix = k.match(/[ⅠⅡⅢ]$/); var _tBg = 'rgba(255,255,255,0.06)'; var _tBd = 'rgba(255,255,255,0.12)';
-            if (tierSuffix) { _tBg = tierBg[tierSuffix[0]] || _tBg; _tBd = tierBd[tierSuffix[0]] || _tBd; }
-            var _tClr = tierSuffix ? (tierSuffix[0]==='Ⅲ'?'var(--accent-yellow)':tierSuffix[0]==='Ⅱ'?'var(--accent-blue)':'var(--accent-green)') : 'var(--text-main)';
-            chip.style.cssText = 'padding:6px 12px;background:' + _tBg + ';border:1px solid ' + _tBd + ';border-radius:4px;cursor:pointer;font-size:13px;color:' + _tClr + ';';
+            chip.style.cssText = 'padding:6px 12px;background:rgba(255,213,79,0.08);border:1px solid rgba(255,213,79,0.2);border-radius:4px;cursor:pointer;font-size:13px;color:var(--accent-yellow);';
             var renderChip = function() {
               chip.innerHTML = '<span>' + _fmtRoman(k) + '</span> <span class=\"txt-xs txt-dim\">×' + count + '</span>' + (selected[k] ? ' <span class=\"txt-xs txt-gold\">已选' + selected[k] + '</span>' : '') + (count >= 3 && selectCount === 0 ? ' <span class=\"txt-xs\" style=\"color:var(--accent-yellow);opacity:0.5;\">右键一键三连</span>' : '');
             };
@@ -2804,7 +2798,7 @@ window.UISystem = (function () {
         if (d.affixText) tip += '&#10;' + d.affixText;
         if (d.slotText) tip += '&#10;<b>可装备：</b>' + d.slotText;
         if (d.coatingText) tip += '&#10;<b>可用于涂抹：</b>' + d.coatingText;
-        tip += '&#10;<b>合成：</b>3个相同 → Ⅰ→Ⅱ→Ⅲ 逐级升级';
+        tip += '&#10;<b>合成：</b>3个相同 → ⭐→⭐⭐→⭐⭐⭐ 逐级升级';
         if (d.dropsHTML) tip += '&#10;<b>掉落：</b>' + d.dropsHTML;
         else if (d.sourceNote) tip += '&#10;<b>来源：</b>' + d.sourceNote;
         return tip;

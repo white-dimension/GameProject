@@ -853,7 +853,7 @@ window.GameData = (function () {
                 { label: '器官进阶', desc: '消耗材料提升插槽阶位 (Tier)。不仅加属性，还会让突变技能的伤害倍率动态成长。', color: 'var(--accent-green)' },
                 { label: '深度同调', desc: '消耗同名副本器官提升 Lv。Lv.3 觉醒后赋予真伤、溅射或吸盾等终极特效。', color: 'var(--accent-yellow)' },
                 { label: '基因突变', desc: '消耗积压的基因点数 (BP) 永久提升基础攻击、防御和生命上限。', color: 'var(--accent-blue)' },
-                { label: '合成与镶嵌', desc: '3个相同组件可合成为 Ⅰ/Ⅱ/Ⅲ 高级版，属性翻倍增长。', color: 'var(--accent-purple)' }
+                { label: '合成与镶嵌', desc: '3个相同组件可合成为 ⭐/⭐⭐/⭐⭐⭐ 高级版，属性翻倍增长。', color: 'var(--accent-purple)' }
             ],
             tip: '多余的领主器官是进行「深度同调」的关键素材，千万不要随意丢弃。'
         },
