@@ -2361,7 +2361,7 @@ window.UISystem = (function () {
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
         _modalOverlay._returnToLab = true;
         var box = _ce('div', 'modal-box');
-        box.style.cssText = 'width:min(500px,90vw);background:var(--bg-modal);border:2px solid var(--accent-purple);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
+        box.style.cssText = 'width:min(500px,90vw);background:var(--bg-modal);border:1px solid var(--accent-purple);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
         var head = _ce('div');
         head.style.cssText = 'padding:14px 20px;background:rgba(156,39,176,0.05);border-bottom:1px solid var(--accent-purple);display:flex;justify-content:space-between;align-items:center;';
         head.innerHTML = '<div class="txt-md txt-purple txt-bold">[ ' + title + ' ] 选择 ' + count + ' 个碎片</div><button class="btn btn-blue btn-sm" onclick="UISystem.closeModal();UISystem.showReorganizeModal();">取消</button>';
@@ -2940,7 +2940,7 @@ window.UISystem = (function () {
         _modalOverlay.style.display = 'flex';
 
         var box = _ce('div', 'modal-box');
-        box.style.cssText = 'width:min(600px,90vw);background:var(--bg-modal);border:2px solid var(--accent-yellow);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 0 40px rgba(0,0,0,1);';
+        box.style.cssText = 'width:min(600px,90vw);background:var(--bg-modal);border:1px solid var(--accent-yellow);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 0 40px rgba(0,0,0,1);';
 
         var head = _ce('div');
         head.style.cssText = 'padding:20px 30px;background:rgba(255,213,79,0.08);border-bottom:1px solid var(--accent-yellow);';
