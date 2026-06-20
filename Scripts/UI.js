@@ -1437,7 +1437,7 @@ window.UISystem = (function () {
 
         // 种族筛选标签栏（遵循设计规范按钮样式）
         var _tabBar = _ce('div');
-        _tabBar.style.cssText = 'display:flex;gap:8px;padding:0 0 12px 0;border-bottom:1px solid var(--border-dim);';
+        _tabBar.style.cssText = 'display:flex;gap:8px;padding:0 0 8px 0;';
         var _tabBtns = {};
         var tabs = [{ r: 'mutant', l: '异变者', cls: 'btn-red' },
                     { r: 'swarm', l: '寄生群落', cls: 'btn-green' },
@@ -1506,7 +1506,7 @@ window.UISystem = (function () {
                 var tierHeader = _ce('div');
                 tierHeader.setAttribute('data-bestiary-race', race);
                 tierHeader.className = 'txt-xs txt-bold';
-                tierHeader.style.cssText = 'width:100%;margin-top:4px;margin-bottom:2px;color:var(--text-dim);border-bottom:1px solid var(--border-dim);padding-bottom:4px;';
+                tierHeader.style.cssText = 'width:100%;margin-top:8px;margin-bottom:2px;color:var(--text-dim);';
                 tierHeader.textContent = '> ' + tierLabels[tier];
                 _bestiaryWrap.appendChild(tierHeader);
                 tierMonsters.forEach(function(tm) {
