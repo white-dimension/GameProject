@@ -117,7 +117,7 @@ window.UISystem = (function () {
         _bgTitleVideo.addEventListener('timeupdate', function() {
             if (!_bgTitleVideo._fadeTriggered && _bgTitleVideo.duration && _bgTitleVideo.currentTime > _bgTitleVideo.duration - 3) {
                 _bgTitleVideo._fadeTriggered = true;
-                _bgTitleVideo._fadeOverlay.style.opacity = '1';
+                _bgTitleVideo._fadeOverlay.style.opacity = '0.85';
             }
             if (!_bgTitleVideo._introTriggered && _bgTitleVideo.duration && _bgTitleVideo.currentTime > _bgTitleVideo.duration - 2) {
                 _bgTitleVideo._introTriggered = true;
