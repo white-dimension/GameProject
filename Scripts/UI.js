@@ -1151,7 +1151,7 @@ window.UISystem = (function () {
             for (var fi = 0; fi < pool.length; fi++) { if (!pool[fi].hidden) { totalN++; if (pool[fi].exhausted) doneN++; } }
             var pct = totalN > 0 ? Math.round(doneN / totalN * 100) : 0;
             var floorBar = _ce('div');
-            floorBar.style.cssText = 'display:flex;align-items:center;justify-content:space-between;width:100%;padding-left:35px;padding-right:25px;font-size:14px;font-family:inherit;';
+            floorBar.style.cssText = 'display:flex;align-items:center;justify-content:space-between;width:100%;padding:10px 25px 10px 35px;font-size:14px;font-family:inherit;min-height:60px;';
             floorBar.innerHTML = '<div style="display:flex;align-items:center;gap:16px;">' +
                 '<span class="txt-bold" style="color:var(--accent-blue);font-size:16px;">' + (function(f){ var cn = ['','一','二','三','四','五','六','七','八','九','十']; return '地下' + (cn[f]||f) + '层'; })(floor) + '</span>' +
                 '<span class="txt-sm txt-bold" style="color:var(--text-main);">节点 ' + doneN + '/' + totalN + '</span>' +
