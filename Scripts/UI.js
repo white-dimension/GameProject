@@ -1353,6 +1353,7 @@ window.UISystem = (function () {
                 _bestiaryWrap.appendChild(item);
             });
         });
+        _filterDisplay();
         box.appendChild(body);
         _modalOverlay.appendChild(box);
     }
