@@ -1,6 +1,16 @@
 # 01 — 开发日志
 
-## v2.1.5 — 2026-06-20 🐛 图鉴布局修复 + HUD头部对齐
+## v3.0.0 — 2026-06-20 🎮 黑平线·原体觉醒 正式版
+
+- **版本号统一升级至 3.0.0**：package.json / Data.js / Core.js 存档 meta
+- 全系统模板引擎 + 9 Boss器官 + AI怪物立绘 + 战斗预测审计
+
+### 图鉴布局修复 + HUD头部对齐
+- **showBestiaryModal**: 删除末尾重复的 `_modalOverlay.appendChild(box)`（DOM 移动语义导致 box 从 wrapper flex 容器中被抽走，左右布局崩溃）
+- **图鉴种族筛选按钮**: `width:100%` → 固定 `width:180px`，`display:inline-flex` → `display:flex`
+- **HUD头部**: `justify-content:space-between` → `flex-start` + `gap:15px`，轮回徽章 `flex-shrink:0`
+
+## v2.1.5 — 2026-06-20 🐛 图鉴布局修复 + HUD头部对齐（已合并至 v3.0.0）
 
 - **showBestiaryModal**: 删除末尾重复的 `_modalOverlay.appendChild(box)`（DOM 移动语义导致 box 从 wrapper flex 容器中被抽走，左右布局崩溃）
 - **图鉴种族筛选按钮**: `width:100%` → 固定 `width:180px`，`display:inline-flex` → `display:flex`，解决按钮边框未左对齐问题
