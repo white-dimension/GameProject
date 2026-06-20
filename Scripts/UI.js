@@ -700,7 +700,7 @@ window.UISystem = (function () {
             var cardBg = (hasBgImage && !dead)
                 ? 'linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.15) 100%), linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url(' + md.image + ') center/cover no-repeat'
                 : 'var(--bg-card)';
-            card.style.cssText = 'position:relative;background:' + cardBg + ';border:2px solid ' + cardBorder + ';border-radius:8px;padding:24px;text-align:center;min-width:280px;max-width:380px;min-height:320px;display:flex;flex-direction:column;justify-content:flex-end;' + cardGlow +
+            card.style.cssText = 'position:relative;background:' + cardBg + ';border:2px solid ' + cardBorder + ';border-radius:8px;padding:24px;text-align:center;min-width:280px;max-width:380px;min-height:320px;display:flex;flex-direction:column;justify-content:flex-start;' + cardGlow +
                 (dead ? 'opacity:0.4;filter:grayscale(0.5);' : '') + 'cursor:' + (isVictory || dead ? 'default' : 'pointer') + ';';
 
             // [新增] 种族克制标记 (方案 A：右上角弱点锁定)
@@ -773,9 +773,10 @@ window.UISystem = (function () {
             var rl = (gs.bestiary && gs.bestiary.researchLevels) ? (gs.bestiary.researchLevels[mon.id] || 0) : 0;
             var hpText = (rl >= 1) ? (mon.hp + ' / ' + mon.hpMax) : (Math.ceil(hpPct) + '%');
 
-            card.innerHTML += '<div class="progress-container monster-bar" style="max-width:200px;width:100%;margin:8px auto 0;border:1px solid #442222;">' +
+            card.innerHTML += '<div style="margin-top:auto;width:100%;">' +
+                '<div class="progress-container monster-bar" style="max-width:200px;width:100%;margin:8px auto 0;border:1px solid #442222;">' +
                 '<div class="progress-fill ' + hpBarClass + '" style="width:' + hpPct + '%;"></div></div>' +
-                '<div class="txt-xs txt-dim" style="margin-top:4px;">' + hpText + '</div>';
+                '<div class="txt-xs txt-dim" style="margin-top:4px;">' + hpText + '</div></div>';
 
             wrap.appendChild(card);
 
