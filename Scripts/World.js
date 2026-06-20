@@ -17,7 +17,7 @@ window.WorldSystem = (function () {
         // 规则：排除教学区 (B1F & 步数<=1)、Boss 房、传送门、遗物、通关
         var canTriggerEvent = gs.mapState.currentFloor > 1 || gs.mapState.stepsTaken > 1;
         if (canTriggerEvent && target.type !== 'boss' && target.type !== 'portal' && target.type !== 'relic' && target.type !== 'victory' && !gs.mapState._eventActive) {
-            if (Math.random() < 0.10 && window.GameData && window.GameData.RANDOM_EVENTS) {
+            if (Math.random() < 0.25 && window.GameData && window.GameData.RANDOM_EVENTS) {
                 var eventKeys = Object.keys(window.GameData.RANDOM_EVENTS);
                 if (eventKeys.length === 0) { gs.mapState._eventActive = false; } else {
                     var eid = eventKeys[Math.floor(Math.random() * eventKeys.length)];
