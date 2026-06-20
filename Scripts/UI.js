@@ -474,10 +474,10 @@ window.UISystem = (function () {
         var p = gs.player;
         var hints = [];
 
-        var totalMP = Object.values(p.masteryPoints || {}).reduce(function(a,b){return a+b;},0);
+        var totalMP = (p.availableMasteryPoints || 0);
         var masterySlots = (p.masteries || []).filter(function(r){return r;}).length;
         var availSlots = (gs.mapState.loop >= 2 ? 3 : 2) - masterySlots;
-        if (availSlots > 0 && p.level >= 1) hints.push('选择一个专精流派以获得战斗增益 [实验室 → 专精学习]');
+        if (availSlots > 0 && p.level >= 1 && totalMP === 0) hints.push('选择一个专精流派以获得战斗增益 [实验室 → 专精学习]');
 
         if (totalMP > 0) hints.push('你有 ' + totalMP + ' 点未分配专精点数 [实验室 → 专精学习]');
 
