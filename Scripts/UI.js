@@ -1562,7 +1562,8 @@ window.UISystem = (function () {
         infoBar.style.cssText = 'flex:0 0 200px;padding:24px 16px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:6px;text-align:left;align-self:flex-start;';
         infoBar.innerHTML = '<div style="margin-bottom:12px;"><span class="txt-xs txt-blue txt-bold">核心指标</span><div class="txt-xs txt-dim" style="margin-top:4px;">当前原体的最终属性。悬停数值可查看加成来源（溯源）。</div></div>' +
             '<div style="margin-bottom:12px;"><span class="txt-xs txt-blue txt-bold">器官状态</span><div class="txt-xs txt-dim" style="margin-top:4px;">展示已挂载器官及其同调等级。</div></div>' +
-            '<div><span class="txt-xs txt-blue txt-bold">专精流派</span><div class="txt-xs txt-dim" style="margin-top:4px;">投入专精点提升属性，特定组合激活全局被动。</div></div>';
+            '<div style="margin-bottom:12px;"><span class="txt-xs txt-blue txt-bold">专精流派</span><div class="txt-xs txt-dim" style="margin-top:4px;">投入专精点提升属性，特定组合激活全局被动。</div></div>' +
+            '<div><span class="txt-xs txt-gold txt-bold">被动汇总</span><div class="txt-xs txt-dim" style="margin-top:4px;">当前全部生效的被动效果、组件词条与器官觉醒。</div></div>';
 
         // 3. 右侧主内容盒
         var box = _ce('div', 'modal-box status-modal');
@@ -1753,6 +1754,103 @@ window.UISystem = (function () {
         });
         masteryHTML += '</div></div>'; // 关闭 fold-content 和外层容器
         body.innerHTML += masteryHTML;
+
+        // === 被动汇总 ===
+        var passiveHTML = '<div style="margin-top:10px;padding:15px 20px;background:rgba(255,213,79,0.03);border:1px solid rgba(255,213,79,0.15);border-radius:6px;">' +
+            '<div class="txt-sm txt-gold txt-bold" style="margin-bottom:8px;">> 被动效果汇总</div><div style="display:flex;flex-direction:column;gap:6px;">';
+
+        // 双专精被动
+        var races = (p.masteries||[]).filter(function(r){return r;});
+        if (races.length >= 2) {
+            var dualKey = races.slice(0,2).sort().join('+');
+            var dualPassives = {
+                'mutant+swarm': { name:'骨疽自溶', desc:'受击40%概率释放大面积毒素', color:'var(--accent-purple)' },
+                'mutant+ember': { name:'动能回馈', desc:'防御转护盾，受击+1进程，流血免疫', color:'var(--accent-blue)' },
+                'swarm+ember': { name:'电子真菌', desc:'毒技能35%概率不消耗进程', color:'var(--accent-green)' },
+                'mutant+mutant': { name:'源初毁灭者', desc:'物理伤害×1.4，无视30%防御', color:'var(--race-mutant)' },
+                'swarm+swarm': { name:'瘟疫主宰', desc:'毒素抗性-30%，自溶伤害5%→8%', color:'var(--race-swarm)' },
+                'ember+ember': { name:'终焉母核', desc:'每回合释放连锁闪电，防御×1.2伤害', color:'var(--race-ember)' }
+            };
+            var dp = dualPassives[dualKey];
+            if (dp) passiveHTML += '<div><span class="txt-xs" style="color:' + dp.color + ';">◆ ' + dp.name + '</span><span class="txt-xs txt-dim"> — ' + dp.desc + '</span></div>';
+            if (races.length >= 3 && races[2]) {
+                passiveHTML += '<div><span class="txt-xs txt-dim">第三专精 [' + _RACE_NAMES[races[2]] + '] 提供属性加成（同系叠加150%）</span></div>';
+            }
+        }
+
+        // 涂层
+        if (p.activeCoating) {
+            var coat = (GD().COATINGS||{})[p.activeCoating];
+            if (coat) passiveHTML += '<div><span class="txt-xs" style="color:var(--accent-yellow);">◆ 基因涂层: ' + coat.name + '</span><span class="txt-xs txt-dim"> — 剩余 ' + (p.coatingTurnsLeft||0) + ' 回合</span></div>';
+        }
+
+        // 组件被动
+        var compFx = (function(){
+            var fx = {};
+            ['predatory_organ','chitin_epidermis','gland_core'].forEach(function(s){
+                (p[s].component_slots||[]).forEach(function(cid){
+                    if(!cid) return;
+                    var aff = (function(){
+                        var comp = (GD().COMPONENTS||{})[cid];
+                        if (comp && comp.affixes) return comp.affixes;
+                        var base = cid.replace(/[ⅠⅡⅢ]$/,'');
+                        var baseComp = (GD().COMPONENTS||{})[base];
+                        if (baseComp && baseComp.affixes) {
+                            var mult = Math.pow(2, cid.length - base.length);
+                            var a = {};
+                            Object.keys(baseComp.affixes).forEach(function(k){
+                                var v = baseComp.affixes[k];
+                                if (typeof v === 'boolean') a[k] = v;
+                                else if (k === 'critMultiplier') a[k] = v + 0.5 * (cid.length - base.length);
+                                else a[k] = v * mult;
+                            });
+                            return a;
+                        }
+                        return null;
+                    })();
+                    if (!aff) return;
+                    Object.keys(aff).forEach(function(k){ if(aff[k]) fx[k] = (fx[k]||0) + (typeof aff[k]==='boolean'?1:aff[k]); });
+                });
+            });
+            return fx;
+        })();
+        var passives = [];
+        if (compFx.atkBonus) passives.push('攻击+' + compFx.atkBonus);
+        if (compFx.defBonus) passives.push('防御+' + compFx.defBonus);
+        if (compFx.flatDefBonus) passives.push('防御+' + compFx.flatDefBonus);
+        if (compFx.shieldBonus) passives.push('生命+' + compFx.shieldBonus);
+        if (compFx.bonusVsSwarm) passives.push('对寄生增伤+' + Math.round(compFx.bonusVsSwarm*100) + '%');
+        if (compFx.armorPenetration||compFx.armorPen) passives.push('破甲' + Math.round((compFx.armorPenetration||compFx.armorPen)*100) + '%');
+        if (compFx.physMultiplier) passives.push('物理×' + compFx.physMultiplier.toFixed(1));
+        if (compFx.thornsPercent) passives.push('反伤' + Math.round(compFx.thornsPercent*100) + '%');
+        if (compFx.lifeDrainChance) passives.push('吸血' + Math.round(compFx.lifeDrainChance*100) + '%·' + (compFx.lifeDrainAmount||0) + 'HP');
+        if (compFx.toxinConversion||compFx.toxinConv) passives.push('毒素转化' + Math.round((compFx.toxinConversion||compFx.toxinConv)*100) + '%');
+        if (compFx.critChance) passives.push('暴击率' + Math.round(compFx.critChance*100) + '%');
+        if (compFx.critMultiplier && compFx.critMultiplier>1.5) passives.push('暴伤×' + compFx.critMultiplier.toFixed(1));
+        if (compFx.dotBonus) passives.push('毒伤+' + compFx.dotBonus);
+        if (compFx.killHeal) passives.push('击杀回复' + compFx.killHeal + 'HP');
+        if (compFx.deathDefy) passives.push('死亡抗拒');
+        if (compFx.processOnHit) passives.push('受击回复' + compFx.processOnHit + '进程');
+        if (compFx.poisonImmune) passives.push('毒素免疫');
+        if (passives.length > 0) passiveHTML += '<div><span class="txt-xs txt-dim">◆ 组件:</span> ' + passives.map(function(t){return '<span class="txt-xs" style="color:var(--accent-yellow);">' + t + '</span>';}).join(' · ') + '</div>';
+
+        // Boss器官被动
+        ['predatory_organ','chitin_epidermis','gland_core'].forEach(function(s){
+            var eq = p[s].equipped; if (!eq) return;
+            var bo = (GD().BOSS_ORGANS||{})[eq]; if (!bo) return;
+            var syncLvl = (gs.inventory.organSyncLevels||{})[eq] || 1;
+            var oc = _getOrganColor(eq);
+            var boDesc = bo.skillName + ' [Sync Lv.' + syncLvl + ']';
+            if (syncLvl >= 3) {
+                if (eq === '暴君核心') boDesc += ' — 觉醒: 攻击转为真实伤害';
+                else if (eq === '蜂后髓核') boDesc += ' — 觉醒: 召唤突袭吸取50%护盾';
+                else if (eq === '高能电泳核') boDesc += ' — 觉醒: 电弧全场溅射50%';
+            }
+            passiveHTML += '<div><span class="txt-xs" style="color:' + oc.hex + ';">◆ ' + boDesc + '</span></div>';
+        });
+
+        passiveHTML += '</div></div>';
+        body.innerHTML += passiveHTML;
         box.appendChild(body);
     }
 
