@@ -2995,8 +2995,8 @@ window.UISystem = (function () {
     var _fmtRoman = function(str) {
         var m = str.match(/([ⅠⅡⅢ]+)$/);
         var n = m ? ({ 'Ⅰ':1,'Ⅱ':2,'Ⅲ':3 })[m[1]] || m[1].length : 0;
-        var stars = ''; for (var i=0;i<n;i++) stars += '⭐';
-        return (stars ? stars : '') + str.replace(/[ⅠⅡⅢ]+$/g, '');
+        var label = n >= 3 ? 'MAX ' : (n > 0 ? (function(){var s='';for(var i=0;i<n;i++)s+='⭐';return s+' ';})() : '');
+        return label + str.replace(/[ⅠⅡⅢ]+$/g, '');
     };
 
     // --- Boss器官颜色/职业映射 ---
