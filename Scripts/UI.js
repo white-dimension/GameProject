@@ -2930,7 +2930,7 @@ window.UISystem = (function () {
         var syncLvl = gs.inventory.organSyncLevels[d.equipped] || 1;
         var html = '';
         // 名称行
-        html += '<div class="txt-xs txt-green txt-bold">' + organNames[s] + '<span style="color:var(--accent-yellow);margin-left:4px;">' + _fmtTierStars(d.tier) + '</span></div>';
+        html += '<div class="txt-xs txt-green txt-bold">' + organNames[s] + '</div>';
         // 挂载行
         html += '<div class="txt-xs txt-dim" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">';
         html += '<span>挂载: </span>';
