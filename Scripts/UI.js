@@ -751,6 +751,14 @@ window.UISystem = (function () {
                 (isTarget && !dead && !isVictory ? '<span style="color:var(--accent-red);margin-right:4px;">▸</span> ' : '') + mon.name + affixIcons +
                 ' <span style="font-weight:bold;font-size:0.85em;">· ' + (raceNames[md.race] || '') + '</span></div>';
 
+            // 技能/意图标签
+            if (mon.intent && !dead) {
+                var intentClrs2 = _INTENT_COLORS;
+                var iclr2 = intentClrs2[mon.intent.type] || 'var(--accent-red)';
+                var labelText = mon.intent.label.replace(/<[^>]*>/g, '').trim();
+                card.innerHTML += '<div class="txt-xs" style="margin-top:4px;color:' + iclr2 + ';">' + labelText + '</div>';
+            }
+
             if (dead) {
                 card.innerHTML += '<div class="txt-xs txt-dim" style="margin-top:6px;">已融毁</div>';
             }
