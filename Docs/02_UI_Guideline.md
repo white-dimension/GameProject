@@ -63,7 +63,7 @@
 | `.txt-blue` | `--accent-blue` | 信息/护盾 |
 | `.txt-bold` | — | 加粗 |
 
-**规则**：最小字号 13px（允许 12px 仅限极小按钮）。禁用颜色简写（`#f44`、`#0f8`）。
+**规则**：最小字号 13px（允许 12px 仅限极小按钮；战斗被动标签（renderTag）允许12px）。禁用颜色简写（`#f44`、`#0f8`）。
 
 ## 3. 按钮系统
 
@@ -106,11 +106,12 @@
 | 图鉴 | `showBestiaryModal()` | `--accent-yellow` | 按种族分组、颜色标题、上方击杀统计 |
 | 存档 | `showSaveModal()` | `--accent-purple` | 3槽位 + 导入导出 |
 | 手册 | `showHelpPanel()` | `--accent-blue` | 4标签(基础/战斗/实验室/配方) |
-| 合成 | `_showSynthesizeModal()` | `--accent-yellow` | 选择3组件→预览→确认 |
+| 合成 | `_showSynthesizeModal()` | `--accent-yellow` | 嵌入在实验室弹窗内，由 showReorganizeModal() 统一管理 |
 | 通知 | `showNotification()` | 动态 | 1px边框、淡入淡出1.6s |
 | 死亡 | 内联 | `--accent-red` | 序列崩解 + BP扣减 + 确认重组按钮 |
 
 框外说明栏：弹窗上/下方20px间距，背景 `var(--bg-card)`，边框 `var(--border-dim)`，圆角4px。
+- 弹窗侧栏宽度 200→300px（v2.1.4）
 
 ## 6. 图标系统
 
@@ -184,7 +185,7 @@
 │   ├── #ui-divider                ← 分隔线 (1px)
 │   └── #_mainView / #_battleView  ← 探索/战斗视图
 │
-└── .action-bar                    ← 底部操作栏 (高度:130px)
+└── .action-bar                    ← 底部操作栏 (高度:60px（最小高度）)
     ├── 探索模式: 楼层进度条 + 按钮(实验室/档案/图鉴/存档)
     └── 战斗模式: 技能卡 + 魔药 + 结束回合 + 逃跑
 ```
@@ -281,4 +282,4 @@ _bgVideos.push(newVid);
 
 ---
 
-> v1.0 初始 | v2.0 字体+状态条+光标 | v2.1 布局重构 | v3.6 颜色/图标/地图/战斗全面重制 | v3.8 逻辑同步与清理 | **V2.1 视听升级 (2026-06-19)**
+> v1.0 初始 | v2.0 字体+状态条+光标 | v2.1 布局重构 | v3.6 颜色/图标/地图/战斗全面重制 | v3.8 逻辑同步与清理 | **V2.1 视听升级 (2026-06-20)**
