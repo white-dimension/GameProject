@@ -1155,6 +1155,29 @@ window.GameData = (function () {
     };
 
     // =========================================================================
+    // 12. 状态效果模板
+    // =========================================================================
+    var STATUS_TEMPLATES = {
+        poison: { id:'poison',name:'毒素发作',icon:'icon-poison-gas',color:'var(--accent-purple)',maxStacks:9,stackable:true,tooltip:'每回合损失5%最大生命值（瘟疫主宰10%）',hooks:{onTurnStart:{type:'dot',formula:'ceil(hpMax*dotPct)+dotBonus+statusDamage'},onExpire:{msg:'毒素已自行分解。'}}},
+        bleed: { id:'bleed',name:'流血',icon:'icon-dripping-blade',color:'var(--accent-red)',maxStacks:9,stackable:true,tooltip:'每回合损失固定伤害值',hooks:{onTurnStart:{type:'dot',formula:'bleedDmg'},onExpire:{msg:'流血已止住。'}}},
+        compromised: { id:'compromised',name:'生物崩解',icon:'icon-hazard-sign',color:'var(--accent-yellow)',maxStacks:1,stackable:false,tooltip:'防御归零+闪避无效。被腺体脉冲引爆后陷入易伤',hooks:{onApply:{effects:[{type:'setFlag',flag:'_dodging',value:false},{type:'setFlag',flag:'_compDefZero',value:true}]},onExpire:{effects:[{type:'setFlag',flag:'_compDefZero',value:false}]}}},
+        ionized: { id:'ionized',name:'电离标记',icon:'icon-lightning-arc',color:'var(--accent-blue)',maxStacks:1,stackable:false,tooltip:'下次捕食打击引爆：剥离护盾+全场溅射',hooks:{}},
+        stunned: { id:'stunned',name:'眩晕',icon:'icon-time-trap',color:'var(--accent-yellow)',maxStacks:1,stackable:false,tooltip:'跳过本回合行动',hooks:{onExpire:{msg:'眩晕已解除。'}}}
+    };
+
+    // =========================================================================
+    // 13. 被动效果模板
+    // =========================================================================
+    var PASSIVE_TEMPLATES = {
+        'dual_mutant+mutant': { id:'dual_mutant+mutant',name:'超量撕裂',color:'var(--accent-red)',passiveDesc:'所有攻击物理伤害x1.4，无视30%防御',triggers:[{on:'onBeforeDamage',condition:'slot==="predatory_organ"',effects:[{type:'multiplyDamage',value:1.4},{type:'setFlag',flag:'dualIgnoreDef',value:true}]}]},
+        'dual_mutant+swarm': { id:'dual_mutant+swarm',name:'骨疽自溶',color:'var(--accent-purple)',passiveDesc:'受击时55%概率毒雾反击',triggers:[{on:'onDamaged',condition:'Math.random()<0.55',effects:[{type:'applyStatus',status:'poison',target:'attacker',params:{duration:3}}]}]},
+        'dual_ember+mutant': { id:'dual_ember+mutant',name:'动能回馈',color:'var(--accent-blue)',passiveDesc:'防御转护盾，受击+1进程，流血免疫',triggers:[{on:'onBattleStart',effects:[{type:'gainShield',formula:'player.def'}]},{on:'onDamaged',effects:[{type:'gainShield',formula:'ceil(player.def*0.3)'},{type:'gainProcess',formula:'1'}]}]},
+        'dual_swarm+swarm': { id:'dual_swarm+swarm',name:'瘟疫主宰',color:'var(--accent-purple)',passiveDesc:'毒素发作5%->10%，无视护盾',triggers:[]},
+        'dual_ember+swarm': { id:'dual_ember+swarm',name:'电子真菌',color:'var(--accent-yellow)',passiveDesc:'毒技能35%概率不消耗进程',triggers:[{on:'onSkillUse',condition:'slot==="gland_core"&&Math.random()<0.35',effects:[{type:'setFlag',flag:'_freeSkill',value:true}]}]},
+        'dual_ember+ember': { id:'dual_ember+ember',name:'终焉母核',color:'var(--accent-blue)',passiveDesc:'每回合连锁闪电x2，防御x1.2伤害，清除闪避',triggers:[{on:'onTurnStart',effects:[{type:'setFlag',target:'allEnemies',flag:'_dodging',value:false},{type:'chainLightning',formula:'ceil(player.def*1.2)',count:2}]}]}
+    };
+
+    // =========================================================================
     // 公开 API
     // =========================================================================
     return {
@@ -1170,6 +1193,8 @@ window.GameData = (function () {
         STATUS_CONSTANTS: STATUS_CONSTANTS,
         TUTORIALS: TUTORIALS,
         RANDOM_EVENTS: RANDOM_EVENTS,
+        STATUS_TEMPLATES: STATUS_TEMPLATES,
+        PASSIVE_TEMPLATES: PASSIVE_TEMPLATES,
         calcTierUpgradeCost: calcTierUpgradeCost,
         getRandomBossOrgan: _getRandomBossOrgan
     };

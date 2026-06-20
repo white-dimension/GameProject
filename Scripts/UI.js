@@ -984,78 +984,64 @@ window.UISystem = (function () {
             var bsv = CS().getBattleState();
             var skillInfo = document.getElementById('ui-skill-info');
 
-            // [新增] 伤害/数值预测逻辑
+            // 伤害/数值预测逻辑 — 使用 DamagePipeline 确保与实战一致
             var getForecast = function(slot, baseAtk) {
                 if (!bsv) return { dmg: baseAtk, heal: 0, tag: "" };
                 var mon = bsv.monsters[bsv.currentTarget];
                 if (!mon || mon.hp <= 0) return { dmg: baseAtk, heal: 0, tag: "" };
+                var md = GD().MONSTERS[mon.id]; if (!md) return { dmg: baseAtk, heal: 0, tag: "" };
+                var TE = window.TemplateEngine; if (!TE) return { dmg: baseAtk, heal: 0, tag: "" };
 
-                var md = GD().MONSTERS[mon.id];
-                var dmg = baseAtk;
-                var ignoreDef = false;
-                var tag = "";
-
-                // === 公共：研究等级 / 种族是否克制 ===
-                var rl = (gs.bestiary && gs.bestiary.researchLevels) ? (gs.bestiary.researchLevels[mon.id] || 0) : 0;
-                var pRaces = gs.player.masteries.filter(function(r){return r;});
-                var isCounter = false;
-                for(var i=0; i<pRaces.length; i++){
-                    var pr = pRaces[i];
-                    if((pr==='mutant' && md.race==='swarm')||(pr==='swarm' && md.race==='ember')||(pr==='ember' && md.race==='mutant')){ isCounter = true; break; }
-                }
-                // 组件种族增伤（全槽位通用）
-                var compFx = bsv ? (bsv.componentEffects || {}) : {};
-                if (compFx.bonusVsSwarm > 0 && md.race === 'swarm') dmg *= (1 + compFx.bonusVsSwarm);
-
-                // === 槽位参数 ===
-                var sData = gs.player[slot] || { tier: 1 };
+                var p = gs.player;
+                var sData = p[slot] || { tier: 1 };
                 var eqId = sData.equipped;
-                var boData = eqId ? (GD().BOSS_ORGANS || {})[eqId] : null;
                 var syncLvl = gs.inventory.organSyncLevels[eqId] || 1;
                 var tierFactor = 1 + (sData.tier - 1) * 0.1 * syncLvl;
+                var compFx = bsv.componentEffects || {};
+                var rl = (gs.bestiary && gs.bestiary.researchLevels) ? (gs.bestiary.researchLevels[mon.id] || 0) : 0;
+                var isCounter = false;
+                var pRaces = p.masteries.filter(function(r){return r;});
+                for (var ci = 0; ci < pRaces.length; ci++) {
+                    if ((pRaces[ci] === 'mutant' && md.race === 'swarm') ||
+                        (pRaces[ci] === 'swarm' && md.race === 'ember') ||
+                        (pRaces[ci] === 'ember' && md.race === 'mutant')) { isCounter = true; break; }
+                }
+                var coatingMultiplier = 1, coatingIgnoreDef = false;
+                if (p.activeCoating === 'COAT_ANTI_MUTANT' && md.race === 'mutant') { coatingMultiplier = 1.5; coatingIgnoreDef = true; }
+                else if (p.activeCoating === 'COAT_ANTI_SWARM' && md.race === 'swarm') coatingMultiplier = 1.6;
+                else if (p.activeCoating === 'COAT_ANTI_EMBER' && md.race === 'ember') coatingMultiplier = 1.3;
+                var organMultiplier = 1, organIgnoreDef = false;
+                if (eqId === '暴君核心') { organMultiplier = 2.5; organIgnoreDef = true; }
+                else if (eqId === '蜂后毒牙') organMultiplier = 1.5;
+                else if (eqId === '核心钻头') { organMultiplier = 2.0; organIgnoreDef = true; }
+                else if (eqId === '暴君腺体') organMultiplier = 2.0;
+                else if (eqId === '蜂后髓核') organMultiplier = 3.0;
+                else if (eqId === '高能电泳核') { organMultiplier = 2.0; organIgnoreDef = true; }
+                if (slot === 'gland_core' && !eqId) {
+                    if (mon.status['poison']) organMultiplier = 3.0;
+                    else if (mon.status['compromised']) organMultiplier = 2.0;
+                    else organMultiplier = 0.5;
+                }
+                var dualMultiplier = 1, dualIgnoreDef = false;
+                if (bsv.dualKey === 'mutant+mutant') { dualMultiplier = 1.4; dualIgnoreDef = true; }
 
+                var ctx = {
+                    baseAtk: baseAtk, slot: slot,
+                    targetMon: mon, targetData: md,
+                    tierFactor: (slot === 'gland_core' && eqId) ? 1 : tierFactor,
+                    coatingMultiplier: coatingMultiplier, coatingIgnoreDef: coatingIgnoreDef,
+                    organMultiplier: organMultiplier, organIgnoreDef: organIgnoreDef,
+                    dualMultiplier: dualMultiplier, dualIgnoreDef: dualIgnoreDef,
+                    isCounter: isCounter, compEffects: compFx,
+                    researchLvl: rl, battleState: bsv
+                };
+                var result = TE.DamagePipeline.forecast(ctx);
+                var tag = isCounter ? " (弱点)" : "";
                 var heal = 0;
-
-                if (slot === 'predatory_organ') {
-                    // [1] 研究×克制×tier基础（对应 Combat.js:315）
-                    var researchMult = rl >= 2 ? 1.1 : 1.0;
-                    dmg = Math.ceil(dmg * researchMult * tierFactor);
-                    // 暴君核心 Lv.3觉醒
-                    if (eqId === '暴君核心' && syncLvl >= 3) ignoreDef = true;
-                    // 涂层
-                    if (gs.player.activeCoating === 'COAT_ANTI_MUTANT' && md.race === 'mutant') { dmg = Math.ceil(dmg * 1.5); ignoreDef = true; }
-                    if (gs.player.activeCoating === 'COAT_ANTI_SWARM' && md.race === 'swarm') dmg = Math.ceil(dmg * 1.6);
-                    if (gs.player.activeCoating === 'COAT_ANTI_EMBER' && md.race === 'ember') dmg = Math.ceil(dmg * 1.3);
-                    // Boss器官基础倍率（暴君 2.5x）
-                    if (eqId === '暴君核心') { dmg = Math.ceil(dmg * 2.5); ignoreDef = true; }
-                    else if (boData && boData.skillEffect && boData.skillEffect.baseMultiplier) { dmg = Math.ceil(dmg * boData.skillEffect.baseMultiplier); }
-                    // 种族克制 1.5x
-                    if (isCounter) { dmg = Math.ceil(dmg * 1.5); ignoreDef = true; tag = " (弱点)"; }
-                    // 双专精
-                    if (bsv && bsv.dualKey === 'mutant+mutant') { dmg = Math.ceil(dmg * 1.4); ignoreDef = true; }
-                } else if (slot === 'chitin_epidermis') {
-                    // 生物防御 — 仅护盾值 = atk × 0.6（不产生伤害预估）
-                    dmg = Math.ceil(dmg * tierFactor);
-                } else if (slot === 'gland_core') {
-                    // [1] 连招引爆（对应 Combat.js:391-447）→ 不含研究/克制加成！
-                    dmg = Math.ceil(dmg * tierFactor);
-                    if (eqId === '蜂后髓核') { dmg = Math.ceil(dmg * 3); heal = dmg; }
-                    else if (eqId === '高能电泳核') { dmg = Math.ceil(dmg * 2.0); ignoreDef = true; }
-                    else if (mon.status['poison']) { dmg = Math.ceil(dmg * 3); heal = dmg; tag = " (爆发)"; }
-                    else if (mon.status['compromised']) { dmg = Math.ceil(dmg * 2.0); tag = " (崩解)"; }
-                    else { dmg = Math.ceil(dmg * 0.5); }
+                if (slot === 'gland_core') {
+                    if (eqId === '蜂后髓核' || (!eqId && mon.status['poison'])) heal = result.damage;
                 }
-
-                // === 防御减免（所有槽位通用）===
-                if (!ignoreDef) {
-                    var effDef = (mon.def || 0) + (mon._defBuff || 0);
-                    var cfx = bsv.componentEffects || {};
-                    if (cfx.armorPen > 0) effDef *= (1 - cfx.armorPen);
-                    var reduction = window.GameState.calcDamageReduction(effDef);
-                    dmg = Math.ceil(dmg * (1 - reduction));
-                }
-
-                return { dmg: Math.ceil(dmg), heal: Math.ceil(heal), tag: tag };
+                return { dmg: result.damage, heal: heal, tag: tag };
             };
 
             if (skillInfo) {

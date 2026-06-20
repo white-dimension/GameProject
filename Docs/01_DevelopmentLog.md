@@ -1,5 +1,33 @@
 # 01 — 开发日志
 
+## v2.1.1 — 2026-06-20 🔧 模板引擎重构 — 伤害管道 + 状态引擎 + 被动系统
+
+### 新增 TemplateEngine.js (289行)
+- **DamagePipeline**：统一伤害管道，收集所有修正器（研究/阶位/克制/涂层/器官/双专精/组件/易伤）→ 计算最终伤害 → 防御减免 → 暴击。`forecast()` 与 `calculate()` 共享同一管道，消除 UI 和 Combat 之间的伤害计算重复。
+- **StatusEngine**：状态效果模板引擎。注册→施加→tick(回合开始/结束)→过期。支持 DOT 公式求值、onApply/onExpire 钩子。
+- **PassiveEngine**：被动效果事件系统。`register()`→`trigger(eventName, ctx)`→`applyResults()`。支持 onBattleStart/onTurnStart/onDamaged/onBeforeDamage/onSkillUse 等触发时机。
+- **ModifierStack**：增益叠加计算器（flat + pct + mul → resolve），支持来源追踪。
+- **IntentExecutor** / **LootEngine** / **TurnFlow**：预留框架，供后续阶段接入。
+
+### Data.js — 新增模板定义
+- **STATUS_TEMPLATES**：5种状态（poison/bleed/compromised/ionized/stunned）的完整模板定义（钩子+公式+图标+颜色）
+- **PASSIVE_TEMPLATES**：6种双专精被动（超量撕裂/骨疽自溶/动能回馈/瘟疫主宰/电子真菌/终焉母核）全部数据驱动
+
+### Combat.js 重构
+- `_applyGlobalPassives`：if/else 链（6分支35行）→ PassiveEngine.register + onBattleStart触发（12行）
+- `_processStatusEffects`：内联 DOT 计算 → StatusEngine.tickTurnStart 批量处理
+- `_executePlayerSkill`：新增 `_buildPipelineCtx` 辅助函数收集所有修正器上下文 → DamagePipeline.calculate() 统一计算伤害。删除约80行硬编码伤害叠加。
+- 器官特殊效果（中毒/眩晕/电离/崩解/吸血/溅射）保留在函数内，通过 DamagePipeline 上下文传递倍率
+
+### UI.js — 预测统一
+- `getForecast()` 不再复制伤害公式，改为构建 DamagePipeline 上下文 → `DamagePipeline.forecast()` 计算预测值，确保预测与实际伤害完全一致
+
+### 收益
+- 加新 Boss 器官：在 Data.js 中定义 organMultiplier + organIgnoreDef，`_buildPipelineCtx` 的 if/else 链只需加 1 行
+- 加新状态效果：在 STATUS_TEMPLATES 中定义钩子公式，引擎自动处理
+- 加新被动：在 PASSIVE_TEMPLATES 中定义触发条件+效果，无需改 Combat.js
+- 伤害预测与实际伤害永远一致（同一条管道）
+
 ## v2.1.0 — 2026-06-20 ⚔️ 9 Boss器官 + 战斗预测审计 + 全界面打磨
 
 ### Boss器官扩展 — 9 器官体系

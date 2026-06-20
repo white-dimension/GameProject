@@ -262,13 +262,54 @@ window.CombatSystem = (function () {
     }
 
     function _getSkillName(slot) { var p=GS().player; var eq=p[slot].equipped; if(eq){ var bo=GD().BOSS_ORGANS||{}; if(bo[eq]&&bo[eq].skillName) return bo[eq].skillName; } var defs={predatory_organ:'捕食打击',chitin_epidermis:'生物防御',gland_core:'腺体脉冲'}; return defs[slot]||'攻击'; }
+
+    function _buildPipelineCtx(slot, baseAtk) {
+        var gs = GS(); var p = gs.player;
+        var m = _getMonsterData(); var curMon = _getMonster();
+        var sData = p[slot];
+        var syncLvl = gs.inventory.organSyncLevels[sData.equipped] || 1;
+        var tierFactor = 1 + (sData.tier - 1) * 0.1 * syncLvl;
+        var compFx = _getComponentEffects();
+        var isCounter = false;
+        if (m && m.race) {
+            var counterRaces = (p.masteries || []).filter(function(r){return r;});
+            for (var ci = 0; ci < counterRaces.length; ci++) {
+                if ((counterRaces[ci] === 'mutant' && m.race === 'swarm') ||
+                    (counterRaces[ci] === 'swarm' && m.race === 'ember') ||
+                    (counterRaces[ci] === 'ember' && m.race === 'mutant')) { isCounter = true; break; }
+            }
+        }
+        var coatingMultiplier = 1, coatingIgnoreDef = false, coatingShieldStrip = 0;
+        if (p.activeCoating === 'COAT_ANTI_MUTANT' && m && m.race === 'mutant') { coatingMultiplier = 1.5; coatingIgnoreDef = true; }
+        else if (p.activeCoating === 'COAT_ANTI_SWARM' && m && m.race === 'swarm') { coatingMultiplier = 1.6; }
+        else if (p.activeCoating === 'COAT_ANTI_EMBER' && m && m.race === 'ember') { coatingMultiplier = 1.3; coatingShieldStrip = 50; }
+        var organMultiplier = 1, organIgnoreDef = false;
+        if (sData.equipped === '暴君核心') { organMultiplier = 2.5; organIgnoreDef = true; }
+        else if (sData.equipped === '蜂后毒牙') { organMultiplier = 1.5; }
+        else if (sData.equipped === '核心钻头') { organMultiplier = 2.0; organIgnoreDef = true; }
+        else if (sData.equipped === '暴君腺体') { organMultiplier = 2.0; tierFactor = 1; }
+        else if (sData.equipped === '蜂后髓核') { organMultiplier = 3.0; tierFactor = 1; }
+        else if (sData.equipped === '高能电泳核') { organMultiplier = 2.0; tierFactor = 1; organIgnoreDef = true; }
+        var dualMultiplier = 1, dualIgnoreDef = false;
+        if (_battleState.dualKey === 'mutant+mutant') { dualMultiplier = 1.4; dualIgnoreDef = true; }
+        var researchLvl = (gs.bestiary && gs.bestiary.researchLevels && gs.bestiary.researchLevels[curMon.id]) || 0;
+        return {
+            baseAtk: baseAtk, slot: slot,
+            targetMon: curMon, targetData: m,
+            organData: sData, tierFactor: tierFactor, syncLvl: syncLvl,
+            coatingMultiplier: coatingMultiplier, coatingIgnoreDef: coatingIgnoreDef, coatingShieldStrip: coatingShieldStrip,
+            organMultiplier: organMultiplier, organIgnoreDef: organIgnoreDef,
+            dualMultiplier: dualMultiplier, dualIgnoreDef: dualIgnoreDef,
+            isCounter: isCounter, compEffects: compFx,
+            researchLvl: researchLvl, battleState: _battleState
+        };
+    }
     function _executePlayerSkill(slot) {
         var gs = GS(); var p = gs.player;
         var m = _getMonsterData();
         var curMon = _getMonster();
         var baseAtk = p.atk;
-        var damage = 0;
-        var ignoreDef = false;
+        var TE = window.TemplateEngine;
 
         window.UISystem.triggerShake('monster-icon');
         if (window.Sound) { if (slot === 'gland_core') window.Sound.electric(); else window.Sound.attack(); }
@@ -277,49 +318,61 @@ window.CombatSystem = (function () {
             baseAtk = Math.ceil(baseAtk * (1 + 0.5 * berserkMult));
         }
         if (_battleState.playerStatus['atkDebuff']) { baseAtk = Math.ceil(baseAtk * 0.8); }
-
-        // --- 环境衰减 ---
         if (_battleState.dungeonEnv && _battleState.dungeonEnv.effect.nonEmberAtkMult) {
             var isEmberSkill = (p.masteries[0] === 'ember' || p.masteries[1] === 'ember') && slot === 'gland_core';
-            if (!isEmberSkill) {
-                baseAtk = Math.ceil(baseAtk * _battleState.dungeonEnv.effect.nonEmberAtkMult);
+            if (!isEmberSkill) { baseAtk = Math.ceil(baseAtk * _battleState.dungeonEnv.effect.nonEmberAtkMult); }
+        }
+
+        var sData = p[slot];
+        var syncLvl = gs.inventory.organSyncLevels[sData.equipped] || 1;
+        var pipeCtx = _buildPipelineCtx(slot, baseAtk);
+        var compFx = pipeCtx.compEffects;
+
+        // ===== chitin_epidermis 纯护盾 =====
+        if (slot === 'chitin_epidermis') {
+            var eqChitin = p.chitin_epidermis.equipped;
+            var chitinSync = syncLvl;
+            var shield = 0;
+            if (eqChitin === '暴君甲壳') {
+                var smult = chitinSync >= 3 ? 1.8 : 1.2;
+                shield = Math.ceil(baseAtk * smult);
+                _battleState._chitinThorns = chitinSync >= 3 ? 0.25 : 0.15;
+                _log('<span style="color:var(--accent-red)">骨板硬化！获得 ' + shield + ' 护盾，受击反弹' + Math.round(_battleState._chitinThorns*100) + '%伤害。' + (chitinSync >= 3 ? ' <b>觉醒强化！</b>' : '') + '</span>');
+            } else if (eqChitin === '蜂后甲壳') {
+                shield = Math.ceil(baseAtk * 0.8);
+                _battleState._chitinHeal = chitinSync >= 3 ? 0.2 : 0.1;
+                _log('<span style="color:var(--race-swarm)">幼虫护盾生成！获得 ' + shield + ' 护盾+每回合回复' + Math.round(_battleState._chitinHeal*100) + '%HP。' + (chitinSync >= 3 ? ' <b>觉醒强化！</b>' : '') + '</span>');
+            } else if (eqChitin === '核心护盾') {
+                shield = Math.ceil(baseAtk * 0.6);
+                _battleState._chitinRegen = chitinSync >= 3 ? 2 : 1;
+                _log('<span style="color:var(--race-ember)">纳米修复场启动！获得 ' + shield + ' 护盾+每回合+' + _battleState._chitinRegen + '进程。' + (chitinSync >= 3 ? ' <b>觉醒强化！</b>' : '') + '</span>');
+            } else {
+                shield = Math.ceil(baseAtk * 0.6);
+                _log('<span style="color:var(--accent-green)">生物增殖，获得 ' + shield + ' 点防御护盾。</span>');
+            }
+            _battleState.shieldAmount += shield;
+            window.UISystem.showDamageFloat('<span class="icon icon-energy-shield"></span>' + shield, 'var(--accent-green)', 'player');
+            return;
+        }
+
+        // ===== gland_core 连招倍率 =====
+        if (slot === 'gland_core') {
+            if (p.gland_core.equipped === '暴君腺体') {
+                var stunChance = syncLvl >= 3 ? 0.7 : 0.4;
+                if (Math.random() < stunChance) { curMon.status['stunned'] = 1; if (syncLvl >= 3) curMon._slowed = 2; }
+            }
+            if (!p.gland_core.equipped) {
+                if (curMon.status['poison']) { pipeCtx.organMultiplier = 3.0; }
+                else if (curMon.status['compromised']) { pipeCtx.organMultiplier = 2.0; }
+                else { pipeCtx.organMultiplier = 0.5; }
             }
         }
 
-        // --- 种族克制矩阵（基础机制，不依赖双专精） ---
-        var counterBonus = 0;
-        if (m && m.race) {
-            var counterRaces = [];
-            if (p.masteries[0]) counterRaces.push(p.masteries[0]);
-            if (p.masteries[1]) counterRaces.push(p.masteries[1]);
-            var hasCounter = false;
-            for (var ci = 0; ci < counterRaces.length; ci++) {
-                if ((counterRaces[ci] === 'mutant' && m.race === 'swarm') ||
-                    (counterRaces[ci] === 'swarm' && m.race === 'ember') ||
-                    (counterRaces[ci] === 'ember' && m.race === 'mutant')) { hasCounter = true; break; }
-            }
-            if (hasCounter) counterBonus = (GD().STATUS_CONSTANTS && GD().STATUS_CONSTANTS.counterBonus) || 0.5;
-        }
-
-        // [新增] 研究等级 2 奖励：伤害提升 10%
-        var researchBonus = 1.0;
-        if (gs.bestiary && gs.bestiary.researchLevels && gs.bestiary.researchLevels[curMon.id] >= 2) {
-            researchBonus = 1.1;
-        }
-
+        // ===== predatory 器官特效 =====
         if (slot === 'predatory_organ') {
-            var sData = p[slot];
-            var syncLvl = gs.inventory.organSyncLevels[sData.equipped] || 1;
-            var tierFactor = 1 + (sData.tier - 1) * 0.1 * syncLvl;
-
-            damage = Math.ceil(baseAtk * researchBonus * tierFactor);
-
-            // === Boss器官专有特效 ===
-            // 暴君核心 Lv.3 觉醒
             if (sData.equipped === '暴君核心' && syncLvl >= 3) {
-                ignoreDef = true; _log('<span style="color:var(--accent-red)">【暴君觉醒】终极撕裂无视防御！</span>');
+                _log('<span style="color:var(--accent-red)">【暴君觉醒】终极撕裂无视防御！</span>');
             }
-            // 蜂后毒牙: 1.5× + 挂猛毒
             if (sData.equipped === '蜂后毒牙') {
                 var poisonDur = syncLvl >= 3 ? 5 : 3;
                 var poisonDmg = syncLvl >= 3 ? 5 : 2;
@@ -327,253 +380,94 @@ window.CombatSystem = (function () {
                 curMon._poisonDamage = poisonDmg;
                 _log('<span style="color:var(--accent-purple)">【毒液注射】目标陷入猛毒，持续' + poisonDur + '回合！' + (syncLvl >= 3 ? ' <b>觉醒强化！</b>' : '') + '</span>');
             }
-            // 核心钻头: 暴击
             if (sData.equipped === '核心钻头') {
                 var critRate = syncLvl >= 3 ? 0.4 : 0.2;
                 var critMult = syncLvl >= 3 ? 3 : 2;
-                if (Math.random() < critRate) {
-                    damage = Math.ceil(damage * critMult);
-                    _log('<span style="color:var(--accent-yellow)">【超频贯穿】暴击×' + critMult + '！' + (syncLvl >= 3 ? ' <b>觉醒强化！</b>' : '') + '</span>');
-                }
+                if (Math.random() < critRate) { pipeCtx.organMultiplier *= critMult; _log('<span style="color:var(--accent-yellow)">【超频贯穿】暴击×' + critMult + '！' + (syncLvl >= 3 ? ' <b>觉醒强化！</b>' : '') + '</span>'); }
             }
+            if (pipeCtx.coatingShieldStrip > 0) { curMon._shield = Math.max(0, (curMon._shield || 0) - pipeCtx.coatingShieldStrip); }
+        }
 
-            // 涂层：细胞壁溶解酶（反异变）
-            if (p.activeCoating === 'COAT_ANTI_MUTANT' && m && m.race === 'mutant') {
-                damage = Math.ceil(damage * 1.5);
-                ignoreDef = true;
-            }
-            // 涂层：生物自溶催化剂（反寄生 — 全伤+20% + 毒素+40%）
-            if (p.activeCoating === 'COAT_ANTI_SWARM' && m && m.race === 'swarm') {
-                damage = Math.ceil(damage * 1.6);
-            }
-            // 涂层：电磁短路脉冲液（反机械 — 全伤+30% + 拆盾50）
-            if (p.activeCoating === 'COAT_ANTI_EMBER' && m && m.race === 'ember') {
-                damage = Math.ceil(damage * 1.3);
-                curMon._shield = Math.max(0, (curMon._shield || 0) - 50);
-            }
+        // ===== DamagePipeline 计算伤害 =====
+        var result = TE.DamagePipeline.calculate(pipeCtx);
+        var damage = result.damage;
 
-            // Boss器官倍率
-            if (p.predatory_organ.equipped === '暴君核心') {
-                damage = Math.ceil(damage * 2.5); ignoreDef = true;
-            } else if (p.predatory_organ.equipped === '蜂后毒牙') {
-                damage = Math.ceil(damage * 1.5);
-            } else if (p.predatory_organ.equipped === '核心钻头') {
-                damage = Math.ceil(damage * 2.0); ignoreDef = true;
-            }
-
-            // 种族克制
-            if (counterBonus > 0) { damage = Math.ceil(damage * (1 + counterBonus)); }
-
-            // 源初毁灭者
-            if (_battleState.dualKey === 'mutant+mutant') {
-                damage = Math.ceil(damage * 1.4);
-                ignoreDef = true;
-            }
-
-            // 挂毒与电离标记（仅默认器官；Boss器官有独立机制）
-            if (!p.predatory_organ.equipped && m && m.race === 'ember') {
-                if (curMon.status['ionized']) {
-                    // 已有电离标记 → 引爆
-                    delete curMon.status['ionized'];
-                    var shieldStrip = curMon._shield || 0;
-                    curMon._shield = 0;
-                    var splash = Math.ceil(damage * 0.5);
-                    _log('<span style="color:var(--accent-blue)">>> [电荷传导] 连招触发！剥离 ' + shieldStrip + ' 护盾，传导造成 ' + splash + ' 溅射伤害。</span>');
-                    _getAliveMonsters().forEach(function(om) {
-                        if (om !== curMon) { om.hp = Math.max(0, om.hp - splash); window.UISystem.showDamageFloat('-' + splash, 'var(--accent-blue)', 'monster'); }
-                    });
-                } else {
-                    // 首次命中 → 施加电离标记（下次命中引爆）
-                    curMon.status['ionized'] = true;
-                    _log('<span style="color:var(--accent-blue)">'+_getSkillName('predatory_organ')+'造成电荷残留：目标已被【电离标记】。</span>');
-                }
-            }
-
-            // 挂毒：30%概率（仅默认器官）
-            if (!p.predatory_organ.equipped && Math.random() < 0.3) {
-                curMon.status['poison'] = 3;
-                _log('<span style="color:var(--accent-red)">发起'+_getSkillName('predatory_organ')+'：' + damage + '点伤害</span>，注入毒素标记。');
+        // ===== 默认器官 标记/连招 =====
+        if (slot === 'predatory_organ' && !p.predatory_organ.equipped && m && m.race === 'ember') {
+            if (curMon.status['ionized']) {
+                delete curMon.status['ionized'];
+                var shieldStrip = curMon._shield || 0; curMon._shield = 0;
+                var splash = Math.ceil(damage * 0.5);
+                _log('<span style="color:var(--accent-blue)">>> [电荷传导] 连招触发！剥离 ' + shieldStrip + ' 护盾，传导造成 ' + splash + ' 溅射伤害。</span>');
+                _getAliveMonsters().forEach(function(om) { if (om !== curMon) { om.hp = Math.max(0, om.hp - splash); window.UISystem.showDamageFloat('-' + splash, 'var(--accent-blue)', 'monster'); } });
             } else {
-                _log('<span style="color:var(--accent-red)">发起'+_getSkillName('predatory_organ')+'，造成 ' + damage + ' 点物理伤害。</span>');
+                curMon.status['ionized'] = true;
+                _log('<span style="color:var(--accent-blue)">'+_getSkillName('predatory_organ')+'造成电荷残留：目标已被【电离标记】。</span>');
             }
+        }
+        if (slot === 'predatory_organ' && !p.predatory_organ.equipped && Math.random() < 0.3) {
+            curMon.status['poison'] = 3;
+            _log('<span style="color:var(--accent-red)">发起'+_getSkillName('predatory_organ')+'：' + damage + '点伤害</span>，注入毒素标记。');
+        } else if (slot === 'predatory_organ') {
+            _log('<span style="color:var(--accent-red)">发起'+_getSkillName('predatory_organ')+'，造成 ' + damage + ' 点物理伤害。</span>');
+        }
+        if (slot === 'predatory_organ' && !p.predatory_organ.equipped && m && m.race === 'swarm') {
+            curMon._compTicks = (curMon._compTicks || 0) + 1;
+            if (curMon._compTicks >= 2) { curMon.status['compromised'] = 3; _log('<span style="color:var(--accent-yellow)">连续打击生效：目标已被【生物崩解标记】。</span>'); curMon._compTicks = 0; }
+        }
 
-            // 生物崩解积攒（仅默认器官）
-            if (!p.predatory_organ.equipped && m && m.race === 'swarm') {
-                curMon._compTicks = (curMon._compTicks || 0) + 1;
-                if (curMon._compTicks >= 2) {
-                    curMon.status['compromised'] = 3;
-                    _log('<span style="color:var(--accent-yellow)">连续打击生效：目标已被【生物崩解标记】。</span>');
-                    curMon._compTicks = 0;
-                }
-            }
-        } else if (slot === 'gland_core') {
-            var sData3 = p[slot];
-            var syncLvl3 = gs.inventory.organSyncLevels[sData3.equipped] || 1;
-            var tierFactor3 = 1 + (sData3.tier - 1) * 0.1 * syncLvl3;
-
-            // Boss器官：暴君腺体
+        // ===== gland 器官日志 =====
+        if (slot === 'gland_core') {
             if (p.gland_core.equipped === '暴君腺体') {
-                damage = Math.ceil(baseAtk * 2.0 * tierFactor3);
-                var stunChance = syncLvl3 >= 3 ? 0.7 : 0.4;
-                if (Math.random() < stunChance) {
-                    curMon.status['stunned'] = 1;
-                    if (syncLvl3 >= 3) curMon._slowed = 2;
-                    _log('<span style=\"color:var(--race-mutant)\">>> [震波咆哮] 造成 ' + damage + '点伤害，目标眩晕！' + (syncLvl3 >= 3 ? ' 追加减速2回合 <b>觉醒强化！</b>' : '') + '</span>');
-                } else {
-                    _log('<span style=\"color:var(--race-mutant)\">>> [震波咆哮] 造成 ' + damage + '点伤害。</span>');
-                }
-            }
-            // Boss器官：蜂后髓核
-            else if (p.gland_core.equipped === '蜂后髓核') {
-                damage = Math.ceil(baseAtk * 3 * tierFactor3);
+                var extra2 = curMon.status['stunned'] ? '目标眩晕！' : '';
+                if (syncLvl >= 3 && extra2) extra2 += ' 追加减速2回合 <b>觉醒强化！</b>';
+                _log('<span style="color:var(--race-mutant)">>> [震波咆哮] 造成 ' + damage + '点伤害。' + extra2 + '</span>');
+            } else if (p.gland_core.equipped === '蜂后髓核') {
                 var healMsg = '汲取 ' + damage + ' HP';
-                // Lv.3 觉醒：额外吸取护盾
-                if (syncLvl3 >= 3) {
-                    var stolenShield = Math.ceil(damage * 0.5);
-                    _battleState.shieldAmount += stolenShield;
-                    healMsg += ' 并生成 ' + stolenShield + ' 护盾';
-                }
+                if (syncLvl >= 3) { var stolenShield = Math.ceil(damage * 0.5); _battleState.shieldAmount += stolenShield; healMsg += ' 并生成 ' + stolenShield + ' 护盾'; }
                 _log('<span style="color:var(--accent-yellow)">>> [母体孵化] 召唤集群突袭！造成 ' + damage + ' 点伤害。' + healMsg + '</span>');
                 p.hp = Math.min(p.hp_max, p.hp + damage);
                 window.UISystem.showDamageFloat('+' + damage, 'var(--accent-green)', 'player');
-            }
-            // Boss器官：高能电泳核 — 电离穿透，无视防御
-            else if (p.gland_core.equipped === '高能电泳核') {
-                damage = Math.ceil(baseAtk * 2.0 * tierFactor3);
-                ignoreDef = true;
-                // Lv.3 觉醒：连锁全场
-                if (syncLvl3 >= 3) {
+            } else if (p.gland_core.equipped === '高能电泳核') {
+                if (syncLvl >= 3) {
                     var others = _getAliveMonsters().filter(function(m2) { return m2 !== curMon; });
-                    others.forEach(function(om) {
-                        var splash = Math.ceil(damage * 0.5);
-                        om.hp = Math.max(0, om.hp - splash);
-                        _log('<span style="color:var(--accent-blue)">>> [闪电链] 溅射伤害 ' + splash + ' 点。</span>');
-                    });
+                    others.forEach(function(om) { var splash2 = Math.ceil(damage * 0.5); om.hp = Math.max(0, om.hp - splash2); _log('<span style="color:var(--accent-blue)">>> [闪电链] 溅射伤害 ' + splash2 + ' 点。</span>'); });
                 }
                 _log('<span style="color:var(--accent-blue)">>> [电弧过载风暴] 释放高压电弧！造成 ' + damage + ' 点电离伤害。</span>');
-            }
-            else if (curMon.status['poison']) {
-                damage = baseAtk * 3;
-                delete curMon.status['poison'];
-                var heal = damage;
-                p.hp = Math.min(p.hp_max, p.hp + heal);
-                _log('<span style="color:var(--accent-yellow)">>> [基因融毁] 触发连招爆破！造成 ' + damage + ' 点伤害</span>，<span style="color:var(--accent-green)">吸取 ' + heal + ' HP</span>。');
-                window.UISystem.showDamageFloat('+' + heal, 'var(--accent-green)', 'player');
-            }
-            else if (curMon.status['compromised']) {
-                // [连招] 生物崩解 -> 腺体脉冲 (引爆：禁闪避+易伤)
-                damage = Math.ceil(baseAtk * 2 * tierFactor3);
-                curMon._dodging = false;
-                curMon._vulnerable = 2; // 易伤 2 回合
-                delete curMon.status['compromised'];
-                _log('<span style="color:var(--accent-yellow)">>> [生物崩解] 连招触发！目标闪避归零，陷入易伤状态。造成 ' + damage + ' 点伤害。</span>');
-            }
-            else {
-                damage = Math.ceil(baseAtk * 0.5);
-                _log('<span style="color:var(--accent-yellow)">'+_getSkillName('gland_core')+'造成 ' + damage + ' 点轻微酸蚀。</span>');
-            }
-        } else if (slot === 'chitin_epidermis') {
-            var eqChitin = p.chitin_epidermis.equipped;
-            var shield = 0;
-            // === Boss器官专有效果 ===
-            var eqChitin = p.chitin_epidermis.equipped;
-            var chitinSync = gs.inventory.organSyncLevels[eqChitin] || 1;
-            if (eqChitin === '暴君甲壳') {
-                var mult = chitinSync >= 3 ? 1.8 : 1.2;
-                shield = Math.ceil(baseAtk * mult);
-                _battleState._chitinThorns = chitinSync >= 3 ? 0.25 : 0.15;
-                _log('<span style=\"color:var(--accent-red)\">骨板硬化！获得 ' + shield + ' 护盾，受击反弹' + Math.round(_battleState._chitinThorns*100) + '%伤害。' + (chitinSync >= 3 ? ' <b>觉醒强化！</b>' : '') + '</span>');
-            } else if (eqChitin === '蜂后甲壳') {
-                shield = Math.ceil(baseAtk * 0.8);
-                _battleState._chitinHeal = chitinSync >= 3 ? 0.2 : 0.1;
-                _log('<span style=\"color:var(--race-swarm)\">幼虫护盾生成！获得 ' + shield + ' 护盾+每回合回复' + Math.round(_battleState._chitinHeal*100) + '%HP。' + (chitinSync >= 3 ? ' <b>觉醒强化！</b>' : '') + '</span>');
-            } else if (eqChitin === '核心护盾') {
-                shield = Math.ceil(baseAtk * 0.6);
-                _battleState._chitinRegen = chitinSync >= 3 ? 2 : 1;
-                _log('<span style=\"color:var(--race-ember)\">纳米修复场启动！获得 ' + shield + ' 护盾+每回合+' + _battleState._chitinRegen + '进程。' + (chitinSync >= 3 ? ' <b>觉醒强化！</b>' : '') + '</span>');
             } else {
-                shield = Math.ceil(baseAtk * 0.6);
-                _log('<span style=\"color:var(--accent-green)\">生物增殖，获得 ' + shield + ' 点防御护盾。</span>');
+                if (curMon.status['poison']) { delete curMon.status['poison']; var heal = damage; p.hp = Math.min(p.hp_max, p.hp + heal); _log('<span style="color:var(--accent-yellow)">>> [基因融毁] 触发连招爆破！造成 ' + damage + ' 点伤害</span>，<span style="color:var(--accent-green)">吸取 ' + heal + ' HP</span>。'); window.UISystem.showDamageFloat('+' + heal, 'var(--accent-green)', 'player'); }
+                else if (curMon.status['compromised']) { curMon._dodging = false; curMon._vulnerable = 2; delete curMon.status['compromised']; _log('<span style="color:var(--accent-yellow)">>> [生物崩解] 连招触发！目标闪避归零，陷入易伤状态。造成 ' + damage + ' 点伤害。</span>'); }
+                else { _log('<span style="color:var(--accent-yellow)">'+_getSkillName('gland_core')+'造成 ' + damage + ' 点轻微酸蚀。</span>'); }
             }
-            _battleState.shieldAmount += shield;
-            window.UISystem.showDamageFloat('<span class=\"icon icon-energy-shield\"></span>' + shield, 'var(--accent-green)', 'player');
-            return;
         }
 
-        // --- 蜂后闪避：100% 闪避 ---
-        if (curMon._dodging) {
-            _log(m.name + ' 正在产卵闪避中！攻击落空。');
-            window.UISystem.showDamageFloat('闪避', 'var(--accent-yellow)', 'monster');
-            return;
-        }
-        // --- 怪物护盾吸收（每只独立）---
-        if ((curMon._shield || 0) > 0) {
-            var absorbed = Math.min(curMon._shield, damage);
-            curMon._shield -= absorbed;
-            damage -= absorbed;
-            if (absorbed > 0) _log('<span style="color:var(--accent-blue);">护盾吸收 ' + absorbed + ' 点伤害。</span>');
-        }
-        // 物理抗性（暴君皮肤免疫50%物理伤害）
-        if (slot === 'predatory_organ' && m && m.physicalResist) {
-            damage = Math.ceil(damage * (1 - m.physicalResist));
-        }
+        // ===== 通用后处理 =====
+        if (curMon._dodging) { _log(m.name + ' 正在产卵闪避中！攻击落空。'); window.UISystem.showDamageFloat('闪避', 'var(--accent-yellow)', 'monster'); return; }
+        if ((curMon._shield || 0) > 0) { var absorbed = Math.min(curMon._shield, damage); curMon._shield -= absorbed; damage -= absorbed; if (absorbed > 0) _log('<span style="color:var(--accent-blue);">护盾吸收 ' + absorbed + ' 点伤害。</span>'); }
+        if (slot === 'predatory_organ' && m && m.physicalResist) { damage = Math.ceil(damage * (1 - m.physicalResist)); }
 
-        // [连招] 易伤修正
-        if (curMon._vulnerable) {
-            damage = Math.ceil(damage * 1.5);
-            _log('<span style="color:var(--accent-red)">易伤修正：伤害提升 50%。</span>');
+        if (result.defenseReduction > 0) {
+            _log('<span style="color:var(--accent-red)">>> 发起攻击：造成 ' + damage + ' (' + (damage + result.defenseReduction) + '原始 - ' + result.defenseReduction + '防御) 点伤害。</span>');
+        } else {
+            _log('<span style="color:var(--accent-red)">>> 发起攻击：造成 ' + damage + ' 点伤害。</span>');
         }
-        // --- 组件词条：种族增伤 ---
-        var compFx = _getComponentEffects();
-        if (compFx.bonusVsSwarm > 0 && m && m.race === 'swarm') {
-            damage = Math.ceil(damage * (1 + compFx.bonusVsSwarm));
-        }
-        // --- 组件破甲：减少怪物有效防御 ---
-        var effDef = (curMon ? (curMon.def || 0) : (m ? (m.def || 0) : 0)) + (curMon ? (curMon._defBuff || 0) : 0);
-        if (compFx.armorPen > 0) { effDef = Math.max(0, effDef * (1 - compFx.armorPen)); }
-        var breakdown = '';
-        if (!ignoreDef && effDef > 0) {
-            var reduction = window.GameState.calcDamageReduction(effDef);
-            var afterRed = Math.ceil(damage * (1 - reduction));
-            var redVal = damage - afterRed;
-            damage = afterRed;
-            breakdown = ' (' + (damage + redVal) + '原始 - ' + redVal + '防御)';
-        }
-
-        // 暴击判定
-        if (compFx.critChance > 0 && Math.random() < compFx.critChance) {
-            damage = Math.ceil(damage * compFx.critMultiplier);
-            _log('<span style="color:var(--accent-yellow)">暴击！伤害 ×' + compFx.critMultiplier.toFixed(1) + '！</span>');
-        }
-
         curMon.hp = Math.max(0, curMon.hp - damage);
+        window.UISystem.showDamageFloat('-' + damage, 'var(--accent-red)', 'monster');
+        window.UISystem.shakeMonsterCard(_battleState.currentTarget);
 
-        // [新增] 维度词缀：反馈 (Thorns)
         if (curMon.affixes && curMon.affixes.some(function(a){return a.id==='thorns';})) {
-            var reflect = Math.ceil(damage * 0.1);
-            p.hp = Math.max(0, p.hp - reflect);
+            var reflect = Math.ceil(damage * 0.1); p.hp = Math.max(0, p.hp - reflect);
             _log('<span style="color:var(--accent-red)">【反馈】目标反弹了 ' + reflect + ' 点伤害！</span>');
             window.UISystem.showDamageFloat('-' + reflect, 'var(--accent-red)', 'player');
         }
-
-        // 毒素转化：额外侵蚀（所有技能均可触发）
         if (compFx.toxinConv > 0 && damage > 0) {
-            var toxinExtra = Math.ceil(damage * compFx.toxinConv);
-            curMon.hp = Math.max(0, curMon.hp - toxinExtra);
+            var toxinExtra = Math.ceil(damage * compFx.toxinConv); curMon.hp = Math.max(0, curMon.hp - toxinExtra);
             _log('<span style="color:var(--accent-purple)">毒素转化额外造成 ' + toxinExtra + ' 点侵蚀。</span>');
         }
-        _log('<span style="color:var(--accent-red)">>> 发起攻击：造成 ' + damage + breakdown + ' 点伤害。</span>');
-        window.UISystem.showDamageFloat('-' + damage, 'var(--accent-red)', 'monster');
-        window.UISystem.shakeMonsterCard(_battleState.currentTarget);
         if (curMon.hp <= 0) {
             selectTarget(0);
             _log('<span style="color:var(--accent-red)">' + curMon.name + ' 已融毁。</span>');
-            if (compFx.killHeal > 0) {
-                var healAmt = compFx.killHeal;
-                p.hp = Math.min(p.hp_max, p.hp + healAmt);
-                _log('<span style="color:var(--accent-green)">肾上腺素晶体：击杀回复 ' + healAmt + ' HP。</span>');
-                window.UISystem.showDamageFloat('+' + healAmt, 'var(--accent-green)', 'player');
-            }
+            if (compFx.killHeal > 0) { var healAmt = compFx.killHeal; p.hp = Math.min(p.hp_max, p.hp + healAmt); _log('<span style="color:var(--accent-green)">肾上腺素晶体：击杀回复 ' + healAmt + ' HP。</span>'); window.UISystem.showDamageFloat('+' + healAmt, 'var(--accent-green)', 'player'); }
         }
         if (_allMonstersDead()) { _winBattle(); return; }
     }
@@ -1094,17 +988,20 @@ window.CombatSystem = (function () {
 
     function _processStatusEffects() {
         if (!_battleState || !_battleState.monsters) return;
+        var TE = window.TemplateEngine;
         var dotPct = _battleState.dualKey === 'swarm+swarm' ? 0.10 : 0.05;
         var cfx = _getComponentEffects();
+        var bleedDmg = (GD().STATUS_CONSTANTS && GD().STATUS_CONSTANTS.bleed.damagePerTurn) || 4;
+        var targets = [];
+        _battleState.monsters.forEach(function(mon) {
+            if (mon.hp > 0) targets.push({ target: mon, battleState: _battleState, hpMax: mon.hpMax, dotBonus: cfx.dotBonus || 0, dotPct: dotPct, bleedDmg: bleedDmg });
+        });
+        TE.StatusEngine.tickTurnStart(targets);
         _battleState.monsters.forEach(function(mon) {
             if (mon.status['poison'] && mon.hp > 0) {
-                var dot = Math.ceil(mon.hpMax * dotPct) + (cfx.dotBonus || 0);
-                mon.hp = Math.max(0, mon.hp - dot);
+                var dot = Math.ceil(mon.hpMax * dotPct) + (cfx.dotBonus || 0) + (mon._poisonDamage || 0);
                 window.UISystem.showDamageFloat(dot, 'var(--accent-purple)', 'monster');
                 _log('<span style="color:var(--accent-purple)">' + mon.name + ' 毒素发作 -' + dot + ' HP。（剩余' + (mon.status['poison'] - 1) + '回合）</span>');
-                mon.status['poison']--;
-                if (mon.status['poison'] <= 0) { delete mon.status['poison']; _log('<span style="color:var(--text-dim);">' + mon.name + ' 毒素已清除。</span>'); }
-                // 组件生命吸取
                 if (cfx.lifeDrainChance > 0 && Math.random() < cfx.lifeDrainChance) {
                     var p = GS().player;
                     var drain = Math.min(cfx.lifeDrainAmt, mon.hp);
@@ -1129,39 +1026,25 @@ window.CombatSystem = (function () {
     }
 
     function _applyGlobalPassives(p) {
+        var TE = window.TemplateEngine;
         var mk = '';
         var activeRaces = (p.masteries || []).filter(function(r){return r;});
         if (activeRaces.length >= 2) {
-            // 多槽时选取优先级最高的双专精组合：异变 > 寄生 > 机械
             var racePriority = { mutant: 1, swarm: 2, ember: 3 };
             activeRaces.sort(function(a,b){ return (racePriority[a]||99) - (racePriority[b]||99); });
             mk = [activeRaces[0], activeRaces[1]].sort().join('+');
         }
         if (!mk) return;
         _battleState.dualKey = mk;
-        var dc = GD().DUAL_CLASSES[mk];
-        if (!dc) return;
-
-        // 源初毁灭者：被动数据存到battleState，攻击时应用
-        if (mk === 'mutant+mutant') {
-            _log('<span style="color:var(--accent-red);">被动【超量撕裂】激活：物理 ×1.4，无视 30% 防御</span>');
-        }
-        if (mk === 'mutant+swarm') {
-            _log('<span style="color:var(--accent-purple);">被动【骨疽自溶】激活：受击 55% 概率毒雾反击</span>');
-        }
-        if (mk === 'ember+mutant') {
-            _battleState.shieldAmount += p.def;
-            _log('<span style="color:var(--accent-blue);">被动【动能回馈】激活：防御转护盾 +' + p.def + '，受击+1进程，流血免疫</span>');
-        }
-        if (mk === 'swarm+swarm') {
-            _log('<span style="color:var(--accent-purple);">被动【无限蚀骨】激活：毒素 5%→10%，无视护盾</span>');
-        }
-        if (mk === 'ember+swarm') {
-            _log('<span style="color:var(--accent-yellow);">被动【触突过载】激活：毒技能 35% 免 进程</span>');
-        }
-        if (mk === 'ember+ember') {
-            _log('<span style="color:var(--accent-blue);">被动【格式化电弧】激活：每回合自动连锁闪电×2</span>');
-        }
+        var passiveKey = 'dual_' + mk.replace(/\+/g, '+');
+        var tpl = GD().PASSIVE_TEMPLATES[passiveKey];
+        if (!tpl) return;
+        TE.PassiveEngine.clear();
+        TE.PassiveEngine.register([tpl]);
+        _log('<span style="color:' + (tpl.color || 'var(--text-dim)') + ';">被动【' + tpl.name + '】激活：' + tpl.passiveDesc + '</span>');
+        var ctx = { player: p, battleState: _battleState };
+        var results = TE.PassiveEngine.trigger('onBattleStart', ctx);
+        TE.PassiveEngine.applyResults(results, ctx, _battleState);
     }
 
     function _log(msg) { _battleState.log.push({ turn: _battleState.turn, msg: msg }); }
