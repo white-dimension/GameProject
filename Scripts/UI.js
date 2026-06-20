@@ -145,11 +145,6 @@ window.UISystem = (function () {
         topBar.style.cssText = 'position:relative;display:flex;flex-direction:row;justify-content:center;padding:8px 25px 4px 25px;min-height:60px;background:rgba(10,14,20,0.65);border-bottom:1px solid var(--border-dim);box-shadow: 0 4px 20px rgba(0,0,0,0.5);z-index:500;';
         _root.appendChild(topBar);
 
-        var _hintBar = _ce('div', 'hint-bar');
-        _hintBar.id = 'ui-hint-bar';
-        _hintBar.style.cssText = 'text-align:center;padding:3px 0;min-height:22px;font-size:12px;color:var(--accent-yellow);opacity:0.7;pointer-events:none;transition:opacity 0.5s ease;';
-        _root.appendChild(_hintBar);
-
         _viewport = _ce('div', 'main-viewport');
         _viewport.style.cssText = 'flex:1;position:relative;display:flex;overflow:hidden;background:radial-gradient(circle at center, rgba(13,17,23,0.5), rgba(5,5,8,0.25));';
         _root.appendChild(_viewport);
@@ -472,23 +467,19 @@ window.UISystem = (function () {
             '</button>' +
             '<button class="btn btn-blue btn-sm" onclick="UISystem.showHelpPanel()">?</button>' +
             '</div>';
-        // 轮播提示
-        _renderHints(gs);
     }
 
     var _hintTimer = 0, _hintIdx = 0, _hintTexts = [];
     function _renderHints(gs) {
-        var bar = document.getElementById('ui-hint-bar'); if (!bar) return;
         var p = gs.player;
         var hints = [];
 
-        // 根据游戏状态生成提示
         var totalMP = Object.values(p.masteryPoints || {}).reduce(function(a,b){return a+b;},0);
         var masterySlots = (p.masteries || []).filter(function(r){return r;}).length;
         var availSlots = (gs.mapState.loop >= 2 ? 3 : 2) - masterySlots;
         if (availSlots > 0 && p.level >= 1) hints.push('选择一个专精流派以获得战斗增益 [实验室 → 专精学习]');
 
-        if (totalMP > 0) hints.push('你有 ' + totalMP + ' 点未分配的专精点数 [实验室 → 专精学习]');
+        if (totalMP > 0) hints.push('你有 ' + totalMP + ' 点未分配专精点数 [实验室 → 专精学习]');
 
         var hasCompInventory = false; var compInv = gs.inventory.components || {};
         Object.keys(compInv).forEach(function(k){ if(compInv[k] > 0) hasCompInventory = true; });
@@ -514,18 +505,12 @@ window.UISystem = (function () {
 
         if (hints.length === 0) hints.push('探索地下实验室，击败变异体获取基因点数');
 
-        // 轮播逻辑
-        if (hints.join('|') !== _hintTexts.join('|')) {
-            _hintTexts = hints; _hintIdx = 0;
-        }
-        bar.textContent = _hintTexts[_hintIdx % _hintTexts.length] || '';
-        bar.style.opacity = '0.7';
+        if (hints.join('|') !== _hintTexts.join('|')) { _hintTexts = hints; _hintIdx = 0; }
+        var txt = _hintTexts[_hintIdx % _hintTexts.length] || '';
 
         clearTimeout(_hintTimer);
-        _hintTimer = setTimeout(function() {
-            _hintIdx++;
-            _renderHints(gs);
-        }, 5000);
+        _hintTimer = setTimeout(function() { _hintIdx++; _renderHints(gs); }, 5000);
+        return txt;
     }
 
     function _hudLabel(label, val, max, iconClass) {
@@ -1211,12 +1196,14 @@ window.UISystem = (function () {
             var pct = totalN > 0 ? Math.round(doneN / totalN * 100) : 0;
             var floorBar = _ce('div');
             floorBar.style.cssText = 'display:flex;align-items:center;justify-content:space-between;width:100%;padding:10px 25px 10px 35px;font-size:14px;font-family:inherit;min-height:60px;';
+            var hintText = _renderHints(gs);
             floorBar.innerHTML = '<div style="display:flex;align-items:center;gap:16px;">' +
                 '<span class="txt-bold" style="color:var(--accent-blue);font-size:16px;">' + (function(f){ var cn = ['','一','二','三','四','五','六','七','八','九','十']; return '地下' + (cn[f]||f) + '层'; })(floor) + '</span>' +
                 '<span class="txt-sm txt-bold" style="color:var(--text-main);">节点 ' + doneN + '/' + totalN + '</span>' +
                 '<div class="progress-container" style="width:180px;height:8px;"><div class="progress-fill ram-fill" style="width:' + pct + '%;"></div></div>' +
                 (gs.mapState.bossDefeated ? '<span style="color:var(--accent-red);">领主已击杀</span>' : (pct >= 60 ? '<span style="color:var(--accent-yellow);">领主已现身</span>' : '')) +
                 '</div>' +
+                '<div class="txt-xs" style="text-align:center;color:var(--accent-yellow);opacity:0.65;margin:2px 0;">' + hintText + '</div>' +
                 '<div style="display:flex;gap:10px;">' +
                 '<button class="btn btn-green" onclick="UISystem.showReorganizeModal()"><span class="icon icon-dna"></span>实验室</button>' +
                 '<button class="btn btn-blue" onclick="UISystem.showStatusModal()"><span class="icon icon-archive"></span>档案</button>' +
