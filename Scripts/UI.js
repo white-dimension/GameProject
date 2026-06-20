@@ -1840,13 +1840,21 @@ window.UISystem = (function () {
             var bo = (GD().BOSS_ORGANS||{})[eq]; if (!bo) return;
             var syncLvl = (gs.inventory.organSyncLevels||{})[eq] || 1;
             var oc = _getOrganColor(eq);
-            var boDesc = bo.skillName + ' [Sync Lv.' + syncLvl + ']';
+            var boDesc = eq + ' · ' + bo.skillName + ' [Sync Lv.' + syncLvl + ']';
+            var se = bo.skillEffect || {};
+            var costStr = ' · 消耗' + (bo.skillCost||'?') + '进程';
+            var fxStr = '';
+            if (se.baseMultiplier) fxStr += ' · ' + se.baseMultiplier + '×倍率';
+            if (se.armorPenetration) fxStr += ' · 破甲' + Math.round(se.armorPenetration*100) + '%';
+            if (se.chainTargets) fxStr += ' · 链' + se.chainTargets + '目标';
+            if (se.type === 'summon') fxStr += ' · 召唤集群';
+            boDesc += costStr + fxStr;
             if (syncLvl >= 3) {
-                if (eq === '暴君核心') boDesc += ' — 觉醒: 攻击转为真实伤害';
-                else if (eq === '蜂后髓核') boDesc += ' — 觉醒: 召唤突袭吸取50%护盾';
-                else if (eq === '高能电泳核') boDesc += ' — 觉醒: 电弧全场溅射50%';
+                if (eq === '暴君核心') boDesc += '<br>↳ 觉醒: 攻击转真实伤害(无视防御)';
+                else if (eq === '蜂后髓核') boDesc += '<br>↳ 觉醒: 召唤突袭吸取50%伤害为护盾';
+                else if (eq === '高能电泳核') boDesc += '<br>↳ 觉醒: 电弧溅射全场×50%伤害';
             }
-            passiveHTML += '<div><span class="txt-xs" style="color:' + oc.hex + ';">◆ ' + boDesc + '</span></div>';
+            passiveHTML += '<div style="margin-top:2px;"><span class="txt-xs" style="color:' + oc.hex + ';">◆ ' + boDesc + '</span></div>';
         });
 
         passiveHTML += '</div></div>';
