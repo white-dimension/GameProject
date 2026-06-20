@@ -1,5 +1,24 @@
 # 01 — 开发日志
 
+## v2.0.1 — 2026-06-20 🎨 图标系统更新 — 种族四组专属
+
+### Git 基线重建
+- 清理 Backgrounds/.artifacts/.idea 冗余跟踪，建立 v2.0.0 tag
+- 添加 .gitignore + npm 脚本到 package.json
+- 推送至 GitHub (origin/V1.3-优化细节)
+
+### 种族专属图标系统
+- **mutant.svg** (异变者) → Lorc 怪物风 (frankenstein-creature) — 有机血肉质感
+- **swarm.svg** (寄生群落) → Delapouite 异形虫族 (alien-bug) — 外星节肢风格
+- **ember.svg** (机械余烬) → Delapouite 机械头盔 (robot-helmet) — 锐利科技风
+- **dna.svg** (原体) → Delapouite 半机械面 (cyborg-face) — 人机融合标识
+- 全部 base64 内联同步更新至 CSS styles.css
+
+### 资源整理
+- bg_pixel.jpg 从 Assets/Icons/ 迁移至 Assets/Backgrounds/
+
+---
+
 ## V2.1 — 2026-06-19 🎬 视听升级+组件重构 → [正式版]
 
 ### 多场景背景视频系统
