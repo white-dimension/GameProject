@@ -1163,7 +1163,11 @@ window.UISystem = (function () {
                 bar.appendChild(end);
             } else {
                 var end = _ce('button', 'btn btn-orange btn-battle-card');
-                end.innerHTML = '<span class="txt-sm txt-bold">[空格] 结束回合</span><span class="txt-xs">回复 3 进程</span>';
+                var recoveryVal = gs.player.process_recovery || 3;
+                if (bs._noProcessRecovery) recoveryVal = 0;
+                var aliveM3 = (CS().getBattleState() && CS().getBattleState().monsters || []).filter(function(m){return m.hp>0;});
+                if (aliveM3.some(function(m){ return m.affixes && m.affixes.some(function(a){return a.id==='jammer';}); })) recoveryVal = Math.max(1, recoveryVal - 1);
+                end.innerHTML = '<span class="txt-sm txt-bold">[空格] 结束回合</span><span class="txt-xs">回复 ' + recoveryVal + ' 进程</span>';
                 end.onclick = function() { this.style.transform = 'translateY(2px)'; this.style.filter = 'brightness(0.8)'; setTimeout(function() { CS().endTurn(); }, 80); };
                 bar.appendChild(end);
                 // 逃跑按钮（训练模式不显示）
