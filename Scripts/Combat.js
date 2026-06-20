@@ -314,12 +314,20 @@ window.CombatSystem = (function () {
 
             damage = Math.ceil(baseAtk * researchBonus * tierFactor);
 
-            // Boss 特效：暴君核心 (Lv.3 觉醒：真实伤害)
+            // === Boss器官专有特效 ===
+            // 暴君核心
             if (sData.equipped === '暴君核心') {
-                if (syncLvl >= 3) {
-                    ignoreDef = true;
-                    _log('<span style="color:var(--accent-red)">【暴君觉醒】原体释放终极撕裂，无视目标防御！</span>');
-                }
+                if (syncLvl >= 3) { ignoreDef = true; _log('<span style="color:var(--accent-red)">【暴君觉醒】终极撕裂无视防御！</span>'); }
+            }
+            // 蜂后毒牙: 1.5× + 挂猛毒
+            if (sData.equipped === '蜂后毒牙') {
+                curMon.status['poison'] = (curMon.status['poison'] || 0) + 5;
+                _log('<span style="color:var(--accent-purple)">【毒液注射】目标陷入猛毒，持续5回合！</span>');
+            }
+            // 核心钻头: 20%暴击
+            if (sData.equipped === '核心钻头' && Math.random() < 0.2) {
+                damage = Math.ceil(damage * 2);
+                _log('<span style="color:var(--accent-yellow)">【超频贯穿】暴击！伤害翻倍！</span>');
             }
 
             // 涂层：细胞壁溶解酶（反异变）
@@ -337,10 +345,13 @@ window.CombatSystem = (function () {
                 curMon._shield = Math.max(0, (curMon._shield || 0) - 50);
             }
 
-            // Boss器官：暴君核心
+            // Boss器官倍率
             if (p.predatory_organ.equipped === '暴君核心') {
-                damage = Math.ceil(damage * 2.5);
-                ignoreDef = true;
+                damage = Math.ceil(damage * 2.5); ignoreDef = true;
+            } else if (p.predatory_organ.equipped === '蜂后毒牙') {
+                damage = Math.ceil(damage * 1.5);
+            } else if (p.predatory_organ.equipped === '核心钻头') {
+                damage = Math.ceil(damage * 2.0); ignoreDef = true;
             }
 
             // 种族克制
@@ -393,8 +404,18 @@ window.CombatSystem = (function () {
             var syncLvl3 = gs.inventory.organSyncLevels[sData3.equipped] || 1;
             var tierFactor3 = 1 + (sData3.tier - 1) * 0.1 * syncLvl3;
 
+            // Boss器官：暴君腺体
+            if (p.gland_core.equipped === '暴君腺体') {
+                damage = Math.ceil(baseAtk * 2.0 * tierFactor3);
+                if (Math.random() < 0.4) {
+                    curMon.status['stunned'] = 1;
+                    _log('<span style=\"color:var(--race-mutant)\">>> [震波咆哮] 造成 ' + damage + '点伤害，目标眩晕跳过下回合！</span>');
+                } else {
+                    _log('<span style=\"color:var(--race-mutant)\">>> [震波咆哮] 造成 ' + damage + '点伤害。</span>');
+                }
+            }
             // Boss器官：蜂后髓核
-            if (p.gland_core.equipped === '蜂后髓核') {
+            else if (p.gland_core.equipped === '蜂后髓核') {
                 damage = Math.ceil(baseAtk * 3 * tierFactor3);
                 var healMsg = '汲取 ' + damage + ' HP';
                 // Lv.3 觉醒：额外吸取护盾
@@ -443,10 +464,27 @@ window.CombatSystem = (function () {
                 _log('<span style="color:var(--accent-yellow)">'+_getSkillName('gland_core')+'造成 ' + damage + ' 点轻微酸蚀。</span>');
             }
         } else if (slot === 'chitin_epidermis') {
-            var shield = Math.ceil(baseAtk * 0.6);
+            var eqChitin = p.chitin_epidermis.equipped;
+            var shield = 0;
+            // === Boss器官专有效果 ===
+            if (eqChitin === '暴君甲壳') {
+                shield = Math.ceil(baseAtk * 1.2);
+                _battleState._chitinThorns = 0.15; // 受击反弹15%
+                _log('<span style=\"color:var(--accent-red)\">骨板硬化！获得 ' + shield + ' 护盾，受击反弹15%伤害。</span>');
+            } else if (eqChitin === '蜂后甲壳') {
+                shield = Math.ceil(baseAtk * 0.8);
+                _battleState._chitinHeal = 0.1; // 每回合回复10%HP
+                _log('<span style=\"color:var(--race-swarm)\">幼虫护盾生成！获得 ' + shield + ' 护盾+每回合回复10%HP。</span>');
+            } else if (eqChitin === '核心护盾') {
+                shield = Math.ceil(baseAtk * 0.6);
+                _battleState._chitinRegen = 1; // 每回合+1进程
+                _log('<span style=\"color:var(--race-ember)\">纳米修复场启动！获得 ' + shield + ' 护盾+每回合+1进程。</span>');
+            } else {
+                shield = Math.ceil(baseAtk * 0.6);
+                _log('<span style=\"color:var(--accent-green)\">生物增殖，获得 ' + shield + ' 点防御护盾。</span>');
+            }
             _battleState.shieldAmount += shield;
-            _log('<span style="color:var(--accent-green)">生物增殖，获得 ' + shield + ' 点防御护盾。</span>');
-            window.UISystem.showDamageFloat('<span class="icon icon-energy-shield"></span>' + shield, 'var(--accent-green)', 'player');
+            window.UISystem.showDamageFloat('<span class=\"icon icon-energy-shield\"></span>' + shield, 'var(--accent-green)', 'player');
             return;
         }
 
