@@ -147,10 +147,6 @@ window.UISystem = (function () {
         logWrap.appendChild(logPanel);
         leftPanelCol.appendChild(logWrap);
         _viewport.appendChild(leftPanelCol);
-        var divider = _ce('div');
-        divider.id = 'ui-divider';
-        divider.style.cssText = 'width:1px;align-self:stretch;background:var(--border-dim);margin:25px 30px 25px 0;';
-        _viewport.appendChild(divider);
 
         _mainView = _ce('div', 'discovery-view');
         _mainView.style.cssText = 'flex:0 0 460px;display:flex;justify-content:center;padding:30px 0;gap:20px;margin-right:30px;';
@@ -377,9 +373,7 @@ window.UISystem = (function () {
         var taskEl = document.getElementById('ui-task-panel');
         if (taskEl) taskEl.style.display = inBattle ? 'none' : '';
         var roomInfo = document.getElementById('ui-room-info');
-        var divider = document.getElementById('ui-divider');
         if (roomInfo) roomInfo.style.display = inBattle ? 'none' : '';
-        if (divider) divider.style.display = inBattle ? 'none' : '';
         if (!inBattle) _renderTasks(gs);
         if (inBattle) {
             _mainView.style.display = 'none';
