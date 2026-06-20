@@ -1298,9 +1298,19 @@ window.UISystem = (function () {
             var headerDiv = _ce('div');
             headerDiv.setAttribute('data-bestiary-race', race);
             headerDiv.className = 'txt-sm txt-bold';
-            headerDiv.style.cssText = 'margin-top:8px;margin-bottom:16px;color:' + (raceHeaderClrs[race] || '#ffd54f') + ';';
+            headerDiv.style.cssText = 'margin-top:8px;margin-bottom:4px;color:' + (raceHeaderClrs[race] || '#ffd54f') + ';';
             headerDiv.innerHTML = '<span class="icon ' + raceIcons[race] + '"></span> ' + raceNames[race];
             _bestiaryWrap.appendChild(headerDiv);
+            // 种族背景故事
+            var loreText = (GD().RACE_LORE || {})[race] || '';
+            if (loreText) {
+                var loreDiv = _ce('div');
+                loreDiv.setAttribute('data-bestiary-race', race);
+                loreDiv.className = 'txt-xs';
+                loreDiv.style.cssText = 'color:' + (raceHeaderClrs[race] || '#ffd54f') + ';opacity:0.7;margin-bottom:12px;line-height:1.6;padding-left:2px;';
+                loreDiv.textContent = loreText;
+                _bestiaryWrap.appendChild(loreDiv);
+            }
 
             Object.keys(allMonsters).forEach(function(id) {
                 var m = allMonsters[id];
