@@ -2462,14 +2462,14 @@ window.UISystem = (function () {
         chipRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;';
         items.forEach(function(item) {
             var chip = _ce('div');
-            chip.style.cssText = 'padding:6px 12px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;cursor:pointer;font-size:13px;color:var(--text-main);';
+            chip.style.cssText = 'padding:6px 12px;background:rgba(255,213,79,0.08);border:1px solid rgba(255,213,79,0.2);border-radius:4px;cursor:pointer;font-size:13px;color:var(--accent-yellow);';
             chip.textContent = _fmtRoman(item.id) + ' ×' + item.count + ' [' + item.weight + ']';
             chip.onclick = function() {
                 var cur = selected[item.id] || 0;
                 if (cur < item.count) { selected[item.id] = cur + 1; curWeight += item.weight; }
                 else { selected[item.id] = 0; curWeight -= item.weight * cur; }
-                chip.style.background = selected[item.id] ? 'rgba(0,255,136,0.12)' : 'var(--bg-card)';
-                chip.style.borderColor = selected[item.id] ? 'var(--accent-green)' : 'var(--border-dim)';
+                chip.style.background = selected[item.id] ? 'rgba(255,213,79,0.2)' : 'rgba(255,213,79,0.08)';
+                chip.style.borderColor = selected[item.id] ? 'var(--accent-yellow)' : 'rgba(255,213,79,0.2)';
                 updateStatus();
             };
             chipRow.appendChild(chip);
@@ -2525,13 +2525,13 @@ window.UISystem = (function () {
         items.sort(function(a,b){ return a.id.localeCompare(b.id); });
         items.forEach(function(item) {
             var chip = _ce('div');
-            chip.style.cssText = 'padding:6px 12px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;cursor:pointer;font-size:13px;color:var(--text-main);';
+            chip.style.cssText = 'padding:6px 12px;background:rgba(255,213,79,0.08);border:1px solid rgba(255,213,79,0.2);border-radius:4px;cursor:pointer;font-size:13px;color:var(--accent-yellow);';
             chip.textContent = _fmtRoman(item.id) + ' ×' + item.count;
             chip.onclick = function() {
                 var cur = selected[item.id] || 0;
                 if (cur < item.count && selCount < count) { selected[item.id] = cur + 1; selCount++; }
                 else if (cur > 0) { selected[item.id] = cur - 1; selCount--; if (selected[item.id] === 0) delete selected[item.id]; }
-                chip.style.background = selected[item.id] ? 'rgba(156,39,176,0.15)' : 'var(--bg-card)';
+                chip.style.background = selected[item.id] ? 'rgba(255,213,79,0.2)' : 'rgba(255,213,79,0.08)';
                 chip.style.borderColor = selected[item.id] ? 'var(--accent-purple)' : 'var(--border-dim)';
                 updateStatus();
             };

@@ -868,13 +868,16 @@ window.GameData = (function () {
             tip: '当您进入 Loop 2 后，原体将自动解锁「第三专精插槽」，支持三系毒株融合。'
         },
         craft: {
-            title: '高阶组件预览',
+            title: '组件合成 · 器官觉醒 · 炼金配方',
             sections: [
-                { label: '暴君核心 (Sync Lv.3)', desc: '技能进化为「真实伤害」，完美粉碎机械余烬的护盾。', color: 'var(--accent-red)' },
-                { label: '高能电泳核 (Sync Lv.3)', desc: '技能进化为「全场溅射」，瞬间清理怪潮。', color: 'var(--accent-blue)' },
-                { label: '组件 ⭐⭐⭐ 级', desc: '数值为基础级的 4 倍以上，是通往更高周目的必备武装。', color: 'var(--accent-yellow)' }
+                { key: '合成', label: '组件合成', desc: '3个相同组件 → 升级为 ⭐ 版。⭐ 再3个 → ⭐⭐。⭐⭐ 再3个 → ⭐⭐⭐。每级属性翻倍。不同组件混合 → 随机新组件。', color: 'var(--accent-yellow)' },
+                { key: '魔药', label: '魔药炼制', desc: '消耗 2~3 个组件碎片炼制战斗魔药。最多携带 3 瓶。[4][5][6] 快捷键在战斗中使用。注意毒性累积！', color: 'var(--accent-purple)' },
+                { key: '涂层', label: '基因涂层', desc: '消耗 2 个组件碎片涂抹基因涂层。针对特定种族敌人造成额外伤害。持续 100 回合。', color: 'var(--accent-yellow)' },
+                { key: '暴君', label: '暴君核心 觉醒 (Sync Lv.3)', desc: '攻击转化为「真实伤害」—— 无视目标全部防御力。完克机械余烬的科技护盾。', color: 'var(--race-mutant)' },
+                { key: '蜂后', label: '蜂后髓核 觉醒 (Sync Lv.3)', desc: '召唤突袭时额外吸取伤害值 50% 的护盾。攻守一体，正面硬刚。', color: 'var(--race-swarm)' },
+                { key: '电泳', label: '高能电泳核 觉醒 (Sync Lv.3)', desc: '电弧攻击升级为「全场溅射」—— 对其他敌人造成 50% 伤害。清场神器。', color: 'var(--race-ember)' }
             ],
-            tip: '通过地下五~十层的高级任务可以直接获得特定种族的组织碎片奖励。'
+            tip: 'Boss 器官初始为 1 阶，通过消耗同名器官 + BP 进行深度同调（最高 Lv.3）以解锁觉醒特效。'
         }
     };
 
