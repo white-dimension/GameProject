@@ -1990,7 +1990,11 @@ window.UISystem = (function () {
         // 开始按钮 — 点击后触发视频（绕过浏览器自动播放限制）
         var startBox = _ce('div');
         startBox.style.cssText = 'text-align:center;';
-        startBox.innerHTML = '<div class="txt-lg txt-green txt-bold" style="margin-bottom:32px;">黑地平线：原体觉醒</div>' +
+        startBox.innerHTML = '<div class="txt-lg txt-green txt-bold" style="margin-bottom:16px;font-size:28px;">黑地平线：原体觉醒</div>' +
+            '<div class="txt-sm" style="color:var(--text-dim);margin-bottom:32px;line-height:1.8;max-width:500px;margin-left:auto;margin-right:auto;">' +
+            '2099年，基因剥离计划「余烬」彻底失控。<br>' +
+            '变异血肉、寄生毒素飞蛾、纳米真菌改写的安保机械——<br>' +
+            '三股力量在深达数千米的地下实验室疯狂增殖。你是唯一的原体。</div>' +
             '<button class="btn btn-green" style="padding:10px 40px;font-size:15px;box-shadow:0 0 16px rgba(0,255,136,0.3);">开始游戏</button>';
         startBox.querySelector('button').onclick = function() {
             // 淡出开始按钮，1秒后启动视频
