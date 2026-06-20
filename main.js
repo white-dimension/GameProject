@@ -14,6 +14,10 @@ function createWindow() {
 
   win.setMenuBarVisibility(false);
   win.loadFile('HTML/index.html');
+  // 隐藏系统光标 — 由前端JS自定义光标接管
+  win.webContents.on('dom-ready', function() {
+    win.webContents.insertCSS('html,body,body *{cursor:none!important}');
+  });
 }
 
 app.whenReady().then(() => {
