@@ -1900,7 +1900,7 @@ window.UISystem = (function () {
             var bo = (GD().BOSS_ORGANS||{})[eq]; if (!bo) return;
             var syncLvl = (gs.inventory.organSyncLevels||{})[eq] || 1;
             var oc = _getOrganColor(eq);
-            var boDesc = eq + ' · ' + bo.skillName + ' [Sync Lv.' + syncLvl + ']';
+            var boDesc = eq + ' · ' + bo.skillName + ' [Sync ' + (syncLvl >= 3 ? 'MAX' : 'Lv.' + syncLvl) + ']';
             var se = bo.skillEffect || {};
             var fxParts = [];
             if (se.type === 'shield') {
@@ -2935,7 +2935,9 @@ window.UISystem = (function () {
         html += '<div class="txt-xs txt-dim" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">';
         html += '<span>挂载: </span>';
         if (d.equipped) {
-            var oTip = '<b style=color:' + ocl.hex + '>' + d.equipped + '：</b>&#10;' + ((GD().BOSS_ORGANS[d.equipped] || {}).skillEffect ? GD().BOSS_ORGANS[d.equipped].skillName + '&#10;消耗 ' + GD().BOSS_ORGANS[d.equipped].skillCost + ' 进程&#10;同调等级: Lv.' + syncLvl : 'Boss 专属器官');
+            var syncLabel = syncLvl >= 3 ? 'Lv.MAX' : 'Lv.' + syncLvl;
+            var awDesc = syncLvl >= 3 ? _getOrganAwakening(d.equipped) : '';
+            var oTip = '<b style=color:' + ocl.hex + '>' + d.equipped + '：</b>&#10;' + ((GD().BOSS_ORGANS[d.equipped] || {}).skillEffect ? GD().BOSS_ORGANS[d.equipped].skillName + '&#10;消耗 ' + GD().BOSS_ORGANS[d.equipped].skillCost + ' 进程&#10;同调等级: ' + syncLabel + (awDesc ? '&#10;<b style=color:var(--accent-yellow)>觉醒: ' + awDesc + '</b>' : '') : 'Boss 专属器官');
             html += '<span class="help-tip btn-organ" style="padding:6px 10px;font-size:13px;background:' + ocl.bg + ';border:1px solid ' + ocl.bd + ';border-radius:4px;color:' + ocl.hex + ';cursor:pointer;" data-tip="' + oTip + '"';
             if (opts.interactive) html += ' onclick="try{GameState.equipOrgan(\'' + s + '\',null);}catch(e){}UISystem.showReorganizeModal();UISystem.render();"';
             html += '>' + _fmtTierStars(syncLvl) + ' ' + d.equipped + '</span>';
@@ -3412,7 +3414,9 @@ window.UISystem = (function () {
                 var oc3 = _getOrganColor(oid);
                 var syncLvl = gs.inventory.organSyncLevels[oid] || 1;
                 var bo3 = bos3[oid]; var slotName3 = bo3 ? (_ORGAN_NAMES[bo3.slotType] || '未知') : '未知';
-                var oTip = '<b style=color:' + oc3.hex + '>' + oid + '</b>&#10;<b>' + (bo3 ? bo3.skillName : '') + '</b>&#10;<span style=color:var(--accent-green)>消耗 ' + (bo3?bo3.skillCost:'') + ' 进程</span>&#10;同调等级: Lv.' + syncLvl;
+                var syncLabel2 = syncLvl >= 3 ? 'Lv.MAX' : 'Lv.' + syncLvl;
+                var awDesc2 = syncLvl >= 3 ? _getOrganAwakening(oid) : '';
+                var oTip = '<b style=color:' + oc3.hex + '>' + oid + '</b>&#10;<b>' + (bo3 ? bo3.skillName : '') + '</b>&#10;<span style=color:var(--accent-green)>消耗 ' + (bo3?bo3.skillCost:'') + ' 进程</span>&#10;同调等级: ' + syncLabel2 + (awDesc2 ? '&#10;<b style=color:var(--accent-yellow)>觉醒: ' + awDesc2 + '</b>' : '');
                 if (bo3 && bo3.skillEffect) {
                     var se = bo3.skillEffect;
                     if (se.type === 'shield') {
