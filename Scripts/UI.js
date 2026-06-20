@@ -378,18 +378,8 @@ window.UISystem = (function () {
         // 多场景背景切换
         if (inBattle) {
             _hideBgVideo(_bgVideo);
-            var bs = CS().getBattleState();
-            var isBoss = bs && bs.monsters && bs.monsters.some(function(mon) {
-                var md = GD().MONSTERS[mon.id];
-                return md && md.tier === 'world_boss';
-            });
-            if (isBoss) {
-                _hideBgVideo(_bgBattleVideo);
-                _root.className = 'bg-nest';
-            } else {
-                _showBgVideo(_bgBattleVideo);
-                _root.className = '';
-            }
+            _showBgVideo(_bgBattleVideo);
+            _root.className = '';
         } else {
             _hideBgVideo(_bgBattleVideo);
             _showBgVideo(_bgVideo);
