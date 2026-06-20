@@ -1274,6 +1274,7 @@ window.UISystem = (function () {
         body.appendChild(_tabBar);
 
         var _bestiaryWrap = _ce('div');
+        _bestiaryWrap.style.cssText = 'display:flex;flex-direction:column;gap:12px;';
         body.appendChild(_bestiaryWrap);
 
         var _filterDisplay = function() {
@@ -1297,7 +1298,7 @@ window.UISystem = (function () {
             var headerDiv = _ce('div');
             headerDiv.setAttribute('data-bestiary-race', race);
             headerDiv.className = 'txt-sm txt-bold';
-            headerDiv.style.cssText = 'margin-top:22px;margin-bottom:10px;color:' + (raceHeaderClrs[race] || '#ffd54f') + ';';
+            headerDiv.style.cssText = 'margin-top:8px;margin-bottom:16px;color:' + (raceHeaderClrs[race] || '#ffd54f') + ';';
             headerDiv.innerHTML = '<span class="icon ' + raceIcons[race] + '"></span> ' + raceNames[race];
             _bestiaryWrap.appendChild(headerDiv);
 
