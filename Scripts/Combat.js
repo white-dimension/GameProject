@@ -681,7 +681,7 @@ window.CombatSystem = (function () {
             return;
         }
         _battleState.phase = 'defeat';
-        if (window.Sound) window.Sound.defeat();
+        if (window.Sound) { window.Sound.stopBGM(); window.Sound.defeat(); }
         _log('<span style="color:var(--accent-red); font-weight:bold;">>> 警告：原体序列彻底崩解... 神经链路断开。</span>');
 
         var gs = GS();
