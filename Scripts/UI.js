@@ -697,14 +697,13 @@ window.UISystem = (function () {
             card.setAttribute('data-monster-idx', idx);
             var cardBorder = dead ? 'var(--border-dim)' : mclr;
             var cardGlow = (isTarget && !dead && !isVictory) ? 'box-shadow:0 0 20px ' + (raceCardClrs[md.race] || '#ff4455') + ';' : '';
-            var overlayGrad = 'linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.1) 100%), linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4))';
-            card.style.cssText = 'position:relative;background:' + (hasBgImage && !dead ? overlayGrad : 'var(--bg-card)') + ';border:2px solid ' + cardBorder + ';border-radius:8px;padding:24px;text-align:center;min-width:280px;max-width:380px;min-height:320px;display:flex;flex-direction:column;justify-content:flex-start;overflow:hidden;' + cardGlow +
+            card.style.cssText = 'position:relative;background:' + (hasBgImage && !dead ? 'transparent' : 'var(--bg-card)') + ';border:2px solid ' + cardBorder + ';border-radius:8px;padding:24px;text-align:center;min-width:280px;max-width:380px;min-height:320px;display:flex;flex-direction:column;justify-content:flex-start;overflow:hidden;' + cardGlow +
                 (dead ? 'opacity:0.4;filter:grayscale(0.5);' : '') + 'cursor:' + (isVictory || dead ? 'default' : 'pointer') + ';';
 
             // 背景图层（独立呼吸，不影响卡片大小）
             if (hasBgImage && !dead) {
                 var bgLayer = _ce('div');
-                bgLayer.style.cssText = 'position:absolute;inset:0;z-index:-2;background:url(' + md.image + ') center/100% auto no-repeat;border-radius:8px;';
+                bgLayer.style.cssText = 'position:absolute;inset:0;z-index:-2;background:url(' + md.image + ') center/cover no-repeat;border-radius:8px;';
                 bgLayer.className = 'boss-breathe';
                 bgLayer.style.animationDelay = '-' + (Math.random() * 4).toFixed(2) + 's';
                 card.appendChild(bgLayer);
