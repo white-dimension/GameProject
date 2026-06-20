@@ -7,19 +7,19 @@ window.GuideSystem = (function () {
     var GS = function () { return window.GameState.getState(); };
 
     var _items = [
-        { sel: '.hud-top', pos: 'bottom', title: '状态栏',
+        { sel: '.hud-top', pos: 'bottom', align: 'center', title: '状态栏',
             desc: '<b style="color:var(--accent-red)">生命</b> · <b style="color:var(--accent-green)">进程</b> · <b style="color:var(--accent-purple)">毒性</b> · <b style="color:var(--accent-yellow)">等阶</b>' },
-        { id: 'ui-room-info', pos: 'right', title: '当前位置',
+        { id: 'ui-room-info', pos: 'top', align: 'left', title: '当前位置',
             desc: '所在<b>房间名称</b>和环境描述。<br>母巢是唯一安全区。' },
-        { sel: '.discovery-view', pos: 'bottom', title: '路径卡片',
+        { sel: '.path-card:first-child', pos: 'top', align: 'left', title: '路径卡片',
             desc: '点击卡片<b>探索路径</b>，遭遇怪物、遗物或地下城。每层隐藏一只<b>区域领主</b>。' },
-        { id: 'ui-task-panel', pos: 'right', title: '指令任务',
+        { id: 'ui-task-panel', pos: 'bottom', align: 'left', title: '指令任务',
             desc: '<b>阶段性目标</b>，完成后点击领取奖励。' },
-        { id: 'ui-action-bar', pos: 'top', title: '操作栏',
+        { id: 'ui-action-bar', pos: 'top', align: 'center', title: '操作栏',
             desc: '探索：实验室/图鉴/存档。<br>战斗：<b>1/2/3</b> 技能 · <b>空格</b> 结束回合。' },
-        { id: 'ui-log', pos: 'right', title: '神经日志',
+        { id: 'ui-log', pos: 'top', align: 'left', title: '神经日志',
             desc: '战斗记录、系统消息、奖励通知。' },
-        { sel: '.hud-col-r', pos: 'bottom', title: '帮助',
+        { sel: '.hud-col-r', pos: 'bottom', align: 'right', title: '帮助',
             desc: '<b style="color:var(--accent-green)">[引导]</b> 重温 · <b style="color:var(--accent-blue)">?</b> 手册' }
     ];
 
@@ -50,14 +50,20 @@ window.GuideSystem = (function () {
             card.innerHTML = '<div class="txt-xs txt-green txt-bold" style="margin-bottom:4px;">' + item.title + '</div>' +
                 '<div class="txt-xs" style="color:var(--text-dim);font-size:12px;">' + item.desc + '</div>';
 
-            var cw = 240, gap = 14;
+            var cw = 240, gap = 10;
             var l;
-            switch (item.pos) {
-                case 'right':  l = Math.min(rect.right + gap, window.innerWidth - cw - 10); card.style.left = l + 'px'; card.style.top = Math.max(10, rect.top) + 'px'; break;
-                case 'left':   l = Math.max(10, rect.left - cw - gap); card.style.left = l + 'px'; card.style.top = Math.max(10, rect.top) + 'px'; break;
-                case 'top':    l = Math.max(10, rect.left + rect.width / 2 - cw / 2); card.style.left = l + 'px'; card.style.bottom = (window.innerHeight - rect.top + gap) + 'px'; break;
-                default:       l = Math.max(10, rect.left + rect.width / 2 - cw / 2); card.style.left = l + 'px'; card.style.top = Math.min(rect.bottom + gap, window.innerHeight - 10) + 'px';
+            if (item.align === 'left') l = Math.max(10, rect.left);
+            else if (item.align === 'right') l = Math.max(10, rect.right - cw);
+            else l = Math.max(10, rect.left + rect.width / 2 - cw / 2);
+
+            card.style.left = l + 'px';
+
+            if (item.pos === 'top') {
+                card.style.bottom = (window.innerHeight - rect.top + gap) + 'px';
+            } else {
+                card.style.top = Math.min(rect.bottom + gap, window.innerHeight - 10) + 'px';
             }
+
             _overlay.appendChild(card);
             _cards.push(card);
         });
