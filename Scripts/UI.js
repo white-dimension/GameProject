@@ -1699,30 +1699,8 @@ window.UISystem = (function () {
         // 器官状态
         var organHTML = '<div style="padding:15px 20px;background:rgba(0,255,136,0.03);border:1px solid rgba(0,255,136,0.15);border-radius:6px;display:flex;flex-direction:column;gap:10px;">' +
             '<div class="txt-sm txt-green txt-bold">> 已挂载器官状态</div>';
-        var organNames = _ORGAN_NAMES;
-        var organClrs2 = _BOSS_ORGAN_COLORS;
         ['predatory_organ', 'chitin_epidermis', 'gland_core'].forEach(function(s) {
-            var d = p[s];
-            var ocl = organClrs2[d.equipped] || { hex: 'var(--accent-green)', bg: 'rgba(0,255,136,0.08)', bd: 'rgba(0,255,136,0.2)' };
-            organHTML += '<div style="display:flex;flex-direction:column;gap:6px;">' +
-                '<div style="display:flex;align-items:center;gap:8px;"><span class="txt-xs txt-green txt-bold">' + organNames[s] + '</span> <span class="txt-xs" style="color:var(--accent-yellow);">' + _fmtTierStars(d.tier) + '</span></div>' +
-                '<div class="txt-xs txt-dim" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">' +
-                '<span>挂载: </span><span class="help-tip" style="padding:6px 10px;font-size:13px;background:' + ocl.bg + ';border:1px solid ' + ocl.bd + ';border-radius:4px;color:' + ocl.hex + ';" data-tip="' + (d.equipped ? '<b style=color:' + ocl.hex + '>' + d.equipped + '：</b>&#10;' + ((GD().BOSS_ORGANS[d.equipped] || {}).skillEffect ? GD().BOSS_ORGANS[d.equipped].skillName + '&#10;消耗 ' + GD().BOSS_ORGANS[d.equipped].skillCost + ' 进程&#10;同调等级: Lv.' + (gs.inventory.organSyncLevels[d.equipped]||1) : 'Boss 专属器官') : '<b style=color:var(--accent-green)>标准原型：</b>&#10;默认器官，可被 Boss 掉落替换') + '">' + _fmtTierStars(gs.inventory.organSyncLevels[d.equipped]||1) + ' ' + (d.equipped || '标准原型') + '</span>';
-            var slots = d.component_slots || [null, null];
-            var comps = GD().COMPONENTS || {};
-            [0,1].forEach(function(si) {
-                var cid = slots[si];
-                if (cid) {
-                    var dtl = _buildCompDetail(cid);
-                    var tipText = '<b>' + cid + '</b>' + (dtl.affixText ? '&#10;' + dtl.affixText : '') + (dtl.slotText ? '&#10;可装备：' + dtl.slotText : '');
-                    var _bg3 = 'rgba(255,213,79,0.08)'; var _bd3 = 'rgba(255,213,79,0.2)'; var _cl3 = 'var(--accent-yellow)';
-                    organHTML += '<span class="txt-xs txt-dim"> 组件: </span><span class="help-tip" style="padding:6px 10px;font-size:13px;background:' + _bg3 + ';border:1px solid ' + _bd3 + ';border-radius:4px;color:' + _cl3 + ';" data-tip="' + tipText + '">' + _fmtRoman(cid) + '</span>';
-                } else if (!cid) {
-                    organHTML += '<span class="txt-xs txt-dim"> 组件: </span><span style="padding:6px 10px;font-size:13px;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.15);border-radius:4px;color:var(--text-dim);">空槽</span>';
-                }
-            });
-            organHTML += '</div>';
-            organHTML += '</div>';
+            organHTML += '<div style="display:flex;flex-direction:column;gap:6px;">' + _renderOrganRow(s, p[s], {interactive:false}) + '</div>';
         });
         organHTML += '</div>';
         body.innerHTML += organHTML;
@@ -2940,6 +2918,78 @@ window.UISystem = (function () {
 
     // 罗马数字强制无衬线显示
     var _fmtTierStars = function(tier) { var s=''; for(var i=0;i<tier;i++) s+='⭐'; return s; };
+    // 共享器官行渲染 — 实验室+档案共用
+    var _renderOrganRow = function(s, d, opts) {
+        opts = opts || {};
+        var gs = opts.gs || GS();
+        var p = gs.player;
+        var inv = gs.inventory.components;
+        var comps = GD().COMPONENTS || {};
+        var organNames = _ORGAN_NAMES;
+        var ocl = _BOSS_ORGAN_COLORS[d.equipped] || _BOSS_ORGAN_COLORS._default;
+        var syncLvl = gs.inventory.organSyncLevels[d.equipped] || 1;
+        var html = '';
+        // 名称行
+        html += '<div class="txt-xs txt-green txt-bold">' + organNames[s] + '<span style="color:var(--accent-yellow);margin-left:4px;">' + _fmtTierStars(d.tier) + '</span></div>';
+        // 挂载行
+        html += '<div class="txt-xs txt-dim" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">';
+        html += '<span>挂载: </span>';
+        if (d.equipped) {
+            var oTip = '<b style=color:' + ocl.hex + '>' + d.equipped + '：</b>&#10;' + ((GD().BOSS_ORGANS[d.equipped] || {}).skillEffect ? GD().BOSS_ORGANS[d.equipped].skillName + '&#10;消耗 ' + GD().BOSS_ORGANS[d.equipped].skillCost + ' 进程&#10;同调等级: Lv.' + syncLvl : 'Boss 专属器官');
+            html += '<span class="help-tip btn-organ" style="padding:6px 10px;font-size:13px;background:' + ocl.bg + ';border:1px solid ' + ocl.bd + ';border-radius:4px;color:' + ocl.hex + ';cursor:pointer;" data-tip="' + oTip + '"';
+            if (opts.interactive) html += ' onclick="try{GameState.equipOrgan(\'' + s + '\',null);}catch(e){}UISystem.showReorganizeModal();UISystem.render();"';
+            html += '>' + _fmtTierStars(syncLvl) + ' ' + d.equipped + '</span>';
+        } else {
+            html += '<span class="btn-organ' + (gs.inventory.organs.length > 0 ? ' slot-ready' : '') + '" style="padding:6px 10px;font-size:13px;background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);border-radius:4px;color:var(--accent-green);';
+            if (opts.interactive) html += 'cursor:pointer;" onclick="UISystem._showOrganPicker(\'' + s + '\')"';
+            else html += '"';
+            html += '>标准原型</span>';
+        }
+        // 组件行
+        html += ' <span>组件:</span> <span style="display:inline-flex;align-items:center;gap:8px;">';
+        var slots = d.component_slots || [null, null];
+        [0,1].forEach(function(si) {
+            var cid = slots[si];
+            if (cid) {
+                var etip = '<b>' + cid + '</b>';
+                var ec = comps[cid];
+                if (ec && ec.affixes) {
+                    var ep = []; var ea = ec.affixes;
+                    if (ea.atkBonus) ep.push('攻击+' + ea.atkBonus);
+                    if (ea.flatDefBonus) ep.push('防御+' + ea.flatDefBonus);
+                    if (ea.shieldBonus) ep.push('生命+' + ea.shieldBonus);
+                    if (ea.armorPenetration) ep.push('破甲' + Math.round(ea.armorPenetration*100) + '%');
+                    if (ea.toxinConversion) ep.push('毒素转化' + Math.round(ea.toxinConversion*100) + '%');
+                    if (ea.lifeDrainChance) ep.push('吸血' + Math.round(ea.lifeDrainChance*100) + '%·' + (ea.lifeDrainAmount||0) + 'HP');
+                    if (ea.thornsPercent) ep.push('反伤' + Math.round(ea.thornsPercent*100) + '%');
+                    if (ea.dotBonus) ep.push('毒伤+' + ea.dotBonus);
+                    if (ea.bonusVsSwarm) ep.push('对寄生+' + Math.round(ea.bonusVsSwarm*100) + '%');
+                    if (ea.deathDefy) ep.push('免死一次');
+                    if (ea.poisonImmune) ep.push('毒素免疫');
+                    if (ea.killHeal) ep.push('击杀回复' + ea.killHeal + 'HP');
+                    if (ea.critChance) ep.push('暴击率' + Math.round(ea.critChance*100) + '%');
+                    if (ea.critMultiplier && ea.critMultiplier > 1.5) ep.push('暴伤×' + ea.critMultiplier.toFixed(1));
+                    if (ea.processOnHit) ep.push('受击回' + ea.processOnHit + '进程');
+                    if (ep.length > 0) etip += '&#10;' + ep.join(' · ');
+                }
+                var _bgL = 'rgba(255,213,79,0.08)', _bdL = 'rgba(255,213,79,0.2)', _clL = 'var(--accent-yellow)';
+                html += '<span class="help-tip" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;font-size:13px;background:' + _bgL + ';border:1px solid ' + _bdL + ';border-radius:4px;color:' + _clL + ';';
+                if (opts.interactive) html += (p.bp < 10 ? 'opacity:0.5;cursor:not-allowed;filter:grayscale(1);' : 'cursor:pointer;') + '" data-tip="' + etip + (p.bp < 10 ? '&#10;<b style=color:var(--accent-red)>BP 不足 (需10)</b>' : '&#10;点击卸下 (10 BP)') + '" data-slot="' + s + '" data-sidx="' + si;
+                else html += '" data-tip="' + etip;
+                html += '">' + _fmtRoman(cid) + '</span>';
+            } else {
+                if (opts.interactive) {
+                    var hasAvail = false; Object.keys(inv).forEach(function(ck) { if (inv[ck] > 0 && comps[ck] && comps[ck].allowedSlots && comps[ck].allowedSlots.indexOf(s) !== -1) hasAvail = true; });
+                    html += '<span class="' + (hasAvail ? 'slot-ready' : '') + '" style="padding:6px 10px;font-size:13px;background:' + (hasAvail ? 'rgba(0,255,136,0.04)' : 'rgba(255,255,255,0.04)') + ';border:1px dashed ' + (hasAvail ? 'rgba(0,255,136,0.3)' : 'rgba(255,255,255,0.15)') + ';border-radius:4px;color:' + (hasAvail ? 'var(--accent-green)' : 'var(--text-dim)') + ';cursor:pointer;" onclick="UISystem._showSocketPicker(\'' + s + '\',' + si + ')">空槽</span>';
+                } else {
+                    html += '<span style="padding:6px 10px;font-size:13px;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.15);border-radius:4px;color:var(--text-dim);">空槽</span>';
+                }
+            }
+        });
+        html += '</span>';
+        html += '</div>';
+        return html;
+    };
     var _fmtRoman = function(str) {
         var m = str.match(/([ⅠⅡⅢ]+)$/);
         var n = m ? ({ 'Ⅰ':1,'Ⅱ':2,'Ⅲ':3 })[m[1]] || m[1].length : 0;
@@ -3180,64 +3230,18 @@ window.UISystem = (function () {
             var canUpgrade = Object.keys(inv).reduce(function(a,k){ return a + (inv[k] * getWeight2(k)); }, 0) >= cost;
             var row = _ce('div');
             row.style.cssText = 'padding:14px;background:rgba(0,255,136,0.03);border:1px solid rgba(0,255,136,0.1);border-radius:6px;display:flex;flex-direction:column;gap:10px;';
-            var slots = d.component_slots || [null, null];
-            var slotHTML = '';
-            [0, 1].forEach(function(si) {
-                var cid = slots[si];
-                if (cid) {
-                    var ec = GD().COMPONENTS && GD().COMPONENTS[cid];
-                    var etip = '<b>' + cid + '</b>';
-                    if (ec && ec.affixes) {
-                        var ep = []; var ea = ec.affixes;
-                        if (ea.atkBonus) ep.push('攻击+' + ea.atkBonus);
-                        if (ea.flatDefBonus) ep.push('防御+' + ea.flatDefBonus);
-                        if (ea.shieldBonus) ep.push('生命+' + ea.shieldBonus);
-                        if (ea.physMultiplier) ep.push('物理×' + ea.physMultiplier);
-                        if (ea.armorPenetration) ep.push('破甲' + Math.round(ea.armorPenetration*100) + '%');
-                        if (ea.toxinConversion) ep.push('毒素转化' + Math.round(ea.toxinConversion*100) + '%');
-                        if (ea.lifeDrainChance) ep.push('吸血' + Math.round(ea.lifeDrainChance*100) + '%' + (ea.lifeDrainAmount ? '·' + ea.lifeDrainAmount + 'HP' : ''));
-                        if (ea.thornsPercent) ep.push('反伤' + Math.round(ea.thornsPercent*100) + '%');
-                        if (ea.dotBonus) ep.push('毒伤+' + ea.dotBonus);
-                        if (ea.bonusVsSwarm) ep.push('对寄生+' + Math.round(ea.bonusVsSwarm*100) + '%');
-                        if (ea.deathDefy) ep.push('免死一次');
-                        if (ea.poisonImmune) ep.push('毒素免疫');
-                        if (ea.killHeal) ep.push('击杀回复' + ea.killHeal + 'HP');
-                        if (ea.critChance) ep.push('暴击率' + Math.round(ea.critChance*100) + '%');
-                        if (ea.critMultiplier && ea.critMultiplier > 1.5) ep.push('暴伤×' + ea.critMultiplier.toFixed(1));
-                        if (ea.processOnHit) ep.push('受击回' + ea.processOnHit + '进程');
-                        if (ep.length > 0) etip += '&#10;' + ep.join(' · ');
-                    }
-                    var _bgL = 'rgba(255,213,79,0.08)'; var _bdL = 'rgba(255,213,79,0.2)'; var _clL = 'var(--accent-yellow)';
-                    slotHTML += '<span class="help-tip" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;font-size:13px;background:' + _bgL + ';border:1px solid ' + _bdL + ';border-radius:4px;color:' + _clL + ';' + (p.bp < 10 ? 'opacity:0.5;cursor:not-allowed;filter:grayscale(1);' : 'cursor:pointer;') + '" data-tip="' + etip + (p.bp < 10 ? '&#10;<b style=color:var(--accent-red)>BP 不足 (需10)</b>' : '&#10;点击卸下 (10 BP)') + '" data-slot="' + s + '" data-sidx="' + si + '">' + _fmtRoman(cid) + '</span>';
-                } else {
-                    var hasAvail = false; Object.keys(inv).forEach(function(ck) { if (inv[ck] > 0 && comps[ck] && comps[ck].allowedSlots && comps[ck].allowedSlots.indexOf(s) !== -1) hasAvail = true; });
-                    var slotCls = hasAvail ? 'slot-ready' : '';
-                    var slotStyle = hasAvail ? 'padding:6px 10px;font-size:13px;background:rgba(0,255,136,0.04);border:1px dashed rgba(0,255,136,0.3);border-radius:4px;color:var(--accent-green);cursor:pointer;' : 'padding:6px 10px;font-size:13px;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.15);border-radius:4px;color:var(--text-dim);cursor:pointer;';
-                    slotHTML += '<span class="' + slotCls + '" style="' + slotStyle + '" onclick="UISystem._showSocketPicker(\'' + s + '\',' + si + ')">空槽</span>';
-                }
-            });
-            row.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px;width:100%;">' +
-                '<div class="txt-xs txt-green txt-bold">' + organNames[s] + '<span style="color:var(--accent-yellow);margin-left:4px;">' + _fmtTierStars(d.tier) + '</span></div>' +
-                '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between;">' +
-                '<span class="txt-xs txt-dim" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">挂载: ' + (d.equipped ? '<span class="help-tip btn-organ" style="padding:6px 10px;font-size:13px;background:' + (_organColors[d.equipped]||_organColors._default).bg + ';border:1px solid ' + (_organColors[d.equipped]||_organColors._default).bd + ';border-radius:4px;color:' + (_organColors[d.equipped]||_organColors._default).hex + ';cursor:pointer;" data-tip="点击卸下该器官" onclick="try{GameState.equipOrgan(\'' + s + '\',null);}catch(e){}UISystem.showReorganizeModal();UISystem.render();">' + _fmtTierStars(gs.inventory.organSyncLevels[d.equipped]||1) + ' ' + d.equipped + '</span>' : '<span class="btn-organ' + (gs.inventory.organs.length > 0 ? ' slot-ready' : '') + '" style="padding:6px 10px;font-size:13px;background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);border-radius:4px;color:var(--accent-green);cursor:pointer;" onclick="UISystem._showOrganPicker(\'' + s + '\')">标准原型</span>') + ' 组件: <span style="display:inline-flex;align-items:center;gap:8px;">' + slotHTML + '</span></span>' +
-                (function() {
-                    // [新增] 进阶收益预览逻辑
-                    var nextTier = d.tier + 1;
-                    var bonusDesc = "";
-                    if (s === 'predatory_organ') bonusDesc = "攻击 +3, 生命 +5";
-                    else if (s === 'chitin_epidermis') bonusDesc = "防御 +3, 生命 +3";
-                    else if (s === 'gland_core') bonusDesc = "进程回复 +1, 进程上限 +1";
-
-                    var tipText = "<b style='color:var(--accent-green)'>器官进阶：" + _fmtTierStars(d.tier) + " → " + _fmtTierStars(nextTier) + "</b>&#10;";
-                    tipText += "<b>预估收益：</b><span style='color:var(--accent-green)'>" + bonusDesc + "</span>&#10;";
-                    tipText += "<b>进阶消耗：</b>任意组件 ×" + cost + "&#10;";
-                    tipText += "<b>当前库存：</b>共 " + Object.keys(inv).reduce(function(a,k){ return a + (inv[k] * getWeight2(k)); }, 0) + " (加权)";
-                    if (!canUpgrade) tipText += "&#10;<b style='color:var(--accent-red)'>材料不足，无法进阶</b>";
-
-                    return '<button class="btn btn-green btn-sm help-tip" ' + (canUpgrade ? '' : 'disabled') + ' data-tip="' + tipText + '" onclick="UISystem._showOrganUpgradePicker(\'' + s + '\')">进阶</button>';
-                })() +
-                '</div>' +
-                '</div>';
+            var rowHTML = _renderOrganRow(s, d, {interactive:true});
+            // 进阶按钮
+            var nextTier = d.tier + 1;
+            var bonusDesc = s === 'predatory_organ' ? '攻击 +3, 生命 +5' : s === 'chitin_epidermis' ? '防御 +3, 生命 +3' : '进程回复 +1, 进程上限 +1';
+            var tipText = "<b style='color:var(--accent-green)'>器官进阶：" + _fmtTierStars(d.tier) + " → " + _fmtTierStars(nextTier) + "</b>&#10;";
+            tipText += "<b>预估收益：</b><span style='color:var(--accent-green)'>" + bonusDesc + "</span>&#10;";
+            tipText += "<b>进阶消耗：</b>任意组件 ×" + cost + "&#10;";
+            tipText += "<b>当前库存：</b>共 " + Object.keys(inv).reduce(function(a,k){ return a + (inv[k] * getWeight2(k)); }, 0) + " (加权)";
+            if (!canUpgrade) tipText += "&#10;<b style='color:var(--accent-red)'>材料不足，无法进阶</b>";
+            rowHTML += '<div style="display:flex;justify-content:flex-end;">' +
+                '<button class="btn btn-green btn-sm help-tip" ' + (canUpgrade ? '' : 'disabled') + ' data-tip="' + tipText + '" onclick="UISystem._showOrganUpgradePicker(\'' + s + '\')">进阶</button></div>';
+            row.innerHTML = rowHTML;
             organBlock.appendChild(row);
         });
         body.appendChild(organBlock);
