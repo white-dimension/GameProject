@@ -1485,40 +1485,29 @@ window.UISystem = (function () {
                 // 精英/Boss 差异化样式
                 var isElite = m.tier === 'elite';
                 var isBoss = m.tier === 'world_boss';
+                var isSpecial = (isElite || isBoss) && known && m.image;
                 var tierBadge = '';
                 var tierBorderClr = known ? rclr : '#333';
                 var tierBg = bgClr;
                 var tierPadding = '15px 18px';
                 var tierFontSize = 'txt-sm';
                 if (isBoss && known) {
-                    tierBadge = '<span style="display:inline-block;padding:2px 10px;background:rgba(255,68,85,0.2);border:1px solid var(--accent-red);border-radius:3px;font-size:12px;color:var(--accent-red);margin-left:8px;">首领</span>';
+                    tierBadge = '<span style="display:inline-block;padding:2px 10px;background:rgba(255,68,85,0.2);border:1px solid var(--accent-red);border-radius:3px;font-size:12px;color:var(--accent-red);">首领</span>';
                     tierBorderClr = 'var(--accent-red)';
-                    tierBg = 'rgba(255,68,85,0.03)';
-                    tierPadding = '20px 22px';
                     tierFontSize = 'txt-md';
                 } else if (isElite && known) {
-                    tierBadge = '<span style="display:inline-block;padding:2px 8px;background:rgba(255,213,79,0.12);border:1px solid var(--accent-yellow);border-radius:3px;font-size:12px;color:var(--accent-yellow);margin-left:8px;">精英</span>';
+                    tierBadge = '<span style="display:inline-block;padding:2px 8px;background:rgba(255,213,79,0.12);border:1px solid var(--accent-yellow);border-radius:3px;font-size:12px;color:var(--accent-yellow);">精英</span>';
                     tierBorderClr = 'var(--accent-yellow)';
-                    tierBg = 'rgba(255,213,79,0.02)';
-                    tierPadding = '18px 20px';
-                    tierFontSize = 'txt-sm';
                 }
 
                 var item = _ce('div');
                 item.setAttribute('data-bestiary-race', race);
-                item.style.cssText = 'padding:' + tierPadding + ';background:' + tierBg + ';border-radius:6px;border-left:4px solid ' + tierBorderClr + ';display:flex;flex-direction:column;gap:10px;' + (isBoss && known ? 'box-shadow:0 0 20px rgba(255,68,85,0.1);' : '') + (isElite && known ? 'box-shadow:0 0 10px rgba(255,213,79,0.05);' : '');
-
-                var topRow = '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-                    '<span class="' + tierFontSize + ' txt-bold" style="color:' + (known ? rclr : 'var(--text-disabled)') + ';">' + (known ? m.name : '???') + tierBadge + '</span>' +
-                    '<span class="txt-xs txt-dim">' + (known ? 'Lv.' + m.level : '未遭遇') + '</span>' +
-                    '</div>';
 
                 var researchRow = '';
                 if (known) {
                     var nextCost = [500, 1500, 3000][rl] || null;
                     var canAfford = nextCost !== null && gs.player.bp >= nextCost;
-
-                    researchRow = '<div style="display:flex;align-items:center;gap:15px;margin-top:4px;padding:10px;background:rgba(0,0,0,0.2);border-radius:4px;">' +
+                    researchRow = '<div style="display:flex;align-items:center;gap:15px;margin-top:4px;padding:10px;background:rgba(0,0,0,0.3);border-radius:4px;">' +
                         '<div style="flex:1;">' +
                             '<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span class="txt-xs txt-gold">研究等级 ' + rl + '/3</span>' +
                             (rl >= 3 ? '<span class="txt-xs txt-green">研究已饱和</span>' : '<span class="txt-xs txt-dim">下级需 ' + nextCost + ' BP</span>') + '</div>' +
@@ -1528,15 +1517,30 @@ window.UISystem = (function () {
                         '</div>';
                 }
 
-                // Boss/精英显示缩略图
-                var thumbHTML = '';
-                if (known && m.image && (isBoss || isElite)) {
-                    thumbHTML = '<div style="width:100%;height:80px;border-radius:4px;margin-bottom:4px;background:url(' + m.image + ') center/cover no-repeat;opacity:0.6;filter:grayscale(0.3);"></div>';
+                if (isSpecial) {
+                    // 精英/首领：战斗卡片样式 — 全图背景 + 文字叠层
+                    item.style.cssText = 'position:relative;min-height:200px;border-radius:8px;overflow:hidden;border:2px solid ' + tierBorderClr + ';' + (isBoss ? 'box-shadow:0 0 20px rgba(255,68,85,0.2);' : 'box-shadow:0 0 12px rgba(255,213,79,0.1);');
+                    item.innerHTML = '<div style="position:absolute;inset:0;background:url(' + m.image + ') center/cover no-repeat;filter:brightness(0.4);z-index:0;"></div>' +
+                        '<div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.85) 0%,rgba(0,0,0,0.2) 50%,rgba(0,0,0,0.4) 100%);z-index:1;"></div>' +
+                        '<div style="position:relative;z-index:2;display:flex;flex-direction:column;justify-content:flex-end;min-height:200px;padding:16px;">' +
+                            '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">' +
+                                '<span class="' + tierFontSize + ' txt-bold" style="color:' + rclr + ';">' + m.name + '</span>' + tierBadge +
+                                '<span class="txt-xs txt-dim" style="margin-left:auto;">Lv.' + m.level + '</span>' +
+                            '</div>' +
+                            '<div class="txt-xs txt-dim" style="margin-bottom:8px;">生命:' + m.hp + ' 攻击:' + m.atk + ' 防御:' + m.def + ' | 击杀: ' + kc + '</div>' +
+                            researchRow +
+                        '</div>';
+                } else {
+                    // 普通：横条样式
+                    item.style.cssText = 'padding:' + tierPadding + ';background:' + tierBg + ';border-radius:6px;border-left:4px solid ' + tierBorderClr + ';display:flex;flex-direction:column;gap:10px;';
+                    var topRow = '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+                        '<span class="' + tierFontSize + ' txt-bold" style="color:' + (known ? rclr : 'var(--text-disabled)') + ';">' + (known ? m.name : '???') + tierBadge + '</span>' +
+                        '<span class="txt-xs txt-dim">' + (known ? 'Lv.' + m.level : '未遭遇') + '</span>' +
+                        '</div>';
+                    item.innerHTML = topRow +
+                        (known ? '<div class="txt-xs txt-dim">生命:' + m.hp + ' 攻击:' + m.atk + ' 防御:' + m.def + ' | 击杀: ' + kc + ' | ' + m.weakness + '</div>' : '') +
+                        researchRow;
                 }
-                item.innerHTML = topRow +
-                    thumbHTML +
-                    (known ? '<div class="txt-xs txt-dim">生命:' + m.hp + ' 攻击:' + m.atk + ' 防御:' + m.def + ' | 击杀: ' + kc + ' | ' + m.weakness + '</div>' : '') +
-                    researchRow;
 
                 _bestiaryWrap.appendChild(item);
             });
