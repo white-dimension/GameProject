@@ -1254,14 +1254,13 @@ window.UISystem = (function () {
         var raceNames = _RACE_NAMES;
         var raceIcons = { mutant: 'icon-mutant', swarm: 'icon-swarm', ember: 'icon-ember' };
         var raceClrs = { mutant: '#ff6b4a', swarm: '#9acd32', ember: '#4ab8ff' };
-        var _filterRace = 'all';
+        var _filterRace = 'mutant';
 
         // 种族筛选标签栏（遵循设计规范按钮样式）
         var _tabBar = _ce('div');
         _tabBar.style.cssText = 'display:flex;gap:8px;padding:0 0 12px 0;border-bottom:1px solid var(--border-dim);';
         var _tabBtns = {};
-        var tabs = [{ r: 'all', l: '全部', cls: 'btn-blue' },
-                    { r: 'mutant', l: '异变者', cls: 'btn-red' },
+        var tabs = [{ r: 'mutant', l: '异变者', cls: 'btn-red' },
                     { r: 'swarm', l: '寄生群落', cls: 'btn-green' },
                     { r: 'ember', l: '机械余烬', cls: 'btn-blue' }];
         tabs.forEach(function(t) {
@@ -1288,7 +1287,7 @@ window.UISystem = (function () {
             races.forEach(function(race) {
                 var els = _bestiaryWrap.querySelectorAll('[data-bestiary-race=\"' + race + '\"]');
                 for (var ei = 0; ei < els.length; ei++) {
-                    els[ei].style.display = (_filterRace === 'all' || _filterRace === race) ? '' : 'none';
+                    els[ei].style.display = (_filterRace === race) ? '' : 'none';
                 }
             });
         };
@@ -1298,7 +1297,7 @@ window.UISystem = (function () {
             var headerDiv = _ce('div');
             headerDiv.setAttribute('data-bestiary-race', race);
             headerDiv.className = 'txt-sm txt-bold';
-            headerDiv.style.cssText = 'margin-top:8px;color:' + (raceHeaderClrs[race] || '#ffd54f') + ';';
+            headerDiv.style.cssText = 'margin-top:22px;margin-bottom:10px;color:' + (raceHeaderClrs[race] || '#ffd54f') + ';';
             headerDiv.innerHTML = '<span class="icon ' + raceIcons[race] + '"></span> ' + raceNames[race];
             _bestiaryWrap.appendChild(headerDiv);
 
