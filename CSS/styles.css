@@ -49,8 +49,8 @@ body, html { font-family: "Sarasa Mono SC", "Space Mono", RomanSans, sans-serif;
 
 }
 
-/* 系统光标由JS运行时注入style标签隐藏，此处做静态兜底 */
-html, body, #app { cursor: none; }
+/* 系统光标由JS注入透明PNG隐藏，此处静态兜底 */
+html, body, #app { cursor: url("../Assets/Icons/cursor-transparent.png") 1 1, none; }
 
 /* 禁用右键菜单 */
 body { -webkit-user-select: none; user-select: none; }

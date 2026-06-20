@@ -255,22 +255,10 @@ window.UISystem = (function () {
         document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
 
         // —— 自定义 JS 光标（彻底隐藏系统光标）——
-        function _forceHideCursor() {
-            document.documentElement.style.setProperty('cursor','none','important');
-            document.body.style.setProperty('cursor','none','important');
-        }
-        _forceHideCursor();
-        // 注入style — Chrome兼容
+        // 用透明PNG文件作为系统光标 — 跨平台兼容
         var _cursorStyle = document.createElement('style');
-        _cursorStyle.textContent = '*{cursor:none!important}';
+        _cursorStyle.textContent = '*{cursor:url(../Assets/Icons/cursor-transparent.png) 1 1, none!important}';
         document.head.appendChild(_cursorStyle);
-        // 首次用户交互后重新应用（Chrome安全限制）
-        document.addEventListener('click', function _firstClick() {
-            _forceHideCursor();
-            document.removeEventListener('click', _firstClick);
-        }, { once: true });
-        // 定时刷新兜底
-        setInterval(_forceHideCursor, 1000);
         var _cursorEl = _ce('div');
         _cursorEl.id = 'custom-cursor';
         _cursorEl.style.cssText = 'position:fixed;pointer-events:none;z-index:99999;width:24px;height:24px;transform:translate(-12px,-12px);';
