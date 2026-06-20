@@ -884,8 +884,9 @@ window.GameState = (function () {
         var cost = bpCosts[currentSync];
         if (gs.player.bp < cost) return { success: false, error: 'BP 不足，需 ' + cost };
 
-        // 消耗掉一个背包中的器官
+        // 消耗掉一个背包中的器官（优先消耗背包，未装备的）
         var idx = inv.organs.indexOf(organId);
+        if (idx === -1) return { success: false, error: '背包中未找到该器官' };
         inv.organs.splice(idx, 1);
 
         gs.player.bp -= cost;
