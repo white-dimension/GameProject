@@ -1101,25 +1101,37 @@ window.UISystem = (function () {
 
                 // 实时读取器官技能名和详情
                 var _bos2 = GD().BOSS_ORGANS || {};
-                var _sk = { predatory_organ: { name: '捕食打击', desc: '物理伤害技能', color: 'var(--accent-red)' },
-                            chitin_epidermis: { name: '生物防御', desc: '护盾技能', color: 'var(--accent-green)' },
-                            gland_core: { name: '腺体脉冲', desc: '连招引爆技能', color: 'var(--accent-yellow)' } };
-                ['predatory_organ','chitin_epidermis','gland_core'].forEach(function(s){
-                    var eq2 = gs.player[s].equipped;
-                    if (eq2 && _bos2[eq2] && _bos2[eq2].skillName) {
-                        var bo = _bos2[eq2];
-                        _sk[s] = { name: bo.skillName, desc: bo.skillEffect ? bo.skillEffect.desc || bo.skillName : bo.skillName, color: _getOrganColor(eq2).hex || _sk[s].color };
+                var _sk = {};
+                var _buildSlotInfo = function(slot) {
+                    var eq = gs.player[slot].equipped;
+                    if (eq && _bos2[eq] && _bos2[eq].skillName) {
+                        var bo = _bos2[eq];
+                        var oc = _getOrganColor(eq);
+                        var detail = '';
+                        if (eq === '暴君核心') detail = '<b>真实撕裂：</b>无视全部防御力，裸伤直击。<br><b>倍率：</b>2.5× 攻击力<br><b>觉醒 Lv.3：</b>所有伤害转化为真实伤害';
+                        else if (eq === '蜂后髓核') detail = '<b>母体孵化：</b>召唤工蜂集群撕咬目标。<br><b>倍率：</b>3.0× 攻击力，伤害值全额吸血<br><b>觉醒 Lv.3：</b>额外吸取 50% 伤害为护盾';
+                        else if (eq === '高能电泳核') detail = '<b>电弧风暴：</b>释放高压电离脉冲穿透目标。<br><b>倍率：</b>2.0× 攻击力，无视防御<br><b>觉醒 Lv.3：</b>闪电链溅射全场，各 50% 伤害';
+                        return { name: bo.skillName, color: oc.hex||'var(--accent-yellow)', detail: detail,
+                                 cost: bo.skillCost || 2, multiplier: bo.skillEffect ? bo.skillEffect.baseMultiplier : 1 };
                     }
-                });
+                    // 默认技能
+                    var defs = {
+                        predatory_organ: { name:'捕食打击', color:'var(--accent-red)', cost:2, detail:'<b>撕裂攻击：</b>基础物理伤害。<br><b>电离标记：</b>对机械族首次命中施加标记，二次命中引爆剥离护盾+溅射。<br><b>生物崩解：</b>对寄生族连续2次命中触发崩解标记+防御归零。<br><b>概率：</b>30% 挂毒 3 回合' },
+                        chitin_epidermis: { name:'生物防御', color:'var(--accent-green)', cost:3, detail:'<b>护盾=</b>攻击力 × 0.6<br><b>效果：</b>吸收物理伤害直至破裂<br><b>策略：</b>开局套盾或敌方蓄力前预判' },
+                        gland_core: { name:'腺体脉冲', color:'var(--accent-yellow)', cost:3, detail:'<b>中毒引爆：</b>造成 3× 攻击力伤害+全额吸血。<br><b>崩解引爆：</b>清除闪避+2回合易伤。<br><b>无标记：</b>仅50%酸蚀伤害。<br><b>核心：</b>先挂标记再引爆' }
+                    };
+                    return defs[slot] || { name:'攻击', color:'var(--accent-red)', cost:2, detail:'' };
+                };
+                ['predatory_organ','chitin_epidermis','gland_core'].forEach(function(s){ _sk[s] = _buildSlotInfo(s); });
 
                 skillInfo.innerHTML = '<div class="txt-xs txt-green txt-bold" style="margin-bottom:10px;">> 动态战术预测</div>' +
                     intentHTML +
                     '<div style="display:flex;flex-direction:column;gap:6px;">' +
-                    '<div data-key="1" class="help-tip" style="background:var(--bg-card);border:1px solid ' + (c1 && curMonIon ? 'rgba(0,212,255,0.8)' : 'var(--border-dim)') + ';border-radius:4px;padding:6px 14px;' + (c1 ? '' : 'opacity:0.5;') + (c1 && curMonIon ? 'box-shadow:0 0 10px rgba(0,212,255,0.4);' : '') + '" data-tip="<b style=color:var(--accent-red)>' + _sk.predatory_organ.name + ' · ' + _sk.predatory_organ.desc + '</b>&#10;&#10;<b>公式：</b>最终伤害 = (攻击力 + 器官加成) × 克制倍率 - 目标防御&#10;<b>特殊：</b>对机械族施加 [电离标记]，第二次命中引爆：剥离全部护盾 + 全场 50% 溅射&#10;<b>特殊：</b>对寄生族连续命中触发 [生物崩解] 标记&#10;<b>概率：</b>30% 挂毒 3 回合&#10;&#10;当前预估净伤害 = <b style=color:var(--accent-red)>' + f1.dmg + '</b>（已扣防御/护盾）">' +
+                    '<div data-key="1" class="help-tip" style="background:var(--bg-card);border:1px solid ' + (c1 && curMonIon ? 'rgba(0,212,255,0.8)' : 'var(--border-dim)') + ';border-radius:4px;padding:6px 14px;' + (c1 ? '' : 'opacity:0.5;') + (c1 && curMonIon ? 'box-shadow:0 0 10px rgba(0,212,255,0.4);' : '') + '" data-tip="<b style=color:var(--accent-red)>' + _sk.predatory_organ.name + '"' + _sk.predatory_organ.detail + '"当前预估净伤害 = <b style=color:var(--accent-red)>' + f1.dmg + '</b>（已扣防御/护盾）">' +
                     '<span class="txt-xs txt-bold" style="color:' + gc(c1, 'var(--accent-red)') + ';">[1] ' + _sk.predatory_organ.name + '</span> <span class="txt-xs txt-dim">' + s1Cost + '进程 · <b style="color:var(--accent-red)">' + f1.dmg + '</b>伤害' + f1.tag + '</span></div>' +
-                    '<div data-key="2" class="help-tip" style="background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;padding:6px 14px;' + (c2 ? '' : 'opacity:0.5;') + '" data-tip="<b style=color:var(--accent-green)>' + _sk.chitin_epidermis.name + ' · ' + _sk.chitin_epidermis.desc + '</b>&#10;&#10;<b>公式：</b>护盾值 = 当前攻击力 × 0.6 = <b style=color:var(--accent-blue)>' + Math.ceil(atk * 0.6) + '</b>&#10;<b>效果：</b>护盾存在期间吸收物理伤害&#10;<b>策略：</b>开局套盾防猝死，或在怪物蓄力/狂怒前预判使用">' +
+                    '<div data-key="2" class="help-tip" style="background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;padding:6px 14px;' + (c2 ? '' : 'opacity:0.5;') + '" data-tip="<b style=color:' + _sk.chitin_epidermis.color + '>' + _sk.chitin_epidermis.name + '</b>&#10;&#10;' + _sk.chitin_epidermis.detail + '&#10;&#10;预估护盾值 = <b style=color:var(--accent-blue)>' + Math.ceil(atk * 0.6) + '</b>护盾值 = 当前攻击力 × 0.6 = <b style=color:var(--accent-blue)>' + Math.ceil(atk * 0.6) + '</b>&#10;<b>效果：</b>护盾存在期间吸收物理伤害&#10;<b>策略：</b>开局套盾防猝死，或在怪物蓄力/狂怒前预判使用">' +
                     '<span class="txt-xs txt-bold" style="color:' + gc(c2, 'var(--accent-green)') + ';">[2] ' + _sk.chitin_epidermis.name + '</span> <span class="txt-xs txt-dim">' + s2Cost + '进程 · <b style="color:var(--accent-blue)">+' + Math.ceil(atk * 0.6) + '</b>护盾</span></div>' +
-                    '<div data-key="3" class="help-tip" style="background:var(--bg-card);border:1px solid ' + (c3 && (curMonStatus || curMonComp) ? 'rgba(255,213,79,0.8)' : 'var(--border-dim)') + ';border-radius:4px;padding:6px 14px;' + (c3 ? '' : 'opacity:0.5;') + (c3 && (curMonStatus || curMonComp) ? 'box-shadow:0 0 10px rgba(255,213,79,0.4);' : '') + '" data-tip="<b style=color:var(--accent-yellow)>' + _sk.gland_core.name + ' · ' + _sk.gland_core.desc + '</b>&#10;&#10;<b>中毒目标：</b>引爆造成 攻击力 × 3 伤害 + <b style=color:var(--accent-green)>全额吸血</b>&#10;<b>崩解目标：</b>引爆清除闪避 + 易伤 2 回合&#10;<b>无标记：</b>仅造成 50% 微弱酸蚀伤害&#10;&#10;<b>核心思路：</b>先用 [1] 打击 挂标记，再用 [3] 脉冲 引爆。单体高爆发 + 自回复。">' +
+                    '<div data-key="3" class="help-tip" style="background:var(--bg-card);border:1px solid ' + (c3 && (curMonStatus || curMonComp) ? 'rgba(255,213,79,0.8)' : 'var(--border-dim)') + ';border-radius:4px;padding:6px 14px;' + (c3 ? '' : 'opacity:0.5;') + (c3 && (curMonStatus || curMonComp) ? 'box-shadow:0 0 10px rgba(255,213,79,0.4);' : '') + '" data-tip="<b style=color:' + _sk.gland_core.color + '>' + _sk.gland_core.name + '</b>&#10;&#10;' + _sk.gland_core.detail + '&#10;&#10;当前预估伤害 = <b style=color:var(--accent-yellow)>' + f3.dmg + '</b>爆破。">' +
                     '<span class="txt-xs txt-bold" style="color:' + gc(c3, 'var(--accent-yellow)') + ';">[3] ' + _sk.gland_core.name + '</span> <span class="txt-xs txt-dim">' + s3Cost + '进程 · <b style="color:var(--accent-yellow)">' + f3.dmg + '</b>爆破' + (f3.heal > 0 ? ' <b style="color:var(--accent-green)">+' + f3.heal + '吸血</b>' : '') + f3.tag + '</span></div>' +
                     '<div data-key="Space" style="background:var(--bg-card);border:1px solid ' + (isVictory ? 'rgba(0,255,136,0.3)' : 'var(--border-dim)') + ';border-radius:4px;padding:6px 14px;">' +
                     '<span class="txt-xs txt-bold" style="color:' + 'var(--accent-orange)' + ';">[空格] ' + (isVictory ? '退出战斗' : '回合结束 · 回复 ' + (gs.player.process_recovery || 3) + ' 进程') + '</span></div>' +
