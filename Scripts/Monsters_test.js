@@ -1,11 +1,15 @@
 /**
- * Monsters.js — v3.0 怪物图鉴数据库
+ * Data.js — v3.0 全量静态数据库
+ * 怪物图鉴 / 器官 / Component碎片 / 魔药 / 涂层 / 专精
  */
 
-window.MonsterDB = (function () {
+window.GameData = (function () {
     'use strict';
 
-const RACE = {
+    // =========================================================================
+    // 1. 种族枚举
+    // =========================================================================
+    const RACE = {
         MUTANT: 'mutant',
         SWARM: 'swarm',
         EMBER: 'ember'
@@ -17,7 +21,11 @@ const RACE = {
         ember: 'Rogue AI「余烬」在闸门锁死后，通过纳米真菌接管了所有的安保无人机与清理机器人。它们执行着逻辑冰冷的「格式化」程序，试图用高能电弧清理实验室内的一切有机残留。由于其金属构造，传统的物理打击极难穿透。'
     };
 
+    // =========================================================================
+    // 2. 怪物图鉴数据库
+    // =========================================================================
     const MONSTERS = {
+        // —— 🧬 异变者生态群 ——
         MON_CH1_ZOMBIE: {
             id: 'MON_CH1_ZOMBIE',
                         icon: 'mon_ch1_zombie',
@@ -116,6 +124,7 @@ const RACE = {
             bpReward: [100, 100]
         },
 
+        // —— 🦟 寄生群落生态群 ——
         MON_CH1_RAT: {
             id: 'MON_CH1_RAT',
                         icon: 'mon_ch1_rat',
@@ -208,6 +217,7 @@ const RACE = {
             bpReward: [100, 100]
         },
 
+        // —— 🤖 机械余烬生态群 ——
         MON_CH1_CLEANER_ROBOT: {
             id: 'MON_CH1_CLEANER_ROBOT',
                         icon: 'mon_ch1_cleaner_robot',
@@ -247,6 +257,7 @@ const RACE = {
             bpReward: [2, 5]
         },
 
+        // —— v3.7 新增变异体 ——
         MON_CH1_AMALGAM: {
             id: 'MON_CH1_AMALGAM',
                         icon: 'mon_ch1_amalgam',
@@ -388,6 +399,7 @@ const RACE = {
             trainingOnly: true,
             intents: [{ type: 'dummy', label: '待命中...' }]
         },
+        // —— v2.1 新怪 ——
         MON_CH2_WORM: {
             id: 'MON_CH2_WORM', name: '腐肉蠕虫',
                         icon: 'mon_ch2_worm',
@@ -529,6 +541,3 @@ const RACE = {
             bpReward: [35, 50]
         }
     };
-
-    return { RACE: RACE, RACE_LORE: RACE_LORE, MONSTERS: MONSTERS };
-})();

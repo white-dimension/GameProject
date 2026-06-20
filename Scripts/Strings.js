@@ -157,7 +157,7 @@ window.GameStrings = (function () {
     // =========================================================================
     var COMBAT = {
         startBattle: '第 {turn} 回合开始。前方 {count} 只变异体！',
-        potionUsed: '使用了 {name}。毒性增加至 {tox}' + (consec > 0 ? ' (耐药效能{eff}%)' : ''),
+        potionUsed: '使用了 {name}。毒性增加至 {tox}{resist}',
         potionHeal: '凝血再生！防御暂时下降。',
         potionDefense: '表皮硬化！防御提升，攻击下降。',
         potionRam: '进程回复 8 点，毒性 +5。',
