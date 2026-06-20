@@ -496,7 +496,6 @@ window.UISystem = (function () {
             '</div>' +
             '</div>' +
             '<div class="hud-col hud-col-r" style="display:flex;gap:6px;align-items:center;">' +
-            '<button class="btn btn-green btn-sm" onclick="window.GuideSystem.start()">引导</button>' +
             '<button class="btn btn-blue btn-sm" onclick="UISystem.showHelpPanel()">?</button>' +
             '</div>';
     }
@@ -2419,7 +2418,6 @@ window.UISystem = (function () {
                         var ri3 = document.getElementById('ui-room-info'); if (ri3) ri3.style.display = '';
                         logPanel.style.cssText = logPanel.style.cssText.replace('max-height:none', '');
                         UISystem.render();
-                        if (window.GuideSystem) window.GuideSystem.autoStart();
                     });
                 };
                 document.addEventListener('keydown', _spaceHandler);
