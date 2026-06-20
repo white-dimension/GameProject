@@ -231,7 +231,7 @@ window.UISystem = (function () {
 
         var actionBar = _ce('div', 'action-bar');
         actionBar.id = 'ui-action-bar';
-        actionBar.style.cssText = 'position:relative;height:130px;background:rgba(5,5,8,0.75);border-top:1px solid var(--border-dim);box-shadow: 0 -4px 20px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;gap:20px;z-index:500;';
+        actionBar.style.cssText = 'position:relative;min-height:60px;padding:8px 25px;background:rgba(5,5,8,0.75);border-top:1px solid var(--border-dim);box-shadow: 0 -4px 20px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;gap:20px;z-index:500;';
         _root.appendChild(actionBar);
 
         _modalOverlay = _ce('div', 'modal-overlay');
@@ -508,8 +508,15 @@ window.UISystem = (function () {
         if (hints.join('|') !== _hintTexts.join('|')) { _hintTexts = hints; _hintIdx = 0; }
         var txt = _hintTexts[_hintIdx % _hintTexts.length] || '';
 
+        // 直接更新DOM
+        var hintEl = document.getElementById('ui-floor-hint');
+        if (hintEl) { hintEl.textContent = txt; hintEl.style.opacity = '0.65'; }
+
         clearTimeout(_hintTimer);
-        _hintTimer = setTimeout(function() { _hintIdx++; _renderHints(gs); }, 5000);
+        _hintTimer = setTimeout(function() {
+            _hintIdx++;
+            var gs2 = GS(); if (gs2) _renderHints(gs2);
+        }, 5000);
         return txt;
     }
 
@@ -1203,7 +1210,7 @@ window.UISystem = (function () {
                 '<div class="progress-container" style="width:180px;height:8px;"><div class="progress-fill ram-fill" style="width:' + pct + '%;"></div></div>' +
                 (gs.mapState.bossDefeated ? '<span style="color:var(--accent-red);">领主已击杀</span>' : (pct >= 60 ? '<span style="color:var(--accent-yellow);">领主已现身</span>' : '')) +
                 '</div>' +
-                '<div class="txt-xs" style="text-align:center;color:var(--accent-yellow);opacity:0.65;margin:2px 0;">' + hintText + '</div>' +
+                '<div id="ui-floor-hint" class="txt-xs" style="text-align:center;color:var(--accent-yellow);opacity:0.65;margin:2px 0;">' + hintText + '</div>' +
                 '<div style="display:flex;gap:10px;">' +
                 '<button class="btn btn-green" onclick="UISystem.showReorganizeModal()"><span class="icon icon-dna"></span>实验室</button>' +
                 '<button class="btn btn-blue" onclick="UISystem.showStatusModal()"><span class="icon icon-archive"></span>档案</button>' +
