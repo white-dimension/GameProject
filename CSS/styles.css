@@ -329,7 +329,7 @@ body::after {
 /* Boss立绘呼吸动画 */
 @keyframes boss-breathe {
     0%, 100% { filter: brightness(1) saturate(1); }
-    50% { filter: brightness(1.08) saturate(1.05); }
+    50% { filter: brightness(1.2) saturate(1.1); }
 }
 .boss-breathe { animation: boss-breathe 4s ease-in-out infinite; }
 
