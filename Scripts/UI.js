@@ -2746,7 +2746,21 @@ window.UISystem = (function () {
             } else {
             filtered.forEach(function(oid) {
                 var oc = oClrs[oid] || { hex: 'var(--accent-green)', bg: 'rgba(0,255,136,0.08)', bd: 'rgba(0,255,136,0.2)' };
-                var bo = bos[oid]; var desc = bo ? '<span style=color:var(--accent-green)>' + bo.skillName + '</span> | <span style=color:var(--accent-green)>' + bo.skillCost + '进程</span> | ' + (bo.skillEffect ? ('<span style=color:var(--accent-red)>×' + (bo.skillEffect.baseMultiplier || '召唤') + '</span>' + (bo.skillEffect.armorPenetration ? ' <span style=color:var(--accent-blue)>破甲' + Math.round(bo.skillEffect.armorPenetration*100) + '%</span>' : '') + (bo.skillEffect.chainTargets ? ' <span style=color:var(--accent-blue)>链' + bo.skillEffect.chainTargets + '</span>' : '') + (bo.skillEffect.summonCount ? ' <span style=color:var(--accent-yellow)>召' + bo.skillEffect.summonCount + '</span>' : '')) : '') : '';
+                var bo = bos[oid]; var desc = '';
+                if (bo) {
+                    desc = '<span style=color:var(--accent-green)>' + bo.skillName + '</span> | <span style=color:var(--accent-green)>' + bo.skillCost + '进程</span> | ';
+                    if (bo.skillEffect) {
+                        var se = bo.skillEffect;
+                        if (se.type === 'shield') {
+                            desc += '<span style=color:var(--accent-blue)>护盾×' + (se.shieldMultiplier || '?') + '</span>';
+                        } else {
+                            desc += '<span style=color:var(--accent-red)>×' + (se.baseMultiplier || '?') + '</span>';
+                            if (se.armorPenetration) desc += ' <span style=color:var(--accent-blue)>破甲' + Math.round(se.armorPenetration*100) + '%</span>';
+                            if (se.chainTargets) desc += ' <span style=color:var(--accent-blue)>链' + se.chainTargets + '</span>';
+                            if (se.summonCount) desc += ' <span style=color:var(--accent-yellow)>召' + se.summonCount + '</span>';
+                        }
+                    }
+                }
                 var row = _ce('div');
                 row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:' + oc.bg + ';border:1px solid ' + oc.bd + ';border-radius:4px;cursor:pointer;';
                 row.innerHTML = '<div><span class="txt-xs txt-bold" style="color:' + oc.hex + ';">' + oid + '</span><span class="txt-xs txt-dim"> ' + desc + '</span></div>';
@@ -3234,7 +3248,22 @@ window.UISystem = (function () {
             gs.inventory.organs.forEach(function(oid) {
                 var oc3 = _getOrganColor(oid);
                 var bo3 = bos3[oid]; var slotName3 = bo3 ? (_ORGAN_NAMES[bo3.slotType] || '未知') : '未知';
-                var oTip = '<b style=color:' + (organColors3[oid]||{}).hex + '>' + oid + '</b>&#10;<b>' + (bo3 ? bo3.skillName : '') + '</b>&#10;<span style=color:var(--accent-green)>消耗 ' + (bo3?bo3.skillCost:'') + ' 进程</span>' + (bo3 && bo3.skillEffect ? '&#10;<span style=color:var(--accent-red)>伤害 ×' + (bo3.skillEffect.baseMultiplier || '?') + '</span>' + (bo3.skillEffect.armorPenetration ? ' | <span style=color:var(--accent-blue)>破甲' + Math.round(bo3.skillEffect.armorPenetration*100) + '%</span>' : '') + (bo3.skillEffect.chainTargets ? ' | <span style=color:var(--accent-blue)>链' + bo3.skillEffect.chainTargets + '目标</span>' : '') + (bo3.skillEffect.summonCount ? ' | <span style=color:var(--accent-yellow)>召唤' + bo3.skillEffect.summonCount + '只</span>' : '') : '') + '&#10;可装备于：' + slotName3;
+                var oTip = '<b style=color:' + (organColors3[oid]||{}).hex + '>' + oid + '</b>&#10;<b>' + (bo3 ? bo3.skillName : '') + '</b>&#10;<span style=color:var(--accent-green)>消耗 ' + (bo3?bo3.skillCost:'') + ' 进程</span>';
+                if (bo3 && bo3.skillEffect) {
+                    var se = bo3.skillEffect;
+                    if (se.type === 'shield') {
+                        oTip += '&#10;<span style=color:var(--accent-blue)>护盾：攻击力 ×' + (se.shieldMultiplier || '?') + '</span>';
+                        if (se.thornsReflect) oTip += '&#10;<span style=color:var(--accent-red)>反伤 ' + Math.round(se.thornsReflect*100) + '%</span>';
+                        if (se.healOnShield) oTip += '&#10;<span style=color:var(--accent-green)>每回合回复 ' + Math.round(se.healOnShield*100) + '% HP</span>';
+                        if (se.regenPerTurn) oTip += '&#10;<span style=color:var(--accent-blue)>每回合回复 ' + Math.round(se.regenPerTurn*100) + '% 进程</span>';
+                    } else {
+                        oTip += '&#10;<span style=color:var(--accent-red)>伤害 ×' + (se.baseMultiplier || '?') + '</span>';
+                        if (se.armorPenetration) oTip += ' | <span style=color:var(--accent-blue)>破甲' + Math.round(se.armorPenetration*100) + '%</span>';
+                        if (se.chainTargets) oTip += ' | <span style=color:var(--accent-blue)>链' + se.chainTargets + '目标</span>';
+                        if (se.summonCount) oTip += ' | <span style=color:var(--accent-yellow)>召唤' + se.summonCount + '只</span>';
+                    }
+                }
+                oTip += '&#10;可装备于：' + slotName3;
                 orgHTML += '<span class="help-tip" style="padding:4px 10px;font-size:13px;background:' + oc3.bg + ';border:1px solid ' + oc3.bd + ';border-radius:4px;color:' + oc3.hex + ';" data-tip="' + oTip + '">' + oid + '</span>';
             });
             orgHTML += '</div>'; organInvRow.innerHTML = orgHTML; body.appendChild(organInvRow);
