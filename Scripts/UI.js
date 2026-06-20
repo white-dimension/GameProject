@@ -748,8 +748,8 @@ window.UISystem = (function () {
             var nameClr = dead ? 'var(--text-disabled)' : mclr;
             var raceNames = _RACE_NAMES;
             card.innerHTML += '<div class="txt-md txt-bold" style="margin-top:8px;color:' + nameClr + ';display:flex;align-items:center;justify-content:center;">' +
-                (isTarget && !dead && !isVictory ? '<span style="color:var(--accent-red);margin-right:4px;">▸</span> ' : '') + mon.name + affixIcons + '</div>' +
-                '<div class="txt-xs" style="margin-top:2px;color:' + (dead ? 'var(--text-disabled)' : mclr) + ';opacity:0.7;">' + (raceNames[md.race] || '') + '</div>';
+                (isTarget && !dead && !isVictory ? '<span style="color:var(--accent-red);margin-right:4px;">▸</span> ' : '') + mon.name + affixIcons +
+                ' <span style="opacity:0.5;font-weight:normal;font-size:0.8em;">· ' + (raceNames[md.race] || '') + '</span></div>';
 
             // 所有怪物显示简版意图标签
             if (mon.intent && !dead) {
