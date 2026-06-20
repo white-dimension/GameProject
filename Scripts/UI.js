@@ -1900,7 +1900,7 @@ window.UISystem = (function () {
             var bo = (GD().BOSS_ORGANS||{})[eq]; if (!bo) return;
             var syncLvl = (gs.inventory.organSyncLevels||{})[eq] || 1;
             var oc = _getOrganColor(eq);
-            var boDesc = eq + ' · ' + bo.skillName + ' [Sync ' + (syncLvl >= 3 ? 'MAX' : 'Lv.' + syncLvl) + ']';
+            var boDesc = eq + ' · ' + bo.skillName + ' [Lv.' + (syncLvl >= 3 ? 'MAX' : syncLvl) + ']:';
             var se = bo.skillEffect || {};
             var fxParts = [];
             if (se.type === 'shield') {
