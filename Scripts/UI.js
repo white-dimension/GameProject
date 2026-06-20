@@ -1663,7 +1663,7 @@ window.UISystem = (function () {
                 var d = p[s]; if(d.tier<=1) return;
                 var bonus = (d.tier-1) * (type==='atk'?3:(type==='hp'?5:3));
                 if(type==='process') bonus = (d.tier-1);
-                if((type==='atk' && s==='predatory_organ')||(type==='def' && s==='chitin_epidermis')||(type==='hp')||(type==='process' && s==='gland_core')) lines.push("插槽 [" + d.tier + "阶]: +" + bonus);
+                if((type==='atk' && s==='predatory_organ')||(type==='def' && s==='chitin_epidermis')||(type==='hp')||(type==='process' && s==='gland_core')) lines.push("插槽 " + _fmtTierStars(d.tier) + ": +" + bonus);
             });
             return "<b>属性溯源 (" + type.toUpperCase() + "):</b>&#10;" + lines.join("&#10;");
         };
@@ -1690,7 +1690,7 @@ window.UISystem = (function () {
             var d = p[s];
             var ocl = organClrs2[d.equipped] || { hex: 'var(--accent-green)', bg: 'rgba(0,255,136,0.08)', bd: 'rgba(0,255,136,0.2)' };
             organHTML += '<div style="display:flex;flex-direction:column;gap:6px;">' +
-                '<div style="display:flex;align-items:center;gap:8px;"><span class="txt-xs txt-green txt-bold">' + organNames[s] + '</span> <span class="txt-xs" style="color:var(--accent-green);">[' + d.tier + '阶]</span></div>' +
+                '<div style="display:flex;align-items:center;gap:8px;"><span class="txt-xs txt-green txt-bold">' + organNames[s] + '</span> <span class="txt-xs" style="color:var(--accent-yellow);">' + _fmtTierStars(d.tier) + '</span></div>' +
                 '<div class="txt-xs txt-dim" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">' +
                 '<span>挂载: </span><span class="help-tip" style="padding:6px 10px;font-size:13px;background:' + ocl.bg + ';border:1px solid ' + ocl.bd + ';border-radius:4px;color:' + ocl.hex + ';" data-tip="' + (d.equipped ? '<b style=color:' + ocl.hex + '>' + d.equipped + '：</b>&#10;' + ((GD().BOSS_ORGANS[d.equipped] || {}).skillEffect ? GD().BOSS_ORGANS[d.equipped].skillName + '&#10;消耗 ' + GD().BOSS_ORGANS[d.equipped].skillCost + ' 进程' : 'Boss 专属器官') : '<b style=color:var(--accent-green)>标准原型：</b>&#10;默认器官，可被 Boss 掉落替换') + '">' + (d.equipped || '标准原型') + '</span>';
             var slots = d.component_slots || [null, null];
@@ -2910,6 +2910,7 @@ window.UISystem = (function () {
     };
 
     // 罗马数字强制无衬线显示
+    var _fmtTierStars = function(tier) { var s=''; for(var i=0;i<tier;i++) s+='⭐'; return s; };
     var _fmtRoman = function(str) {
         var m = str.match(/([ⅠⅡⅢ]+)$/);
         var n = m ? ({ 'Ⅰ':1,'Ⅱ':2,'Ⅲ':3 })[m[1]] || m[1].length : 0;
@@ -3187,7 +3188,7 @@ window.UISystem = (function () {
                 }
             });
             row.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px;width:100%;">' +
-                '<div class="txt-xs txt-green txt-bold">' + organNames[s] + ' <span class="txt-xs">[' + d.tier + '阶]</span></div>' +
+                '<div class="txt-xs txt-green txt-bold">' + organNames[s] + ' <span class="txt-xs" style="color:var(--accent-yellow);">' + _fmtTierStars(d.tier) + '</span></div>' +
                 '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between;">' +
                 '<span class="txt-xs txt-dim" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">挂载: ' + (d.equipped ? '<span class="help-tip btn-organ" style="padding:6px 10px;font-size:13px;background:' + (_organColors[d.equipped]||_organColors._default).bg + ';border:1px solid ' + (_organColors[d.equipped]||_organColors._default).bd + ';border-radius:4px;color:' + (_organColors[d.equipped]||_organColors._default).hex + ';cursor:pointer;" data-tip="点击卸下该器官" onclick="try{GameState.equipOrgan(\'' + s + '\',null);}catch(e){}UISystem.showReorganizeModal();UISystem.render();">' + d.equipped + '</span>' : '<span class="btn-organ' + (gs.inventory.organs.length > 0 ? ' slot-ready' : '') + '" style="padding:6px 10px;font-size:13px;background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);border-radius:4px;color:var(--accent-green);cursor:pointer;" onclick="UISystem._showOrganPicker(\'' + s + '\')">标准原型</span>') + ' 组件: <span style="display:inline-flex;align-items:center;gap:8px;">' + slotHTML + '</span></span>' +
                 (function() {
@@ -3198,7 +3199,7 @@ window.UISystem = (function () {
                     else if (s === 'chitin_epidermis') bonusDesc = "防御 +3, 生命 +3";
                     else if (s === 'gland_core') bonusDesc = "进程回复 +1, 进程上限 +1";
 
-                    var tipText = "<b style='color:var(--accent-green)'>器官进阶：第 " + d.tier + " 阶 → " + nextTier + " 阶</b>&#10;";
+                    var tipText = "<b style='color:var(--accent-green)'>器官进阶：" + _fmtTierStars(d.tier) + " → " + _fmtTierStars(nextTier) + "</b>&#10;";
                     tipText += "<b>预估收益：</b><span style='color:var(--accent-green)'>" + bonusDesc + "</span>&#10;";
                     tipText += "<b>进阶消耗：</b>任意组件 ×" + cost + "&#10;";
                     tipText += "<b>当前库存：</b>共 " + Object.keys(inv).reduce(function(a,k){ return a + (inv[k] * getWeight2(k)); }, 0) + " (加权)";
