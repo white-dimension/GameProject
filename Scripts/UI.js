@@ -2228,7 +2228,7 @@ window.UISystem = (function () {
             var selNames = []; selKeys.forEach(function(sk) { for (var si = 0; si < selected[sk]; si++) selNames.push(sk); });
             var allSame = selKeys.length === 1 && selectCount === 3;
             // 更新状态行
-            statusLine.innerHTML = '<span class="txt-xs txt-dim">已选 </span><span style="color:var(--accent-yellow)">' + selectCount + '</span><span class="txt-xs txt-dim"> / 3</span>' +
+            statusLine.innerHTML = '<span class="txt-xs txt-dim">已选 </span><span style="color:var(--accent-yellow)">' + selectCount + ' / 3</span>' +
                 (selectCount > 0 ? ' <span class="txt-xs txt-dim">— ' + selNames.map(function(n){return _fmtRoman(n);}).join(' + ') + '</span>' : '');
             if (selectCount === 3 && allSame) {
                 var selectedId = selKeys[0];
@@ -2303,7 +2303,7 @@ window.UISystem = (function () {
         var statusLine = _ce('div');
         statusLine.className = 'txt-sm txt-bold';
         statusLine.style.cssText = 'text-align:left;';
-        statusLine.innerHTML = '<span class="txt-xs txt-dim">已选 </span><span style="color:var(--accent-yellow)">0</span><span class="txt-xs txt-dim"> / 3</span>';
+        statusLine.innerHTML = '<span class="txt-xs txt-dim">已选 </span><span style="color:var(--accent-yellow)">0 / 3</span>';
         body.appendChild(statusLine);
         var preview = _ce('div');
         preview.style.cssText = 'text-align:left;padding:8px 0;min-height:24px;';
