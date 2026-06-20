@@ -2038,10 +2038,13 @@ window.UISystem = (function () {
                 btn.className = 'btn btn-green';
                 btn.style.cssText = 'padding:4px 24px;font-size:13px;opacity:0;transition:opacity 0.5s;position:relative;z-index:9999;';
                 btn.textContent = '激活原体';
-                btn.onclick = function(e) { e.stopPropagation(); UISystem.closeIntro(); };
+                btn.addEventListener('click', function(e) { e.stopPropagation(); window.UISystem.closeIntro(); }, true);
                 btnDiv.appendChild(btn);
                 logPanel.appendChild(btnDiv);
                 requestAnimationFrame(function() { btn.style.opacity = '1'; });
+                // 键盘备用：回车/空格激活
+                var _introKeyHandler = function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); window.UISystem.closeIntro(); document.removeEventListener('keydown', _introKeyHandler); } };
+                document.addEventListener('keydown', _introKeyHandler);
                 return;
             }
             var li = lines[idx];
