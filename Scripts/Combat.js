@@ -352,8 +352,8 @@ window.CombatSystem = (function () {
                 ignoreDef = true;
             }
 
-            // 挂毒与电离标记（两步：先标记，下次命中再引爆）
-            if (m && m.race === 'ember') {
+            // 挂毒与电离标记（仅默认器官；Boss器官有独立机制）
+            if (!p.predatory_organ.equipped && m && m.race === 'ember') {
                 if (curMon.status['ionized']) {
                     // 已有电离标记 → 引爆
                     delete curMon.status['ionized'];
@@ -371,16 +371,16 @@ window.CombatSystem = (function () {
                 }
             }
 
-            // 挂毒：30%概率
-            if (Math.random() < 0.3) {
+            // 挂毒：30%概率（仅默认器官）
+            if (!p.predatory_organ.equipped && Math.random() < 0.3) {
                 curMon.status['poison'] = 3;
                 _log('<span style="color:var(--accent-red)">发起'+_getSkillName('predatory_organ')+'：' + damage + '点伤害</span>，注入毒素标记。');
             } else {
                 _log('<span style="color:var(--accent-red)">发起'+_getSkillName('predatory_organ')+'，造成 ' + damage + ' 点物理伤害。</span>');
             }
 
-            // 生物崩解积攒
-            if (m && m.race === 'swarm') {
+            // 生物崩解积攒（仅默认器官）
+            if (!p.predatory_organ.equipped && m && m.race === 'swarm') {
                 curMon._compTicks = (curMon._compTicks || 0) + 1;
                 if (curMon._compTicks >= 2) {
                     curMon.status['compromised'] = 3;
