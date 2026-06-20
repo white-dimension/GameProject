@@ -990,6 +990,10 @@ window.UISystem = (function () {
             if (p2.toxicity > 0) buffRow.innerHTML += R ? R.renderTag({icon:"icon-biohazard",text:""+p2.toxicity,color:"var(--accent-purple)",bg:"rgba(206,147,216,0.1)",tooltip:"<b>基因毒性</b>&#10;当前 "+p2.toxicity+"/"+(p2.toxicity_max||50)+"&#10;超过 50 时每回合扣血 2%"}) : "";
             // [修复] 增加“进程干扰”Debuff 的 UI 显示
             if (bs._processPenalty > 0) buffRow.innerHTML += R ? R.renderTag({icon:"icon-ram",text:"进程干扰 +"+bs._processPenalty,color:"var(--accent-blue)",bg:"rgba(0,212,255,0.15)",tooltip:"<b>进程干扰</b>&#10;下一次打出器官卡牌时，额外消耗 "+bs._processPenalty+" 点进程"}) : "";
+            // 路径感官共鸣
+            if (bs.playerStatus["pathAffix"]) { var pa = bs.playerStatus["pathAffix"]; buffRow.innerHTML += R ? R.renderTag({icon:"icon-radar-sweep",text:pa.name,color:pa.color,bg:'rgba(255,255,255,0.03)',tooltip:"<b>【感官共鸣】"+pa.name+"</b>&#10;"+pa.desc}) : ""; }
+            // 地下城环境
+            if (bs.dungeonEnv) { var de = bs.dungeonEnv; buffRow.innerHTML += R ? R.renderTag({icon:"icon-hazard-sign",text:de.name,color:"var(--accent-red)",bg:"rgba(255,68,85,0.08)",tooltip:"<b>环境代码变异</b>&#10;"+de.desc}) : ""; }
 
             // --- 固定被动 (passiveRow) ---
             var counterTargets = { mutant: '寄生群落', swarm: '机械余烬', ember: '异变者' };

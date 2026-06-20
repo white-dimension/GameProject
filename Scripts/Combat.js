@@ -64,8 +64,15 @@ window.CombatSystem = (function () {
         if (_battleState.pathAffix) {
             var af = _battleState.pathAffix;
             _log('<span style="color:' + af.color + '">【感官共鸣】' + af.name + '：' + af.desc + '</span>');
+            _battleState.playerStatus['pathAffix'] = { name: af.name, color: af.color, desc: af.desc };
             var patTpl = (GD().PATH_AFFIX_TEMPLATES || []).find(function(t){ return t.id === af.id; });
-            if (patTpl && patTpl.onBattleStart) patTpl.onBattleStart(_battleState, gs);
+            if (patTpl && patTpl.onBattleStart) {
+                patTpl.onBattleStart(_battleState, gs);
+                // 记录具体效果
+                if (af.id === 'high_process') _log('<span style="color:var(--accent-green)">神经突触激活，初始进程 +2。</span>');
+                else if (af.id === 'weak_bio') _log('<span style="color:var(--accent-red)">辐射削弱了全场敌人生命。</span>');
+                else if (af.id === 'corrosive') _log('<span style="color:var(--accent-purple)">酸蚀环境蔓延，敌人已中毒。</span>');
+            }
         }
 
         if (_battleState.dungeonEnv && _battleState.dungeonEnv.effect.startTox) {
