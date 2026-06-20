@@ -102,7 +102,17 @@ window.UISystem = (function () {
         _bgVideo = _createBgVideo('../Assets/Backgrounds/explore.mp4');
         _bgBattleVideo = _createBgVideo('../Assets/Backgrounds/battle.mp4');
         _bgBattleVideo.volume = 0.25;
-        _bgVideos = [_bgVideo, _bgBattleVideo];
+        // 标题视频（播放一次，停住末尾帧）
+        var _bgTitleVideo = _ce('video');
+        _bgTitleVideo.src = '../Assets/Backgrounds/title.mp4';
+        _bgTitleVideo.loop = false;
+        _bgTitleVideo.muted = true;
+        _bgTitleVideo.volume = 0.5;
+        _bgTitleVideo.playsInline = true;
+        _bgTitleVideo.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;display:none;pointer-events:none;filter:brightness(0.5);';
+        _bgTitleVideo.addEventListener('ended', function() { _bgTitleVideo.pause(); });
+        _root.appendChild(_bgTitleVideo);
+        _bgVideos = [_bgVideo, _bgBattleVideo, _bgTitleVideo];
 
         // 显示/隐藏背景视频（尊重静音状态）
         _showBgVideo = function(v) {
@@ -1951,7 +1961,11 @@ window.UISystem = (function () {
         _introActive = true;
         _hideBgVideo(_bgVideo);
         _hideBgVideo(_bgBattleVideo);
-        _root.className = 'bg-title';
+        _bgTitleVideo.currentTime = 0;
+        _bgTitleVideo.muted = window.Sound ? window.Sound.isMuted() : false;
+        _bgTitleVideo.style.display = 'block';
+        _bgTitleVideo.play().catch(function(){});
+        _root.className = '';
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
         var box = _ce('div');
@@ -1995,6 +2009,8 @@ window.UISystem = (function () {
         var gs = GS(); if (gs) { gs.player.introSeen = true; GameState.save(); }
         _modalOverlay.style.display = 'none';
         _wakingUp = true;
+        _bgTitleVideo.style.display = 'none';
+        _bgTitleVideo.pause();
         _showBgVideo(_bgVideo);
         _root.className = '';
         // [修复] 不再手动设置 _isFirstLoad = false，让 render() 统一处理启动序列
