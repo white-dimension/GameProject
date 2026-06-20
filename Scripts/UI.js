@@ -718,7 +718,9 @@ window.UISystem = (function () {
     }
 
     function _renderBattle(gs) {
-        var bs = CS().getBattleState(); if (!bs) return;
+        var bs = CS().getBattleState();
+        var R = window.TemplateEngine ? window.TemplateEngine.UIRenderers : null;
+        if (!bs) return;
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _battleView.innerHTML = '';
         var monsters = bs.monsters || [];
@@ -870,28 +872,28 @@ window.UISystem = (function () {
                 // --- 怪物临时 Buff (monBuffRow) ---
                 if (mon.status['poison']) {
                     var dotPct = bs.dualKey === 'swarm+swarm' ? 8 : 5;
-                    monBuffRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(206,147,216,0.15);border:1px solid var(--accent-purple);border-radius:3px;color:var(--accent-purple);" data-tip="<b>基因毒素</b>&#10;每回合扣除 ' + dotPct + '% 最大HP&#10;剩余 ' + mon.status['poison'] + ' 回合&#10;使用 [腺体脉冲] 可引爆并吸血"><span class="icon icon-poison-gas"></span> 中毒 ' + mon.status['poison'] + '</span>';
+                    monBuffRow.innerHTML += R ? R.renderTag({icon:'icon-poison-gas',text:'中毒 '+mon.status['poison'],color:'var(--accent-purple)',bg:'rgba(206,147,216,0.15)',tooltip:'<b>基因毒素</b>&#10;每回合扣除 '+dotPct+'% 最大HP&#10;剩余 '+mon.status['poison']+' 回合&#10;使用 [腺体脉冲] 可引爆并吸血'}) : '';
                 }
                 if (mon._shield > 0) {
-                    monBuffRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(0,212,255,0.12);border:1px solid var(--accent-blue);border-radius:3px;color:var(--accent-blue);" data-tip="<b>科技护盾</b>&#10;吸收 ' + mon._shield + ' 点伤害&#10;护盾耗尽后才扣减HP"><span class="icon icon-energy-shield"></span> ' + mon._shield + '</span>';
+                    monBuffRow.innerHTML += R ? R.renderTag({icon:'icon-energy-shield',text:''+mon._shield,color:'var(--accent-blue)',bg:'rgba(0,212,255,0.12)',tooltip:'<b>科技护盾</b>&#10;吸收 '+mon._shield+' 点伤害&#10;护盾耗尽后才扣减HP'}) : '';
                 }
                 if (mon._dodging) {
-                    monBuffRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(255,213,79,0.12);border:1px solid var(--accent-yellow);border-radius:3px;color:var(--accent-yellow);" data-tip="<b>产卵闪避</b>&#10;所有攻击全部落空&#10;每3回合切换一次"><span class="icon icon-dodge"></span> 闪避</span>';
+                    monBuffRow.innerHTML += R ? R.renderTag({icon:'icon-dodge',text:'闪避',color:'var(--accent-yellow)',bg:'rgba(255,213,79,0.12)',tooltip:'<b>产卵闪避</b>&#10;所有攻击全部落空&#10;每3回合切换一次'}) : '';
                 }
                 if (mon._charged) {
-                    monBuffRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(245,124,0,0.12);border:1px solid var(--accent-orange);border-radius:3px;color:var(--accent-orange);" data-tip="<b>蓄力中</b>&#10;下回合释放强力攻击&#10;可在蓄力期使用 [神经阻断] 打断"><span class="icon icon-lightning-arc"></span> 蓄力</span>';
+                    monBuffRow.innerHTML += R ? R.renderTag({icon:'icon-lightning-arc',text:'蓄力',color:'var(--accent-orange)',bg:'rgba(245,124,0,0.12)',tooltip:'<b>蓄力中</b>&#10;下回合释放强力攻击&#10;可在蓄力期使用 [神经阻断] 打断'}) : '';
                 }
                 if (mon._enraged) {
-                    monBuffRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(255,68,85,0.15);border:1px solid var(--accent-red);border-radius:3px;color:var(--accent-red);" data-tip="<b>狂怒</b>&#10;攻击力永久翻倍&#10;速战速决，拖延必败"><span class="icon icon-enrage"></span> 狂怒</span>';
+                    monBuffRow.innerHTML += R ? R.renderTag({icon:'icon-enrage',text:'狂怒',color:'var(--accent-red)',bg:'rgba(255,68,85,0.15)',tooltip:'<b>狂怒</b>&#10;攻击力永久翻倍&#10;速战速决，拖延必败'}) : '';
                 }
                 if (mon._defBuff > 0) {
-                    monBuffRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(120,144,156,0.12);border:1px solid var(--text-dim);border-radius:3px;color:var(--text-dim);" data-tip="<b>防御强化</b>&#10;防御力 +' + mon._defBuff + '&#10;建议使用破甲组件或涂层"><span class="icon icon-energy-shield"></span>+ ' + mon._defBuff + '</span>';
+                    monBuffRow.innerHTML += R ? R.renderTag({icon:'icon-energy-shield',text:'+'+mon._defBuff,color:'var(--text-dim)',bg:'rgba(120,144,156,0.12)',tooltip:'<b>防御强化</b>&#10;防御力 +'+mon._defBuff+'&#10;建议使用破甲组件或涂层'}) : '';
                 }
                 if (mon.status['ionized']) {
-                    monBuffRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(0,212,255,0.12);border:1px solid var(--accent-blue);border-radius:3px;color:var(--accent-blue);" data-tip="<b>电离标记</b>&#10;已被电荷标记&#10;下次 [捕食打击] 将引爆：剥离全部护盾 + 全场 50% 溅射伤害"><span class="icon icon-lightning-arc"></span> 电离</span>';
+                    monBuffRow.innerHTML += R ? R.renderTag({icon:'icon-lightning-arc',text:'电离',color:'var(--accent-blue)',bg:'rgba(0,212,255,0.12)',tooltip:'<b>电离标记</b>&#10;已被电荷标记&#10;下次 [捕食打击] 将引爆：剥离全部护盾 + 全场 50% 溅射伤害'}) : '';
                 }
                 if (mon.status['compromised']) {
-                    monBuffRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(255,213,79,0.12);border:1px solid var(--accent-yellow);border-radius:3px;color:var(--accent-yellow);" data-tip="<b>生物崩解</b>&#10;护甲结构已瓦解&#10;防御归零 + 受到伤害提升 100%&#10;使用 [腺体脉冲] 可引爆并清除闪避"><span class="icon icon-biohazard"></span> 崩解</span>';
+                    monBuffRow.innerHTML += R ? R.renderTag({icon:'icon-biohazard',text:'崩解',color:'var(--accent-yellow)',bg:'rgba(255,213,79,0.12)',tooltip:'<b>生物崩解</b>&#10;护甲结构已瓦解&#10;防御归零 + 受到伤害提升 100%&#10;使用 [腺体脉冲] 可引爆并清除闪避'}) : '';
                 }
 
                 // --- 怪物固定被动 (monPassiveRow) ---
@@ -939,13 +941,13 @@ window.UISystem = (function () {
 
             var p2 = gs.player;
             // --- 临时 Buff (buffRow) ---
-            if (bs.playerStatus['berserk']) buffRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(206,147,216,0.15);border:1px solid var(--accent-purple);border-radius:3px;color:var(--accent-purple);" data-tip="<b>狂暴</b>&#10;攻击力 +50%&#10;每回合扣除 1% 最大HP&#10;剩余 ' + bs.playerStatus['berserk'] + ' 回合"><span class="icon icon-enrage"></span> 狂暴</span>';
-            if (bs.playerStatus['bleed']) buffRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(255,107,122,0.15);border:1px solid var(--accent-red);border-radius:3px;color:var(--accent-red);" data-tip="<b>流血</b>&#10;每回合扣除 4 HP&#10;剩余 ' + bs.playerStatus['bleed'] + ' 回合"><span class="icon icon-dripping-blade"></span> 流血</span>';
-            if (bs.shieldAmount > 0) buffRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(0,212,255,0.15);border:1px solid var(--accent-blue);border-radius:3px;color:var(--accent-blue);" data-tip="<b>科技护盾</b>&#10;吸收 ' + bs.shieldAmount + ' 点伤害"><span class="icon icon-energy-shield"></span> ' + bs.shieldAmount + '</span>';
+            if (bs.playerStatus["berserk"]) buffRow.innerHTML += R ? R.renderTag({icon:"icon-enrage",text:"狂暴",color:"var(--accent-purple)",bg:"rgba(206,147,216,0.15)",tooltip:"<b>狂暴</b>&#10;攻击力 +50%&#10;每回合扣除 1% 最大HP&#10;剩余 "+bs.playerStatus["berserk"]+" 回合"}) : "";
+            if (bs.playerStatus["bleed"]) buffRow.innerHTML += R ? R.renderTag({icon:"icon-dripping-blade",text:"流血",color:"var(--accent-red)",bg:"rgba(255,107,122,0.15)",tooltip:"<b>流血</b>&#10;每回合扣除 4 HP&#10;剩余 "+bs.playerStatus["bleed"]+" 回合"}) : "";
+            if (bs.shieldAmount > 0) buffRow.innerHTML += R ? R.renderTag({icon:"icon-energy-shield",text:""+bs.shieldAmount,color:"var(--accent-blue)",bg:"rgba(0,212,255,0.15)",tooltip:"<b>科技护盾</b>&#10;吸收 "+bs.shieldAmount+" 点伤害"}) : "";
             if (p2.activeCoating) buffRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(255,213,79,0.12);border:1px solid var(--accent-yellow);border-radius:3px;color:var(--accent-yellow);" data-tip="<b>基因涂层</b>&#10;剩余 ' + (p2.coatingTurnsLeft||0) + ' 回合"><span class="icon icon-paintbrush"></span>涂层</span>';
-            if (p2.toxicity > 0) buffRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(206,147,216,0.1);border:1px solid var(--accent-purple);border-radius:3px;color:var(--accent-purple);" data-tip="<b>基因毒性</b>&#10;当前 ' + p2.toxicity + '/' + (p2.toxicity_max||50) + '&#10;超过 50 时每回合扣血 2%"><span class="icon icon-biohazard"></span> ' + p2.toxicity + '</span>';
+            if (p2.toxicity > 0) buffRow.innerHTML += R ? R.renderTag({icon:"icon-biohazard",text:""+p2.toxicity,color:"var(--accent-purple)",bg:"rgba(206,147,216,0.1)",tooltip:"<b>基因毒性</b>&#10;当前 "+p2.toxicity+"/"+(p2.toxicity_max||50)+"&#10;超过 50 时每回合扣血 2%"}) : "";
             // [修复] 增加“进程干扰”Debuff 的 UI 显示
-            if (bs._processPenalty > 0) buffRow.innerHTML += '<span class="txt-xs help-tip" style="padding:3px 8px;background:rgba(0,212,255,0.15);border:1px solid var(--accent-blue);border-radius:3px;color:var(--accent-blue);animation:glitch 1.5s infinite;" data-tip="<b>进程干扰</b>&#10;下一次打出器官卡牌时，额外消耗 ' + bs._processPenalty + ' 点进程"><span class="icon icon-ram"></span> 进程干扰 +' + bs._processPenalty + '</span>';
+            if (bs._processPenalty > 0) buffRow.innerHTML += R ? R.renderTag({icon:"icon-ram",text:"进程干扰 +"+bs._processPenalty,color:"var(--accent-blue)",bg:"rgba(0,212,255,0.15)",tooltip:"<b>进程干扰</b>&#10;下一次打出器官卡牌时，额外消耗 "+bs._processPenalty+" 点进程"}) : "";
 
             // --- 固定被动 (passiveRow) ---
             var counterTargets = { mutant: '寄生群落', swarm: '机械余烬', ember: '异变者' };

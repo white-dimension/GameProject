@@ -1,5 +1,18 @@
 # 01 — 开发日志
 
+## v2.1.3 — 2026-06-20 🎨 UI渲染模板 — TagRenderer/BarRenderer/ModalRenderer
+
+### TemplateEngine.js — UIRenderers 渲染器
+- **TagRenderer.renderTag(cfg)**：统一状态/种族/词缀标签渲染，一行调用替代 ~30行HTML拼接
+- **BarRenderer.renderBar(cfg)**：统一进度条渲染（HP/XP/节点计数）
+- **ModalRenderer.createModal(cfg)**：弹窗骨架工厂（box+head+body），setModalHead() 设置标题
+
+### UI.js — 14处状态标签模板化
+- `_renderBattle` 注入 R 别名 → 模板调用
+- 8个怪物状态标签（中毒/护盾/闪避/蓄力/狂怒/防御/电离/崩解）→ renderTag()
+- 5个玩家状态标签（狂暴/流血/盾量/毒性/进程干扰）→ renderTag()
+- 向后兼容：`R ? R.renderTag(...) : '旧HTML'` 双重保障
+
 ## v2.1.2 — 2026-06-20 🔧 模板引擎全覆盖 — 意图/魔药/词缀/掉落/地下城全部数据驱动
 
 ### Data.js 新增模板

@@ -278,12 +278,60 @@ window.TemplateEngine = (function () {
     function resolveByPath(obj, path) { if (!obj || !path) return undefined; var parts = path.split('.'), cur = obj; for (var i = 0; i < parts.length; i++) { if (cur === null || cur === undefined) return undefined; cur = cur[parts[i]]; } return cur; }
     function deepClone(obj) { if (!obj || typeof obj !== 'object') return obj; return JSON.parse(JSON.stringify(obj)); }
 
+    // ===== UI 渲染模板 =====
+    var UIRenderers = {
+        // -- TagRenderer: 状态/种族/词缀标签 --
+        renderTag: function(cfg) {
+            cfg = cfg || {};
+            var icon = cfg.icon ? '<span class="icon ' + cfg.icon + '"></span> ' : '';
+            var tip = cfg.tooltip || cfg.text || '';
+            var cls = cfg.cls || 'txt-xs help-tip';
+            return '<span class="' + cls + '" style="padding:3px 8px;background:' + (cfg.bg || 'rgba(0,0,0,0.25)') + ';border:1px solid ' + (cfg.color || 'var(--text-dim)') + ';border-radius:4px;color:' + (cfg.color || 'var(--text-dim)') + ';font-size:11px;white-space:nowrap;margin:2px;" data-tip="' + tip.replace(/"/g, '&quot;') + '">' + icon + (cfg.text || '') + '</span>';
+        },
+
+        // -- BarRenderer: 进度条 --
+        renderBar: function(cfg) {
+            cfg = cfg || {};
+            var w = cfg.width || 155;
+            var pct = cfg.max > 0 ? Math.round((cfg.current || 0) / cfg.max * 100) : 0;
+            var fillCls = cfg.fillClass || 'hp-fill';
+            var anim = cfg.animated !== false ? 'transition:width 1.2s ease-out;' : '';
+            return '<div class="progress-container ' + (cfg.containerClass || 'hp-bar') + '" style="width:' + w + 'px;"><div class="progress-fill ' + fillCls + '" style="width:' + pct + '%;' + anim + '"></div></div>';
+        },
+
+        // -- ModalRenderer: 弹窗骨架 --
+        createModal: function(cfg) {
+            cfg = cfg || {};
+            var box = document.createElement('div');
+            box.className = 'modal-box' + (cfg.extraClass ? ' ' + cfg.extraClass : '');
+            box.style.cssText = 'width:min(' + (cfg.width || '800px') + ',90vw);background:var(--bg-modal);border:1px solid ' + (cfg.borderColor || 'var(--border-subtle)') + ';border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;' + (cfg.boxStyle || '');
+            var head = document.createElement('div');
+            head.style.cssText = 'padding:20px 30px;background:' + (cfg.headBg || 'rgba(255,255,255,0.03)') + ';border-bottom:1px solid ' + (cfg.headBorder || 'rgba(255,255,255,0.06)') + ';display:flex;justify-content:space-between;align-items:center;';
+            var body = document.createElement('div');
+            body.style.cssText = 'padding:' + (cfg.bodyPadding || '20px') + ';display:flex;flex-direction:column;gap:' + (cfg.bodyGap || '12px') + ';overflow-y:auto;flex:1;';
+            return { box: box, head: head, body: body };
+        },
+
+        // -- 弹窗头部标题行 --
+        setModalHead: function(head, title, color, closeFn) {
+            head.innerHTML = '<div class="txt-md txt-bold" style="color:' + (color || 'var(--text-main)') + '">' + (title || '') + '</div>';
+            if (closeFn) {
+                var btn = document.createElement('button');
+                btn.className = 'btn btn-sm btn-tab-close';
+                btn.textContent = '关闭';
+                btn.addEventListener('click', closeFn);
+                head.appendChild(btn);
+            }
+        }
+    };
+
     return {
         evaluateFormula: evaluateFormula, evaluateCondition: evaluateCondition,
         resolveByPath: resolveByPath, deepClone: deepClone,
         ModifierStack: ModifierStack,
         DamagePipeline: DamagePipeline, StatusEngine: StatusEngine,
         IntentExecutor: IntentExecutor, PassiveEngine: PassiveEngine,
-        LootEngine: LootEngine, TurnFlow: TurnFlow
+        LootEngine: LootEngine, TurnFlow: TurnFlow,
+        UIRenderers: UIRenderers
     };
 })();
