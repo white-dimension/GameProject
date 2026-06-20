@@ -57,7 +57,7 @@ window.GameData = (function () {
                 { type: 'physical', label: '<span class="icon icon-dripping-blade"></span> 物理+流血', value: 12, desc: '造成 12 点物理伤害并施加 3 回合流血', bleed: { duration: 3, damage: 4 } }
             ],
             weakness: '建议使用毒素攻击无视其流血抗性。装配生物表皮护盾可有效防御。',
-            drop: { type: 'component', id: '变异组织', chance: 0.6 },
+            drop: { type: 'component', id: '肾上腺素晶体', chance: 0.5 },
             bpReward: [2, 5]
         },
         MON_CH1_CLEANER: {
