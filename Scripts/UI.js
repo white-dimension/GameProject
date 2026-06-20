@@ -1976,17 +1976,26 @@ window.UISystem = (function () {
         _introActive = true;
         _hideBgVideo(_bgVideo);
         _hideBgVideo(_bgBattleVideo);
-        _bgTitleVideo.currentTime = 0;
-        _bgTitleVideo._fadeTriggered = false;
-        _bgTitleVideo._introTriggered = false;
-        _bgTitleVideo._fadeOverlay.style.opacity = '0';
-        _bgTitleVideo.muted = window.Sound ? window.Sound.isMuted() : false;
-        _bgTitleVideo.style.display = 'block';
-        _bgTitleVideo.play().catch(function(){});
         _root.className = '';
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
-        _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'none';
-        // 文字内容预备，等视频最后2秒由 timeupdate 触发 _renderIntroTexts
+        _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
+        // 开始按钮 — 点击后触发视频（绕过浏览器自动播放限制）
+        var startBox = _ce('div');
+        startBox.style.cssText = 'text-align:center;';
+        startBox.innerHTML = '<div class="txt-lg txt-green txt-bold" style="margin-bottom:32px;">黑地平线：原体觉醒</div>' +
+            '<button class="btn btn-green btn-capsule" style="padding:14px 48px;font-size:16px;">开始游戏</button>';
+        startBox.querySelector('button').onclick = function() {
+            _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'none';
+            _bgTitleVideo.currentTime = 0;
+            _bgTitleVideo._fadeTriggered = false;
+            _bgTitleVideo._introTriggered = false;
+            _bgTitleVideo._fadeOverlay.style.opacity = '0';
+            _bgTitleVideo.muted = window.Sound ? window.Sound.isMuted() : false;
+            _bgTitleVideo.style.display = 'block';
+            _bgTitleVideo.play().catch(function(){});
+            // 文字内容预备，等视频最后2秒由 timeupdate 触发 _renderIntroTexts
+        };
+        _modalOverlay.appendChild(startBox);
     }
     function _renderIntroTexts() {
         var box = _ce('div');
