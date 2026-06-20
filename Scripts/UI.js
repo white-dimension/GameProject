@@ -694,6 +694,8 @@ window.UISystem = (function () {
             // 怪物卡片
             var card = _ce('div');
             card.className = 'monster-card' + (hasBgImage && !dead ? ' boss-breathe' : '');
+            // 每个卡片随机动画相位，避免切换目标时齐步重启
+            if (hasBgImage && !dead) card.style.animationDelay = '-' + (Math.random() * 4).toFixed(2) + 's';
             card.setAttribute('data-monster-idx', idx);
             var cardBorder = dead ? 'var(--border-dim)' : mclr;
             var cardGlow = (isTarget && !dead && !isVictory) ? 'box-shadow:0 0 20px ' + (raceCardClrs[md.race] || '#ff4455') + ';' : '';
