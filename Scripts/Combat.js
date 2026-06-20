@@ -388,6 +388,14 @@ window.CombatSystem = (function () {
                 _log('<span style="color:var(--race-mutant)">>> [震波咆哮] 造成 ' + damage + '点伤害。' + extra2 + '</span>');
             } else if (p.gland_core.equipped === '蜂后髓核') {
                 var healMsg = '汲取 ' + damage + ' HP';
+                // 召唤工蜂：生成3只持续3回合的友方单位
+                var droneCount = syncLvl >= 3 ? 5 : 3;
+                var droneAtk = Math.ceil(p.atk * 0.4);
+                if (!_battleState._drones) _battleState._drones = [];
+                for (var di = 0; di < droneCount; di++) {
+                    _battleState._drones.push({ name: '工蜂', atk: droneAtk, hp: 999, duration: 3 });
+                }
+                healMsg += ' · 召唤 ' + droneCount + ' 只工蜂（' + droneAtk + '攻/3回合）';
                 if (syncLvl >= 3) { var stolenShield = Math.ceil(damage * 0.5); _battleState.shieldAmount += stolenShield; healMsg += ' 并生成 ' + stolenShield + ' 护盾'; }
                 _log('<span style="color:var(--accent-yellow)">>> [母体孵化] 召唤集群突袭！造成 ' + damage + ' 点伤害。' + healMsg + '</span>');
                 p.hp = Math.min(p.hp_max, p.hp + damage);
@@ -575,6 +583,25 @@ window.CombatSystem = (function () {
             _log('<span style="color:var(--accent-blue)">环境异变 [' + _battleState.dungeonEnv.name + '] 对你造成 ' + ed + ' 点伤害。</span>');
             window.UISystem.showDamageFloat(ed, 'var(--accent-blue)', 'player');
             if (p.hp <= 0) { _doDefeat(); return; }
+        }
+
+        // 工蜂自动攻击
+        if (_battleState._drones && _battleState._drones.length > 0) {
+            var dmgTotal = 0;
+            var aliveMons2 = _getAliveMonsters();
+            _battleState._drones = _battleState._drones.filter(function(dr) {
+                dr.duration--;
+                if (dr.duration <= 0) return false;
+                if (aliveMons2.length === 0) return false;
+                var target = aliveMons2[Math.floor(Math.random() * aliveMons2.length)];
+                var dmg = Math.ceil(dr.atk * (1 - window.GameState.calcDamageReduction(target.def || 0)));
+                target.hp = Math.max(0, target.hp - dmg);
+                dmgTotal += dmg;
+                window.UISystem.showDamageFloat('-' + dmg, 'var(--accent-yellow)', 'monster');
+                return true;
+            });
+            if (dmgTotal > 0) _log('<span style="color:var(--accent-yellow)">工蜂集群攻击！造成 ' + dmgTotal + ' 点伤害。（剩余 ' + _battleState._drones.length + ' 只）</span>');
+            if (_allMonstersDead()) { _winBattle(); return; }
         }
 
         // 发送回合更新事件供 UI 渲染
