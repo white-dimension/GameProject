@@ -1339,9 +1339,9 @@ window.UISystem = (function () {
             body.innerHTML += '<div style="padding:12px 16px;background:rgba(255,255,255,0.03);border:1px solid var(--border-dim);border-radius:6px;display:flex;justify-content:space-between;align-items:center;">' +
                 '<div style="display:flex;flex-direction:column;"><span class="txt-sm txt-white">槽位 ' + (i+1) + '</span>' + infoHTML + '</div>' +
                 '<div style="display:flex;gap:10px;">' +
-                '<button class="btn btn-green btn-sm" style="padding:2px 10px;font-size:12px;" onclick="GameState.saveToSlot(' + i + ');UISystem.showSaveModal();">保存</button>' +
-                (!s.empty ? '<button class="btn btn-blue btn-sm" style="padding:2px 10px;font-size:12px;" onclick="var d=GameState.loadFromSlot(' + i + ');if(d){window._activeGameState=d;location.reload();}">读取</button>' : '') +
-                (!s.empty ? '<button class="btn btn-red btn-sm" style="padding:2px 10px;font-size:12px;" onclick="if(confirm(\'删除槽位' + (i+1) + '?\\n不可恢复。\')){GameState.deleteSlot(' + i + ');UISystem.showSaveModal();}">删除</button>' : '') +
+                '<button class="btn btn-green btn-sm" style="padding:4px 12px;font-size:13px;" onclick="GameState.saveToSlot(' + i + ');UISystem.showSaveModal();">保存</button>' +
+                (!s.empty ? '<button class="btn btn-blue btn-sm" style="padding:4px 12px;font-size:13px;" onclick="var d=GameState.loadFromSlot(' + i + ');if(d){window._activeGameState=d;location.reload();}">读取</button>' : '') +
+                (!s.empty ? '<button class="btn btn-red btn-sm" style="padding:4px 12px;font-size:13px;" onclick="if(confirm(\'删除槽位' + (i+1) + '?\\n不可恢复。\')){GameState.deleteSlot(' + i + ');UISystem.showSaveModal();}">删除</button>' : '') +
                 '</div></div>';
         }
         // 导入导出
@@ -1352,7 +1352,7 @@ window.UISystem = (function () {
         // 声音开关
         body.innerHTML += '<div style="margin-top:10px;padding:12px 16px;background:rgba(255,255,255,0.03);border:1px solid var(--border-dim);border-radius:6px;display:flex;justify-content:space-between;align-items:center;">' +
             '<span class="txt-sm txt-white">声音</span>' +
-            '<button class="btn btn-sm ' + (window.Sound && window.Sound.isMuted() ? 'btn-gray' : 'btn-blue') + '" id="btn-sound" onclick="UISystem.toggleSound()">' + (window.Sound && window.Sound.isMuted() ? 'M 静音' : '♪ 开启') + '</button></div>';
+            '<button class="btn btn-sm ' + (window.Sound && window.Sound.isMuted() ? 'btn-gray' : 'btn-blue') + '" id="btn-sound" onclick="UISystem.toggleSound()">' + (window.Sound && window.Sound.isMuted() ? '声音关闭' : '声音开启') + '</button></div>';
         // 重置序列
         body.innerHTML += '<div style="margin-top:10px;padding:12px 16px;background:rgba(255,68,85,0.03);border:1px solid rgba(255,68,85,0.15);border-radius:6px;display:flex;justify-content:space-between;align-items:center;">' +
             '<div><span class="txt-sm txt-red">重置序列</span><div class="txt-xs txt-dim">清除所有存档和进度，不可撤销</div></div>' +
@@ -2339,7 +2339,7 @@ window.UISystem = (function () {
         var muted = window.Sound && window.Sound.toggleMute();
         var btn = document.getElementById('btn-sound');
         if (btn) {
-            btn.innerHTML = muted ? 'M' : '♪';
+            btn.innerHTML = muted ? '声音关闭' : '声音开启';
             btn.className = muted ? 'btn btn-gray btn-sm' : 'btn btn-blue btn-sm';
         }
         _bgVideos.forEach(function(v) {
