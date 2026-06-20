@@ -3083,7 +3083,7 @@ window.UISystem = (function () {
             potHTML += '<span class="help-tip" style="padding:6px 10px;background:rgba(206,147,216,0.1);border:1px solid rgba(206,147,216,0.2);border-radius:4px;" data-tip="' + pd.tooltip + (canCraft ? '' : '（不足，库存' + totalMats + '）') + '">' +
                 '<span class="txt-xs txt-bold" style="color:var(--accent-purple);">' + pd.name + '</span>' +
                 '<span class="txt-xs txt-dim"> 毒性+' + pd.toxicity + '</span>' +
-                (canCraft ? ' <button class="btn btn-purple" style="padding:1px 8px;font-size:12px;" onclick="UISystem._showComponentSelectModal(\'' + pd.name + '\',' + pd.cost + ',function(items){GameState.craftPotionWithSelection(\'' + pid + '\',items);UISystem.showReorganizeModal();});">炼制</button>' : '') +
+                (canCraft ? ' <button class="btn btn-purple btn-sm" style="padding:4px 12px;font-size:13px;" onclick="UISystem._showComponentSelectModal(\'' + pd.name + '\',' + pd.cost + ',function(items){GameState.craftPotionWithSelection(\'' + pid + '\',items);UISystem.showReorganizeModal();});">炼制</button>' : '') +
                 '</span>';
         });
         if (!hasCrafted) potHTML += '<span class="txt-xs txt-dim">暂无可用配方</span>';
@@ -3181,7 +3181,7 @@ window.UISystem = (function () {
 
                 syncHTML += '<span class="help-tip" style="padding:6px 12px;background:rgba(255,213,79,0.05);border:1px solid rgba(255,213,79,0.2);border-radius:4px;display:flex;align-items:center;gap:10px;" data-tip="' + oTip + '">' +
                     '<span class="txt-xs" style="color:var(--accent-yellow);"><span class="icon icon-crown"></span>' + oid + ' <small>Lv.' + syncLvl + '</small></span>' +
-                    (syncLvl < 3 ? ' <button class="btn ' + (canSync ? 'btn-gold' : 'btn-gray') + ' btn-sm" style="padding:1px 8px;font-size:11px;" onclick="if(' + canSync + '){ var r=GameState.syncOrgan(\'' + oid + '\'); if(r.success){ UISystem.showReorganizeModal(); UISystem.showNotification(\'同调突破！\', \'' + oid + ' 等级提升至 \' + r.newLevel, \'var(--accent-yellow)\'); } }">' + (totalOwned < 2 ? '缺少副本' : (p.bp < nextSyncCost ? 'BP不足' : '深度同调')) + '</button>' : '') +
+                    (syncLvl < 3 ? ' <button class="btn ' + (canSync ? 'btn-gold' : 'btn-gray') + ' btn-sm" style="padding:4px 12px;font-size:13px;" onclick="if(' + canSync + '){ var r=GameState.syncOrgan(\'' + oid + '\'); if(r.success){ UISystem.showReorganizeModal(); UISystem.showNotification(\'同调突破！\', \'' + oid + ' 等级提升至 \' + r.newLevel, \'var(--accent-yellow)\'); } }">' + (totalOwned < 2 ? '缺少副本' : (p.bp < nextSyncCost ? 'BP不足' : '深度同调')) + '</button>' : '') +
                     '</span>';
             }
         });
@@ -3205,7 +3205,7 @@ window.UISystem = (function () {
             var canMut = p.bp >= m.cost;
             mutationHTML += '<span class="help-tip" style="padding:6px 12px;background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.2);border-radius:4px;" data-tip="<b style=\'color:var(--accent-blue)\'>' + m.name + '：</b>&#10;永久提升基础属性 ' + m.val + '&#10;<b>消耗：</b>' + m.cost + ' 基因点数' + (canMut ? '' : '（不足）') + '">' +
                 '<span class="txt-xs" style="color:var(--accent-blue);"><span class="icon ' + m.icon + '"></span>' + m.name + '</span>' +
-                (canMut ? ' <button class="btn btn-blue" style="padding:1px 8px;font-size:12px;" onclick="GameState.mutateStat(\'' + m.type + '\');UISystem.showReorganizeModal();">突变</button>' : '') +
+                (canMut ? ' <button class="btn btn-blue btn-sm" style="padding:4px 12px;font-size:13px;" onclick="GameState.mutateStat(\'' + m.type + '\');UISystem.showReorganizeModal();">突变</button>' : '') +
                 '</span>';
         });
         mutationHTML += '</div>';
