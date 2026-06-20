@@ -2677,12 +2677,10 @@ window.UISystem = (function () {
 
     // 罗马数字强制无衬线显示
     var _fmtRoman = function(str) {
-        // Ⅰ→⭐ Ⅱ→⭐⭐ Ⅲ→⭐⭐⭐
-        return str.replace(/[ⅠⅡⅢ]+/g, function(m) {
-            var n = ({ 'Ⅰ':1,'Ⅱ':2,'Ⅲ':3 })[m] || m.length;
-            var stars = ''; for (var i=0;i<n;i++) stars += '⭐';
-            return stars + ' ';
-        });
+        var m = str.match(/([ⅠⅡⅢ]+)$/);
+        var n = m ? ({ 'Ⅰ':1,'Ⅱ':2,'Ⅲ':3 })[m[1]] || m[1].length : 0;
+        var stars = ''; for (var i=0;i<n;i++) stars += '⭐';
+        return (stars ? stars : '') + str.replace(/[ⅠⅡⅢ]+$/g, '');
     };
 
     // --- Boss器官颜色/职业映射 ---
