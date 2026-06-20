@@ -457,9 +457,6 @@ window.UISystem = (function () {
             '</div>' +
             '</div>' +
             '<div class="hud-col hud-col-r" style="display:flex;gap:6px;align-items:center;">' +
-            '<button class="btn btn-sm ' + (window.Sound && window.Sound.isMuted() ? 'btn-gray' : 'btn-blue') + '" id="btn-sound" onclick="UISystem.toggleSound()">' +
-            (window.Sound && window.Sound.isMuted() ? 'M' : '♪') +
-            '</button>' +
             '<button class="btn btn-blue btn-sm" onclick="UISystem.showHelpPanel()">?</button>' +
             '</div>';
     }
@@ -1248,7 +1245,7 @@ window.UISystem = (function () {
                 '<button class="btn btn-green" onclick="UISystem.showReorganizeModal()"><span class="icon icon-dna"></span>实验室</button>' +
                 '<button class="btn btn-blue" onclick="UISystem.showStatusModal()"><span class="icon icon-archive"></span>档案</button>' +
                 '<button class="btn btn-gold" onclick="UISystem.showBestiaryModal()"><span class="icon icon-insect"></span>图鉴</button>' +
-                '<button class="btn btn-purple" onclick="UISystem.showSaveModal()"><span class="icon icon-save"></span>存档</button></div>';
+                '<button class="btn btn-purple" onclick="UISystem.showSaveModal()"><span class="icon icon-cog"></span>设置</button></div>';
             bar.appendChild(floorBar);
         }
     }
@@ -1312,8 +1309,8 @@ window.UISystem = (function () {
         if (!m) box.style.cssText = 'width:min(700px,90vw);max-height:calc(100vh - 200px);background:var(--bg-modal);border:1px solid #9c27b0;border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
         var head = m ? m.head : _ce('div');
         if (!m) head.style.cssText = 'padding:20px 30px;background:rgba(156,39,176,0.08);border-bottom:1px solid #9c27b0;display:flex;justify-content:space-between;align-items:center;';
-        if (UR) UR.setModalHead(head, '[ 神经序列存档管理 ]', 'var(--accent-purple)', function(){ closeModal(); });
-        else { head.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;width:100%;"><div class="txt-md txt-bold" style="color:var(--accent-purple);">[ 神经序列存档管理 ]</div><button class="btn btn-blue btn-sm" onclick="UISystem.closeModal()">关闭</button></div>'; }
+        if (UR) UR.setModalHead(head, '[ 设置 ]', 'var(--accent-purple)', function(){ closeModal(); });
+        else { head.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;width:100%;"><div class="txt-md txt-bold" style="color:var(--accent-purple);">[ 设置 ]</div><button class="btn btn-blue btn-sm" onclick="UISystem.closeModal()">关闭</button></div>'; }
         box.appendChild(head);
         var body = m ? m.body : _ce('div');
         if (!m) body.style.cssText = 'padding:20px;display:flex;flex-direction:column;gap:12px;';
@@ -1347,6 +1344,14 @@ window.UISystem = (function () {
             '<button class="btn btn-blue btn-sm" onclick="var t=GameState.exportSaveText();if(t){navigator.clipboard.writeText(t).then(function(){alert(\'序列已复制到剪贴板。\')});}">导出到剪贴板</button>' +
             '<button class="btn btn-blue btn-sm" onclick="var t=prompt(\'粘贴存档序列:\');if(t){var r=GameState.importSaveText(t);if(r.success){alert(\'序列注入成功，即将刷新。\');location.reload();}else{alert(\'错误: \'+r.error);}}">从剪贴板导入</button>' +
             '</div>';
+        // 声音开关
+        body.innerHTML += '<div style="margin-top:10px;padding:12px 16px;background:rgba(255,255,255,0.03);border:1px solid var(--border-dim);border-radius:6px;display:flex;justify-content:space-between;align-items:center;">' +
+            '<span class="txt-sm txt-white">声音</span>' +
+            '<button class="btn btn-sm ' + (window.Sound && window.Sound.isMuted() ? 'btn-gray' : 'btn-blue') + '" id="btn-sound" onclick="UISystem.toggleSound()">' + (window.Sound && window.Sound.isMuted() ? 'M 静音' : '♪ 开启') + '</button></div>';
+        // 重置序列
+        body.innerHTML += '<div style="margin-top:10px;padding:12px 16px;background:rgba(255,68,85,0.03);border:1px solid rgba(255,68,85,0.15);border-radius:6px;display:flex;justify-content:space-between;align-items:center;">' +
+            '<div><span class="txt-sm txt-red">重置序列</span><div class="txt-xs txt-dim">清除所有存档和进度，不可撤销</div></div>' +
+            '<button class="btn btn-red btn-sm" onclick="UISystem.resetGame()">重置</button></div>';
         box.appendChild(body);
         _modalOverlay.appendChild(box);
     }
@@ -1579,7 +1584,6 @@ window.UISystem = (function () {
         head.innerHTML = '<div class="txt-md txt-blue txt-bold" style="text-shadow:0 0 8px var(--accent-blue);">[ 原体序列深度扫描档案 ]</div>' +
                          '<div style="display:flex;gap:10px;">' +
                          (p.masteries.some(function(m){return m;}) ? '<button class="btn btn-red btn-sm" onclick="if(confirm(\'重置全部专精？\\n消耗 50 基因点数。\')){if(' + p.bp + '>=50){var gs=window.GameState.getState();gs.player.bp-=50;gs.player.masteries=[null,null,null];gs.player.masteryPoints={mutant:0,swarm:0,ember:0};gs.player.availableMasteryPoints+=1;window.GameState.recalcPlayerStats();window.GameState.save();UISystem.render();UISystem.showStatusModal();}}">重置专精</button>' : '') +
-                         '<button class="btn btn-red btn-sm" onclick="UISystem.resetGame()">重置序列</button>' +
                          '<button class="btn btn-blue btn-sm" onclick="UISystem.closeModal()">关闭</button>' +
                          '</div>';
         box.appendChild(head);
