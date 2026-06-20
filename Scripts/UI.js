@@ -145,6 +145,11 @@ window.UISystem = (function () {
         topBar.style.cssText = 'position:relative;display:flex;flex-direction:row;justify-content:center;padding:8px 25px 4px 25px;min-height:60px;background:rgba(10,14,20,0.65);border-bottom:1px solid var(--border-dim);box-shadow: 0 4px 20px rgba(0,0,0,0.5);z-index:500;';
         _root.appendChild(topBar);
 
+        var _hintBar = _ce('div', 'hint-bar');
+        _hintBar.id = 'ui-hint-bar';
+        _hintBar.style.cssText = 'text-align:center;padding:3px 0;min-height:22px;font-size:12px;color:var(--accent-yellow);opacity:0.7;pointer-events:none;transition:opacity 0.5s ease;';
+        _root.appendChild(_hintBar);
+
         _viewport = _ce('div', 'main-viewport');
         _viewport.style.cssText = 'flex:1;position:relative;display:flex;overflow:hidden;background:radial-gradient(circle at center, rgba(13,17,23,0.5), rgba(5,5,8,0.25));';
         _root.appendChild(_viewport);
@@ -467,6 +472,60 @@ window.UISystem = (function () {
             '</button>' +
             '<button class="btn btn-blue btn-sm" onclick="UISystem.showHelpPanel()">?</button>' +
             '</div>';
+        // 轮播提示
+        _renderHints(gs);
+    }
+
+    var _hintTimer = 0, _hintIdx = 0, _hintTexts = [];
+    function _renderHints(gs) {
+        var bar = document.getElementById('ui-hint-bar'); if (!bar) return;
+        var p = gs.player;
+        var hints = [];
+
+        // 根据游戏状态生成提示
+        var totalMP = Object.values(p.masteryPoints || {}).reduce(function(a,b){return a+b;},0);
+        var masterySlots = (p.masteries || []).filter(function(r){return r;}).length;
+        var availSlots = (gs.mapState.loop >= 2 ? 3 : 2) - masterySlots;
+        if (availSlots > 0 && p.level >= 1) hints.push('选择一个专精流派以获得战斗增益 [实验室 → 专精学习]');
+
+        if (totalMP > 0) hints.push('你有 ' + totalMP + ' 点未分配的专精点数 [实验室 → 专精学习]');
+
+        var hasCompInventory = false; var compInv = gs.inventory.components || {};
+        Object.keys(compInv).forEach(function(k){ if(compInv[k] > 0) hasCompInventory = true; });
+        var emptySlots = 0;
+        ['predatory_organ','chitin_epidermis','gland_core'].forEach(function(s){
+            (p[s].component_slots || []).forEach(function(cid){ if(!cid) emptySlots++; });
+        });
+        if (hasCompInventory && emptySlots > 0) hints.push('你有未安装的组件碎片 [实验室 → 组件镶嵌]');
+
+        var hasOrganInv = (gs.inventory.organs || []).length > 0;
+        var emptyOrganSlots = 0;
+        ['predatory_organ','chitin_epidermis','gland_core'].forEach(function(s){
+            if(!p[s].equipped) emptyOrganSlots++;
+        });
+        if (hasOrganInv && emptyOrganSlots > 0) hints.push('你有未装配的突变器官 [实验室 → 器官装配]');
+
+        var hasPotionSlots = (gs.inventory.potions || []).length < 3;
+        if (hasPotionSlots && hasCompInventory) hints.push('你可以炼制魔药以备战斗 [实验室 → 魔药炼制]');
+
+        var hasCoating = Object.keys(gs.inventory.components || {}).some(function(k){ return gs.inventory.components[k] >= 2; });
+        var coatingEquipped = Object.values(GD().COATINGS || {}).some(function(c){ return c.equipped; });
+        if (hasCoating && !coatingEquipped) hints.push('你可以涂抹基因涂层增强战力 [实验室 → 涂层涂抹]');
+
+        if (hints.length === 0) hints.push('探索地下实验室，击败变异体获取基因点数');
+
+        // 轮播逻辑
+        if (hints.join('|') !== _hintTexts.join('|')) {
+            _hintTexts = hints; _hintIdx = 0;
+        }
+        bar.textContent = _hintTexts[_hintIdx % _hintTexts.length] || '';
+        bar.style.opacity = '0.7';
+
+        clearTimeout(_hintTimer);
+        _hintTimer = setTimeout(function() {
+            _hintIdx++;
+            _renderHints(gs);
+        }, 5000);
     }
 
     function _hudLabel(label, val, max, iconClass) {
