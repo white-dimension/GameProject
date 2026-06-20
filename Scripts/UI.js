@@ -1582,6 +1582,17 @@ window.UISystem = (function () {
                         '\n\n<b>弱点</b>\n  ' + (m.weakness || '无特殊弱点');
                 }
                 item.className = 'bestiary-card' + (known ? ' help-tip' : '');
+                if (known && m.image) {
+                    item.style.cursor = 'pointer';
+                    item.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        var ov = document.createElement('div');
+                        ov.style.cssText = 'position:fixed;inset:0;z-index:4000;background:rgba(0,0,0,0.9);display:flex;align-items:center;justify-content:center;cursor:pointer;';
+                        ov.innerHTML = '<img src="' + m.image + '" style="max-width:90vw;max-height:90vh;object-fit:contain;border-radius:8px;box-shadow:0 0 60px rgba(0,0,0,0.8);">';
+                        ov.addEventListener('click', function(){ ov.remove(); });
+                        document.body.appendChild(ov);
+                    });
+                }
                 if (known) item.setAttribute('data-tip', cardTip);
                 item.innerHTML = (known && m.image ? '<div class="card-bg" style="position:absolute;inset:0;background:url(' + m.image + ') center/cover no-repeat;filter:brightness(0.7);z-index:0;"></div>' : imgLayer) +
                     '<div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.75) 0%,rgba(0,0,0,0.15) 50%,rgba(0,0,0,0.25) 100%);z-index:1;"></div>' +
