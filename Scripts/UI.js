@@ -2981,6 +2981,7 @@ window.UISystem = (function () {
             var _costMap = ct.cost;
             var btn = _ce('button', 'btn btn-sm help-tip');
             btn.style.cssText = 'padding:6px 14px;font-size:13px;background:' + rc.bg + ';border:1px solid ' + rc.bd + ';color:' + rc.hex + ';' + (canAfford ? '' : 'opacity:0.4;');
+            btn.textContent = ct.name;
             btn.setAttribute('data-tip', tip);
             if (!canAfford) btn.disabled = true;
             else btn.onclick = function() { UISystem._showComponentSelectModal(ct.name, totalCost, function(items){ GameState.applyCoatingWithSelection(coatId, items); UISystem.showReorganizeModal(); }, _costMap); };
