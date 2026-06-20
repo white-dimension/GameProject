@@ -11,7 +11,7 @@ window.GuideSystem = (function () {
             desc: '<b style="color:var(--accent-red)">生命</b> · <b style="color:var(--accent-green)">进程</b> · <b style="color:var(--accent-purple)">毒性</b> · <b style="color:var(--accent-yellow)">等阶</b>' },
         { id: 'ui-room-info', pos: 'top', align: 'left', title: '当前位置',
             desc: '所在<b>房间名称</b>和环境描述。<br>母巢是唯一安全区。' },
-        { sel: '.path-card:first-child', pos: 'top', align: 'left', title: '路径卡片',
+        { sel: '.path-card:first-child', pos: 'top', align: 'self-left', title: '路径卡片',
             desc: '点击卡片<b>探索路径</b>，遭遇怪物、遗物或地下城。每层隐藏一只<b>区域领主</b>。' },
         { id: 'ui-task-panel', pos: 'bottom', align: 'left', title: '指令任务',
             desc: '<b>阶段性目标</b>，完成后点击领取奖励。' },
@@ -55,6 +55,8 @@ window.GuideSystem = (function () {
             if (item.align === 'left') {
                 var leftPanel = document.querySelector('.left-panel-col');
                 l = leftPanel ? Math.max(10, leftPanel.getBoundingClientRect().left) : Math.max(10, rect.left);
+            } else if (item.align === 'self-left') {
+                l = Math.max(10, rect.left);
             } else if (item.align === 'right') l = Math.max(10, rect.right - cw);
             else l = Math.max(10, rect.left + rect.width / 2 - cw / 2);
 
