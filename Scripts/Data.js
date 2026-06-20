@@ -361,7 +361,7 @@ window.GameData = (function () {
             atk: 25,
             def: 40,
             bleedImmune: true,
-            shieldPerTurn: 200,
+            shieldPerTurn: 80,
             intents: [
                 { type: 'shield', label: '<span class="icon icon-magic-shield"></span> 高能真菌护盾', value: 200, desc: '每回合开始时获得 200 点高能真菌护盾（最大 HP 的 50%）' }
             ],
@@ -542,7 +542,7 @@ window.GameData = (function () {
             id: '变异组织',
             allowedSlots: ['predatory_organ'],
             affixes: {
-                atkBonus: 5,
+                atkBonus: 3,
                 bonusVsSwarm: 0.20
             }
         },
@@ -630,7 +630,7 @@ window.GameData = (function () {
             id: '原始基因',
             allowedSlots: ['predatory_organ', 'chitin_epidermis', 'gland_core'],
             affixes: {
-                atkBonus: 5,
+                atkBonus: 3,
                 defBonus: 3,
                 shieldBonus: 20
             }
@@ -659,17 +659,17 @@ window.GameData = (function () {
         },
         // --- 蜂后（虫群/寄生召唤）---
         '蜂后毒牙': {
-            id: '蜂后毒牙', slotType: 'predatory_organ', tier: 2, bossSource: 'MON_CH1_QUEEN',
+            id: '蜂后毒牙', slotType: 'predatory_organ', tier: 3, bossSource: 'MON_CH1_QUEEN',
             skillName: '毒液注射', skillCost: 3,
             skillEffect: { type: 'toxin', baseMultiplier: 1.5, poisonDuration: 5, poisonDamage: 3, desc: '1.5×倍率，施加5回合猛毒（每回合3点）' }
         },
         '蜂后甲壳': {
-            id: '蜂后甲壳', slotType: 'chitin_epidermis', tier: 2, bossSource: 'MON_CH1_QUEEN',
+            id: '蜂后甲壳', slotType: 'chitin_epidermis', tier: 3, bossSource: 'MON_CH1_QUEEN',
             skillName: '幼虫护盾', skillCost: 2,
             skillEffect: { type: 'shield', shieldMultiplier: 0.8, healOnShield: 0.1, desc: '生成攻击力×0.8护盾，护盾存在时每回合回复10%最大HP' }
         },
         '蜂后髓核': {
-            id: '蜂后髓核', slotType: 'gland_core', tier: 2, bossSource: 'MON_CH1_QUEEN',
+            id: '蜂后髓核', slotType: 'gland_core', tier: 3, bossSource: 'MON_CH1_QUEEN',
             skillName: '畸变群落母体孵化', skillCost: 4,
             skillEffect: { type: 'summon', baseMultiplier: 3.0, summonCount: 3, desc: '3.0×倍率召唤集群突袭，伤害全额吸血' }
         },
@@ -744,9 +744,9 @@ window.GameData = (function () {
         POT_RAM: {
             id: 'POT_RAM',
             name: '神经突触催化剂',
-            toxicity: 20,
-            effect: { type: 'ramRecover', value: 5, desc: '立即回复 5 点进程' },
-            sideEffect: { type: 'toxinBurst', value: 10, desc: '额外增加 10 点毒性' }
+            toxicity: 12,
+            effect: { type: 'ramRecover', value: 8, desc: '立即回复 8 点进程' },
+            sideEffect: { type: 'toxinBurst', value: 5, desc: '额外增加 5 点毒性' }
         }
     };
 
@@ -775,7 +775,7 @@ window.GameData = (function () {
             name: '电磁短路脉冲液',
             cost: { '纳米破片': 2 },
             targetRace: RACE.EMBER,
-            effect: { shieldStrip: 50, stripChance: 1.0, damageBonus: 0.30 },
+            effect: { shieldStrip: 100, stripChance: 1.0, damageBonus: 0.30 },
             duration: 100
         }
     };
@@ -1193,7 +1193,7 @@ window.GameData = (function () {
         POT_SHIELD_CORE: { effect: function(bs,p,decay){ bs.shieldAmount=(bs.shieldAmount||0)+Math.ceil(p.hp_max*0.4*decay); bs._toxResistDebuff=true; } },
         POT_HEAL: { effect: function(bs,p,decay){ p.hp=Math.min(p.hp_max,p.hp+Math.ceil(p.hp_max*0.4*decay)); bs.playerStatus['defDebuff']=3; } },
         POT_DEFENSE: { effect: function(bs,p,decay){ bs.playerStatus['defBoost']=3; bs.playerStatus['atkDebuff']=3; } },
-        POT_RAM: { effect: function(bs,p,decay){ bs.playerProcess=Math.min(window.GameState.getState().player.process_max,bs.playerProcess+5); window.GameState.getState().player.process=bs.playerProcess; window.GameState.getState().player.toxicity+=10; } }
+        POT_RAM: { effect: function(bs,p,decay){ bs.playerProcess=Math.min(window.GameState.getState().player.process_max,bs.playerProcess+8); window.GameState.getState().player.process=bs.playerProcess; window.GameState.getState().player.toxicity+=5; } }
     };
 
     // =========================================================================

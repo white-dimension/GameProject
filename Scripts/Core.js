@@ -345,7 +345,7 @@ window.GameState = (function () {
             if (slotTypes[sn] === 'atk') { p.atk += tierBonus * 3; p.hp_max += tierBonus * 5; }
             else if (slotTypes[sn] === 'def') { p.def += tierBonus * 3; p.hp_max += tierBonus * 3; }
             else {
-                p.process_max = Math.min(15, p.process_max + tierBonus);
+                p.process_max = Math.min(20, p.process_max + tierBonus);
                 p.process_recovery += tierBonus; // 代谢腺体每阶+1恢复
             }
             if (slot.equipped && data.BOSS_ORGANS && data.BOSS_ORGANS[slot.equipped]) {
@@ -384,7 +384,7 @@ window.GameState = (function () {
                 var mult = dupBonus[race] ? 1.5 : 1.0;
                 var sp = mData[race].statsPerPoint;
                 p.hp_max += (sp.hp_max || 0) * pts * mult; p.atk += (sp.atk || 0) * pts * mult; p.def += (sp.def || 0) * pts * mult;
-                p.process_max = Math.min(15, p.process_max + (sp.process_max || 0) * pts * mult);
+                p.process_max = Math.min(20, p.process_max + (sp.process_max || 0) * pts * mult);
                 if (race === 'ember') { p.process_recovery += pts * mult * 0.5; }
             });
             }
@@ -639,7 +639,7 @@ window.GameState = (function () {
         var ml = (gs.mapState.mapLevel || 1) - 1;
         var loop = gs.mapState.loop || 1;
         // [优化] 基础倍率随楼层增长，且二周目怪物强度大幅提升
-        var loopMult = 1 + (loop - 1) * 0.5; // 每多一周目，基础属性提升 50%
+        var loopMult = 1 + (loop - 1) * 0.3; // 每多一周目，基础属性提升 30%
 
         if (ml <= 0 && loop === 1) return { hpMul: 1, atkMul: 1, defMul: 1, bpMul: 1, xpMul: 1 };
         return {
@@ -816,7 +816,7 @@ window.GameState = (function () {
 
     function mutateStat(statType) {
         var gs = getState(); if (!gs) return { success: false };
-        var costs = { atk: 1500, def: 1200, hp: 1000 }; // 调高单次成本
+        var costs = { atk: 800, def: 600, hp: 500 };
         var cost = costs[statType] || 1500;
         if (gs.player.bp < cost) return { success: false, error: 'BP不足(需' + cost + ')' };
         gs.player.bp -= cost;

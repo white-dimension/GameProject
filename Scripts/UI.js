@@ -3261,9 +3261,9 @@ window.UISystem = (function () {
         var mutationHTML = '<div class="txt-xs txt-blue txt-bold" style="margin-bottom:10px;">> 高阶基因突变（消耗基因点数永久提升基础序列）</div>';
         mutationHTML += '<div style="display:flex;flex-wrap:wrap;gap:8px;">';
         var muts = [
-            { type: 'atk', name: '攻击突变', cost: 1500, val: '+5', icon: 'icon-atk' },
-            { type: 'def', name: '防御突变', cost: 1200, val: '+5', icon: 'icon-def' },
-            { type: 'hp', name: '生命突变', cost: 1000, val: '+25', icon: 'icon-health' }
+            { type: 'atk', name: '攻击突变', cost: 800, val: '+5', icon: 'icon-atk' },
+            { type: 'def', name: '防御突变', cost: 600, val: '+5', icon: 'icon-def' },
+            { type: 'hp', name: '生命突变', cost: 500, val: '+25', icon: 'icon-health' }
         ];
         muts.forEach(function(m) {
             var canMut = p.bp >= m.cost;
