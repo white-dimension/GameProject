@@ -1447,10 +1447,11 @@ window.UISystem = (function () {
             _tabBtns[t.r] = tb;
             _tabBar.appendChild(tb);
         });
+        infoBar.appendChild(_tabBar);
 
         // 左右布局容器
         var wrapper = _ce('div');
-        wrapper.style.cssText = 'display:flex;gap:20px;align-items:flex-start;width:min(950px,95vw);';
+        wrapper.style.cssText = 'display:flex;flex-direction:row;gap:20px;align-items:flex-start;width:min(950px,95vw);';
         wrapper.appendChild(infoBar);
         wrapper.appendChild(box);
         _modalOverlay.appendChild(wrapper);
