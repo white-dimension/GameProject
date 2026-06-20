@@ -2332,7 +2332,7 @@ window.UISystem = (function () {
         }
     }
     var _lastLogLen = 0;
-    function _updateLog() { var el = document.getElementById('ui-log'); if (!el) return; var bs = CS().getBattleState(); if (bs && bs.log) { var entries = bs.log; if (entries.length === _lastLogLen) return; var newEntries = entries.slice(_lastLogLen); _lastLogLen = entries.length; newEntries.reverse().forEach(function(l, i) { var div = document.createElement('div'); div.className = 'txt-xs txt-dim'; div.style.cssText = 'margin-bottom:5px;'; div.innerHTML = '<span class="txt-green">></span> <span class="typewriter"></span>'; el.insertBefore(div, el.firstChild); setTimeout(function() { _typeText(div.querySelector('.typewriter'), l.msg, null, 20); }, i * 30); }); while (el.children.length > 30) { el.removeChild(el.lastChild); } el.scrollTop = 0; } else { _lastLogLen = 0; } }
+    function _updateLog() { var el = document.getElementById('ui-log'); if (!el) return; var bs = CS().getBattleState(); if (bs && bs.log) { var entries = bs.log; if (entries.length === _lastLogLen) return; var newEntries = entries.slice(_lastLogLen); _lastLogLen = entries.length; newEntries.forEach(function(l, i) { var div = document.createElement('div'); div.className = 'txt-xs txt-dim'; div.style.cssText = 'margin-bottom:5px;'; div.innerHTML = '<span class="txt-green">></span> <span class="typewriter"></span>'; el.insertBefore(div, el.firstChild); setTimeout(function() { _typeText(div.querySelector('.typewriter'), l.msg, null, 20); }, i * 30); }); while (el.children.length > 30) { el.removeChild(el.lastChild); } el.scrollTop = 0; } else { _lastLogLen = 0; } }
 
     function _typeText(el, text, cb, speed) {
         if (/<[^>]+>/.test(text)) { el.innerHTML = text; if (cb) cb(); return; }
