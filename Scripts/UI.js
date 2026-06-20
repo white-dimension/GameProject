@@ -2994,7 +2994,7 @@ window.UISystem = (function () {
         var comps = GD().COMPONENTS || {};
         var organBlock = _ce('div');
         organBlock.style.cssText = 'padding:20px;background:rgba(0,255,136,0.02);border:1px solid rgba(0,255,136,0.15);border-radius:8px;display:flex;flex-direction:column;gap:12px;';
-        organBlock.innerHTML = '<div class="txt-sm txt-green txt-bold">> 器官装备</div>';
+        organBlock.innerHTML = '<div class="txt-xs txt-green txt-bold">> 器官装备</div>';
         ['predatory_organ', 'chitin_epidermis', 'gland_core'].forEach(function(s) {
             var d = p[s];
             var cost = Math.ceil(5 * Math.pow(1.6, d.tier));
@@ -3033,7 +3033,7 @@ window.UISystem = (function () {
                 }
             });
             row.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px;width:100%;">' +
-                '<div class="txt-sm txt-green txt-bold">' + organNames[s] + ' <span class="txt-xs">[' + d.tier + '阶]</span></div>' +
+                '<div class="txt-xs txt-green txt-bold">' + organNames[s] + ' <span class="txt-xs">[' + d.tier + '阶]</span></div>' +
                 '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between;">' +
                 '<span class="txt-xs txt-dim" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">挂载: ' + (d.equipped ? '<span class="help-tip btn-organ" style="padding:6px 10px;font-size:13px;background:' + (_organColors[d.equipped]||_organColors._default).bg + ';border:1px solid ' + (_organColors[d.equipped]||_organColors._default).bd + ';border-radius:4px;color:' + (_organColors[d.equipped]||_organColors._default).hex + ';cursor:pointer;" data-tip="点击卸下该器官" onclick="try{GameState.equipOrgan(\'' + s + '\',null);}catch(e){}UISystem.showReorganizeModal();UISystem.render();">' + d.equipped + '</span>' : '<span class="btn-organ' + (gs.inventory.organs.length > 0 ? ' slot-ready' : '') + '" style="padding:6px 10px;font-size:13px;background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);border-radius:4px;color:var(--accent-green);cursor:pointer;" onclick="UISystem._showOrganPicker(\'' + s + '\')">标准原型</span>') + ' 组件: <span style="display:inline-flex;align-items:center;gap:8px;">' + slotHTML + '</span></span>' +
                 (function() {
@@ -3217,7 +3217,7 @@ window.UISystem = (function () {
         var organColors3 = _BOSS_ORGAN_COLORS;
         if (gs.inventory.organs.length > 0) {
             var organInvRow = _ce('div');
-            organInvRow.style.cssText = 'padding:12px 16px;background:rgba(0,255,136,0.02);border:1px solid rgba(0,255,136,0.1);border-radius:6px;margin-bottom:4px;';
+            organInvRow.style.cssText = 'padding:15px 20px;background:rgba(0,255,136,0.02);border:1px solid rgba(0,255,136,0.1);border-radius:6px;';
             var orgHTML = '<div class="txt-xs txt-green txt-bold" style="margin-bottom:6px;">> 突变器官（' + gs.inventory.organs.length + '个）</div><div style="display:flex;flex-wrap:wrap;gap:8px;">';
             gs.inventory.organs.forEach(function(oid) {
                 var oc3 = _getOrganColor(oid);
@@ -3232,7 +3232,7 @@ window.UISystem = (function () {
         var invRow = _ce('div');
         invRow.style.cssText = 'padding:15px 20px;background:rgba(255,213,79,0.03);border:1px solid rgba(255,213,79,0.15);border-radius:6px;';
         var totalCount = 0; Object.keys(inv).forEach(function(k) { totalCount += (inv[k] || 0); });
-        var synBtn = totalCount >= 3 ? '<button class="btn btn-gold btn-sm" style="padding:2px 10px;font-size:12px;" onclick="UISystem._showSynthesizeModal()">三合一</button>' : '';
+        var synBtn = totalCount >= 3 ? '<button class="btn btn-gold btn-sm" style="padding:4px 12px;font-size:13px;" onclick="UISystem._showSynthesizeModal()">三合一</button>' : '';
         var invHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><span class="txt-xs txt-gold txt-bold">> 组件库存（' + totalCount + '个）</span>' + synBtn + '</div><div style="display:flex;flex-wrap:wrap;gap:8px;">';
         var hasAny = false;
         Object.keys(inv).forEach(function(k) { if (inv[k] > 0) { hasAny = true; var tip = _buildCompTooltip(k);
