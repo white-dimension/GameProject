@@ -692,7 +692,7 @@ window.UISystem = (function () {
 
             // 怪物卡片
             var card = _ce('div');
-            card.className = 'monster-card';
+            card.className = 'monster-card' + (isBoss && !dead ? ' boss-breathe' : '');
             card.setAttribute('data-monster-idx', idx);
             var cardBorder = dead ? 'var(--border-dim)' : mclr;
             var cardGlow = (isTarget && !dead && !isVictory) ? 'box-shadow:0 0 20px ' + (raceCardClrs[md.race] || '#ff4455') + ';' : '';

@@ -326,6 +326,13 @@ body::after {
     50% { filter: drop-shadow(0 0 40px rgba(220, 80, 80, 0.8)); }
 }
 
+/* Boss立绘呼吸动画 */
+@keyframes boss-breathe {
+    0%, 100% { background-size: 105% auto; background-position: center center; }
+    50% { background-size: 110% auto; background-position: center 48%; }
+}
+.boss-breathe { animation: boss-breathe 4s ease-in-out infinite; }
+
 /* --- 响应式断点 --- */
 @media (max-width: 900px) {
     .hud-col-c { min-width: 380px; }
