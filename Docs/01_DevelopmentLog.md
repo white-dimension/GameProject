@@ -1,5 +1,11 @@
 # 01 — 开发日志
 
+## v2.1.4 — 2026-06-20 🧹 收尾清理 — 弹窗头部/死亡界面/怪物回合效果模板化
+
+- **showSaveModal/showDungeonWarning**: 弹窗头部 → createModal + setModalHead（向后兼容降级）
+- **_doDefeat**: 死亡界面 DOM → _deathOverlayHTML() 模板函数，两处调用复用
+- **_finishMonsterTurn**: 怪物回合效果（护盾/再生/死誓/狂怒/产卵）→ forEach affixes 统一循环
+
 ## v2.1.3 — 2026-06-20 🎨 UI渲染模板 — TagRenderer/BarRenderer/ModalRenderer
 
 ### TemplateEngine.js — UIRenderers 渲染器

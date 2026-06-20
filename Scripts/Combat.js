@@ -587,45 +587,27 @@ window.CombatSystem = (function () {
             _battleState.playerStatus['bleed']--;
             if (_battleState.playerStatus['bleed'] <= 0) delete _battleState.playerStatus['bleed'];
         }
-        // 安保核心：每回合护盾
+        // 怪物回合效果 — 数据驱动处理
         var aliveMons = _getAliveMonsters();
         aliveMons.forEach(function(mon) {
             var md = GD().MONSTERS[mon.id]; if (!md) return;
-            if (md.shieldPerTurn) { mon._shield = (mon._shield || 0) + md.shieldPerTurn; }
-
-            // [新增] 维度词缀：再生 (Regen)
-            if (mon.affixes && mon.affixes.some(function(a){return a.id==='regen';})) {
-                var regen = Math.ceil(mon.hpMax * 0.05);
-                mon.hp = Math.min(mon.hpMax, mon.hp + regen);
-                _log('<span style="color:var(--accent-green)">【再生】' + mon.name + ' 恢复了 ' + regen + ' HP。</span>');
-                window.UISystem.showDamageFloat('+' + regen, 'var(--accent-green)', 'monster');
-            }
-
-            // [新增] 维度词缀：死誓 (Berserk) - 每回合扣血
-            if (mon.affixes && mon.affixes.some(function(a){return a.id==='berserk';})) {
-                var bDmg = Math.ceil(mon.hpMax * 0.05);
-                mon.hp = Math.max(1, mon.hp - bDmg);
-                _log('<span style="color:var(--accent-orange)">【死誓】' + mon.name + ' 燃尽生命，损失 ' + bDmg + ' HP。</span>');
-            }
-
-            // 狂怒触发（读取 Data.js 中的 triggerTurn）
+            // 护盾刷新
+            if (md.shieldPerTurn) mon._shield = (mon._shield || 0) + md.shieldPerTurn;
+            // 维度词缀处理
+            (mon.affixes || []).forEach(function(a) {
+                if (a.id === 'regen') { var rgn = Math.ceil(mon.hpMax * 0.05); mon.hp = Math.min(mon.hpMax, mon.hp + rgn); _log('<span style="color:var(--accent-green)">【再生】' + mon.name + ' 恢复了 ' + rgn + ' HP。</span>'); window.UISystem.showDamageFloat('+' + rgn, 'var(--accent-green)', 'monster'); }
+                if (a.id === 'berserk') { var bd = Math.ceil(mon.hpMax * 0.05); mon.hp = Math.max(1, mon.hp - bd); _log('<span style="color:var(--accent-orange)">【死誓】' + mon.name + ' 燃尽生命，损失 ' + bd + ' HP。</span>'); }
+            });
+            // 狂怒触发
             if (md.intents) {
-                var enrageIntent = md.intents.find(function(it) { return it.type === 'enrage'; });
-                if (enrageIntent && !mon._enraged && _battleState.turn >= (enrageIntent.triggerTurn || 30)) { mon._enraged = true; mon._atkMult = (mon._atkMult || 1) * (enrageIntent.value || 2); _log('<span style="color:var(--accent-red);font-weight:bold;">' + mon.name + ' 进入狂怒！攻击力永久翻倍！</span>'); }
-            }
-            // 蜂后闪避
-            if (md.intents) {
-                var spawnIntent = md.intents.find(function(it) { return it.type === 'spawn'; });
-                if (spawnIntent && _battleState.turn % (spawnIntent.spawnInterval || 3) === 0 && !mon._dodging) {
-                    mon._dodging = true;
-                    if (!mon._originalDef) mon._originalDef = mon.def;
-                    mon.def = 0; // defenseZero 生效
-                    _log('<span class="txt-red">' + mon.name + ' 开始产卵！获得 100% 闪避，但防御力归零。</span>');
-                }
-                if (mon._dodging && _battleState.turn % (spawnIntent.spawnInterval || 3) !== 0) {
-                    mon._dodging = false;
-                    if (mon._originalDef !== undefined) { mon.def = mon._originalDef; mon._originalDef = undefined; }
-                    _log('<span>' + mon.name + ' 产卵结束，防御力恢复。</span>');
+                var ei = md.intents.find(function(it){return it.type==='enrage';});
+                if (ei && !mon._enraged && _battleState.turn >= (ei.triggerTurn||30)) { mon._enraged = true; mon._atkMult = (mon._atkMult||1) * (ei.value||2); _log('<span style="color:var(--accent-red);font-weight:bold;">' + mon.name + ' 进入狂怒！攻击力永久翻倍！</span>'); }
+                // 蜂后产卵/闪避
+                var si = md.intents.find(function(it){return it.type==='spawn';});
+                if (si) {
+                    var interval = si.spawnInterval || 3;
+                    if (_battleState.turn % interval === 0 && !mon._dodging) { mon._dodging = true; if (!mon._originalDef) mon._originalDef = mon.def; mon.def = 0; _log('<span class="txt-red">' + mon.name + ' 开始产卵！获得 100% 闪避，但防御力归零。</span>'); }
+                    if (mon._dodging && _battleState.turn % interval !== 0) { mon._dodging = false; if (mon._originalDef !== undefined) { mon.def = mon._originalDef; mon._originalDef = undefined; } _log('<span>' + mon.name + ' 产卵结束，防御力恢复。</span>'); }
                 }
             }
         });
@@ -708,13 +690,18 @@ window.CombatSystem = (function () {
         }
 
         window.UISystem.render();
+        function _deathOverlayHTML(msg, sub, btn) {
+            return '<div style="text-align:center;" class="death-box">' +
+                '<div class="txt-lg txt-red txt-bold" style="margin-bottom:' + (btn ? '16px' : '20px') + ';">序列崩解</div>' +
+                (msg ? '<div class="txt-md txt-red txt-bold" style="margin-bottom:10px;">' + msg + '</div>' : '') +
+                (sub ? '<div class="txt-xs txt-dim" style="margin-bottom:16px;">' + sub + '</div>' : '') +
+                (btn ? btn : '<div class="progress-container" style="width:300px;margin:0 auto;"><div class="progress-fill hp-fill" id="death-countdown-fill" style="width:100%;"></div></div><div class="txt-sm txt-dim" style="margin-top:10px;">母巢重组中...</div>') +
+                '</div>';
+        }
         var cdEl = document.createElement('div');
         cdEl.id = 'death-overlay';
         cdEl.style.cssText = 'position:fixed;inset:0;z-index:3200;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);';
-        cdEl.innerHTML = '<div style="text-align:center;" class="death-box">' +
-            '<div class="txt-lg txt-red txt-bold" style="margin-bottom:20px;">序列崩解</div>' +
-            '<div class="progress-container" style="width:300px;margin:0 auto;"><div class="progress-fill hp-fill" id="death-countdown-fill" style="width:100%;"></div></div>' +
-            '<div class="txt-sm txt-dim" style="margin-top:10px;">母巢重组中...</div></div>';
+        cdEl.innerHTML = _deathOverlayHTML();
         document.body.appendChild(cdEl);
         requestAnimationFrame(function() {
             var fill = document.getElementById('death-countdown-fill');
@@ -762,11 +749,11 @@ window.CombatSystem = (function () {
                 var penalty = Math.max(10, Math.floor(p.bp * 0.2));
                 p.bp = Math.max(0, p.bp - penalty);
                 window.GameState.save();
-                cdEl.innerHTML = '<div style="text-align:center;" class="death-box">' +
-                    '<div class="txt-lg txt-red txt-bold" style="margin-bottom:16px;">序列崩解</div>' +
-                    '<div class="txt-md txt-red txt-bold" style="margin-bottom:10px;">失去 ' + penalty + ' 基因点数</div>' +
-                    '<div class="txt-xs txt-dim" style="margin-bottom:16px;">剩余 ' + p.bp + ' | 将回到母巢重组</div>' +
-                    '<button class="btn btn-red btn-capsule" id="death-respawn-btn" style="padding:10px 40px;">确认重组</button></div>';
+                cdEl.innerHTML = _deathOverlayHTML(
+                    '失去 ' + penalty + ' 基因点数',
+                    '剩余 ' + p.bp + ' | 将回到母巢重组',
+                    '<button class="btn btn-red btn-capsule" id="death-respawn-btn" style="padding:10px 40px;">确认重组</button>'
+                );
                 var btn = document.getElementById('death-respawn-btn');
                 if (btn) btn.addEventListener('click', function() {
                     // [修复] 死亡重组时也将进程状态同步

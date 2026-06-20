@@ -1301,15 +1301,17 @@ window.UISystem = (function () {
         var gs = GS(); var p = gs.player;
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
-        var box = _ce('div', 'modal-box');
-        box.style.cssText = 'width:min(700px,90vw);max-height:calc(100vh - 200px);background:var(--bg-modal);border:1px solid #9c27b0;border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
-        var head = _ce('div');
-        head.style.cssText = 'padding:20px 30px;background:rgba(156,39,176,0.08);border-bottom:1px solid #9c27b0;display:flex;justify-content:space-between;align-items:center;';
-        head.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;width:100%;">' +
-            '<div class="txt-md txt-bold" style="color:var(--accent-purple);">[ 神经序列存档管理 ]</div>' +
-            '<button class="btn btn-blue btn-sm" onclick="UISystem.closeModal()">关闭</button></div>';
+        var UR = window.TemplateEngine ? window.TemplateEngine.UIRenderers : null;
+        var m = UR ? UR.createModal({width:'700px',borderColor:'#9c27b0',headBg:'rgba(156,39,176,0.08)',headBorder:'#9c27b0',bodyPadding:'20px',bodyGap:'12px'}) : null;
+        var box = m ? m.box : _ce('div', 'modal-box');
+        if (!m) box.style.cssText = 'width:min(700px,90vw);max-height:calc(100vh - 200px);background:var(--bg-modal);border:1px solid #9c27b0;border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
+        var head = m ? m.head : _ce('div');
+        if (!m) head.style.cssText = 'padding:20px 30px;background:rgba(156,39,176,0.08);border-bottom:1px solid #9c27b0;display:flex;justify-content:space-between;align-items:center;';
+        if (UR) UR.setModalHead(head, '[ 神经序列存档管理 ]', 'var(--accent-purple)', function(){ closeModal(); });
+        else { head.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;width:100%;"><div class="txt-md txt-bold" style="color:var(--accent-purple);">[ 神经序列存档管理 ]</div><button class="btn btn-blue btn-sm" onclick="UISystem.closeModal()">关闭</button></div>'; }
         box.appendChild(head);
-        var body = _ce('div');
+        var body = m ? m.body : _ce('div');
+        if (!m) body.style.cssText = 'padding:20px;display:flex;flex-direction:column;gap:12px;';
         body.style.cssText = 'padding:25px 30px;display:flex;flex-direction:column;gap:15px;overflow-y:auto;flex:1;';
         // 自动存档
         body.innerHTML += '<div style="padding:10px 16px;background:rgba(255,255,255,0.03);border-radius:6px;display:flex;justify-content:space-between;align-items:center;">' +
@@ -1488,14 +1490,17 @@ window.UISystem = (function () {
 
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
-        var box = _ce('div', 'modal-box');
-        box.style.cssText = 'width:min(500px,90vw);background:var(--bg-modal);border:1px solid var(--accent-red);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
-        var head = _ce('div');
-        head.style.cssText = 'padding:20px 30px;background:rgba(255,68,85,0.08);border-bottom:1px solid var(--accent-red);';
-        head.innerHTML = '<div class="txt-md txt-red txt-bold">[ 地下城准入环境预警 ]</div>';
+        var UR = window.TemplateEngine ? window.TemplateEngine.UIRenderers : null;
+        var m = UR ? UR.createModal({width:'500px',borderColor:'var(--accent-red)',headBg:'rgba(255,68,85,0.08)',headBorder:'var(--accent-red)',bodyPadding:'25px 30px',bodyGap:'18px'}) : null;
+        var box = m ? m.box : _ce('div', 'modal-box');
+        if (!m) box.style.cssText = 'width:min(500px,90vw);background:var(--bg-modal);border:1px solid var(--accent-red);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
+        var head = m ? m.head : _ce('div');
+        if (!m) head.style.cssText = 'padding:20px 30px;background:rgba(255,68,85,0.08);border-bottom:1px solid var(--accent-red);';
+        if (UR) UR.setModalHead(head, '[ 地下城准入环境预警 ]', 'var(--accent-red)', function(){ closeModal(); });
+        else head.innerHTML = '<div class="txt-md txt-red txt-bold">[ 地下城准入环境预警 ]</div>';
         box.appendChild(head);
-        var body = _ce('div');
-        body.style.cssText = 'padding:25px 30px;display:flex;flex-direction:column;gap:18px;';
+        var body = m ? m.body : _ce('div');
+        if (!m) body.style.cssText = 'padding:25px 30px;display:flex;flex-direction:column;gap:18px;';
         body.innerHTML = '<div class="txt-sm txt-white" style="line-height:1.6;">你正准备进入一个深层隔离区。传感器监测到该区域存在<b>底层环境代码变异</b>。</div>' +
             '<div style="padding:15px;background:rgba(255,68,85,0.05);border:1px solid rgba(255,68,85,0.25);border-radius:6px;">' +
             '<div class="txt-sm txt-red txt-bold" style="margin-bottom:6px;"><span class="icon icon-hazard-sign"></span> ' + env.name + '</div>' +
