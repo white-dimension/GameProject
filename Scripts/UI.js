@@ -1407,16 +1407,15 @@ window.UISystem = (function () {
         var allMonsters = GD().MONSTERS;
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
-        _modalOverlay.style.alignItems = 'stretch';
 
         var killedCount = 0; Object.keys(gs.bestiary.killCount || {}).forEach(function(id) { killedCount += (gs.bestiary.killCount[id] || 0); });
         var _filterRace = 'mutant';
+        var killed = gs.bestiary.killCount || {};
+        var research = gs.bestiary.researchLevels || {};
+        var raceNames = _RACE_NAMES;
+        var raceIcons = { mutant: 'icon-mutant', swarm: 'icon-swarm', ember: 'icon-ember' };
 
-        // 1. 左右布局容器
-        var wrapper = _ce('div');
-        wrapper.style.cssText = 'display:flex;gap:20px;align-items:flex-start;width:min(950px,95vw);';
-
-        // 2. 左侧信息栏
+        // 左侧信息栏
         var infoBar = _ce('div');
         infoBar.style.cssText = 'flex:0 0 220px;padding:20px 16px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:6px;text-align:left;';
         infoBar.innerHTML = '<div style="margin-bottom:12px;"><span class="txt-xs txt-gold">已击杀 ' + killedCount + ' 只</span></div>' +
@@ -1429,12 +1428,11 @@ window.UISystem = (function () {
             '<div style="border-top:1px solid var(--border-dim);padding-top:10px;">' +
             '<div class="txt-xs txt-bold" style="color:var(--accent-yellow);margin-bottom:6px;">> 种族克制</div>' +
             '<div class="txt-xs txt-dim" style="line-height:1.6;">异变 → 寄生 → 机械 → 异变<br>克制伤害 +50% 无视防御</div></div>';
-
-        // 种族筛选标签
-        var _tabBar2 = _ce('div');
-        _tabBar2.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:14px;border-top:1px solid var(--border-dim);padding-top:10px;';
+        // 种族筛选
         var _tabBtns = {};
         var tabs = [{ r: 'mutant', l: '异变者', cls: 'btn-red' },{ r: 'swarm', l: '寄生群落', cls: 'btn-green' },{ r: 'ember', l: '机械余烬', cls: 'btn-blue' }];
+        var _tabBar2 = _ce('div');
+        _tabBar2.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:14px;border-top:1px solid var(--border-dim);padding-top:10px;';
         tabs.forEach(function(t) {
             var tb = _ce('button', 'btn btn-sm ' + t.cls);
             tb.style.cssText = 'width:100%;padding:4px 12px;font-size:13px;';
@@ -1444,38 +1442,34 @@ window.UISystem = (function () {
             _tabBar2.appendChild(tb);
         });
         infoBar.appendChild(_tabBar2);
-        wrapper.appendChild(infoBar);
 
-        // 3. 右侧主内容
+        // 右侧主内容
         var box = _ce('div');
         box.style.cssText = 'flex:1;min-width:0;max-height:calc(100vh - 200px);background:var(--bg-modal);border:1px solid #f57f17;border-radius:12px;display:flex;flex-direction:column;overflow:hidden;';
         var head = _ce('div');
         head.style.cssText = 'padding:20px 30px;background:rgba(245,124,0,0.08);border-bottom:1px solid #f57f17;display:flex;justify-content:space-between;align-items:center;';
         head.innerHTML = '<div class="txt-md txt-gold txt-bold">[ 变异体图鉴 & 基因深度研究 ]</div><button class="btn btn-blue btn-sm" onclick="UISystem.closeModal()">关闭</button>';
         box.appendChild(head);
+
+        // 左右布局
+        var wrapper = _ce('div');
+        wrapper.style.cssText = 'display:flex;gap:20px;align-items:flex-start;width:min(950px,95vw);';
+        wrapper.appendChild(infoBar);
         wrapper.appendChild(box);
         _modalOverlay.appendChild(wrapper);
 
         var body = _ce('div');
         body.style.cssText = 'padding:15px 20px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;flex:1;';
-        var killed = gs.bestiary.killCount || {};
-        var research = gs.bestiary.researchLevels || {};
-        var tierNames = { common: '普通', elite: '精英', world_boss: '世界首领' };
-        var raceNames = _RACE_NAMES;
-        var raceIcons = { mutant: 'icon-mutant', swarm: 'icon-swarm', ember: 'icon-ember' };
-        var raceClrs = { mutant: '#ff6b4a', swarm: '#9acd32', ember: '#4ab8ff' };
 
         var _bestiaryWrap = _ce('div');
         _bestiaryWrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;';
         body.appendChild(_bestiaryWrap);
 
         var _filterDisplay = function() {
-            // 更新按钮激活态
             tabs.forEach(function(t) {
                 _tabBtns[t.r].style.opacity = (_filterRace === t.r) ? '1' : '0.5';
                 _tabBtns[t.r].style.filter = (_filterRace === t.r) ? 'brightness(1.2)' : 'brightness(1)';
             });
-            // 切换显示
             var races = ['mutant','swarm','ember'];
             races.forEach(function(race) {
                 var els = _bestiaryWrap.querySelectorAll('[data-bestiary-race=\"' + race + '\"]');
@@ -1493,7 +1487,6 @@ window.UISystem = (function () {
             headerDiv.style.cssText = 'width:100%;margin-top:8px;margin-bottom:4px;color:' + (raceHeaderClrs[race] || '#ffd54f') + ';';
             headerDiv.innerHTML = '<span class="icon ' + raceIcons[race] + '"></span> ' + raceNames[race];
             _bestiaryWrap.appendChild(headerDiv);
-            // 种族背景故事
             var loreText = (GD().RACE_LORE || {})[race] || '';
             if (loreText) {
                 var loreDiv = _ce('div');
