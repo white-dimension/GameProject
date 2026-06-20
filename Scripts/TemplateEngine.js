@@ -286,7 +286,7 @@ window.TemplateEngine = (function () {
             var icon = cfg.icon ? '<span class="icon ' + cfg.icon + '"></span> ' : '';
             var tip = cfg.tooltip || cfg.text || '';
             var cls = cfg.cls || 'txt-xs help-tip';
-            return '<span class="' + cls + '" style="padding:3px 8px;background:' + (cfg.bg || 'rgba(0,0,0,0.25)') + ';border:1px solid ' + (cfg.color || 'var(--text-dim)') + ';border-radius:4px;color:' + (cfg.color || 'var(--text-dim)') + ';font-size:11px;white-space:nowrap;margin:2px;" data-tip="' + tip.replace(/"/g, '&quot;') + '">' + icon + (cfg.text || '') + '</span>';
+            return '<span class="' + cls + '" style="padding:3px 8px;background:' + (cfg.bg || 'rgba(0,0,0,0.25)') + ';border:1px solid ' + (cfg.color || 'var(--text-dim)') + ';border-radius:4px;color:' + (cfg.color || 'var(--text-dim)') + ';font-size:12px;white-space:nowrap;margin:2px;" data-tip="' + tip.replace(/"/g, '&quot;') + '">' + icon + (cfg.text || '') + '</span>';
         },
 
         // -- BarRenderer: 进度条 --
