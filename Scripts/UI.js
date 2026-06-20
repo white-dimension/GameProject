@@ -517,7 +517,7 @@ window.UISystem = (function () {
     function _hudBarFill(val, max, fillClass) {
         var pct = Math.min(100, Math.max(0, val / max * 100));
         var startPct = _wakingUp ? '0' : pct;
-        return '<div style="width:130px;"><div class="progress-container hp-bar"><div class="progress-fill ' + fillClass + '" style="width:' + startPct + '%;transition:width 1.2s ease-out;"></div></div></div>';
+        return '<div style="width:155px;"><div class="progress-container hp-bar"><div class="progress-fill ' + fillClass + '" style="width:' + startPct + '%;transition:width 1.2s ease-out;"></div></div></div>';
     }
 
     function _handleDiscoveryResult(res, pathIndex, cardEl) {

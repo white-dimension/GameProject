@@ -131,9 +131,9 @@ body::after {
 /* 4. 状态条 (Progress Bars) */
 .progress-container {
     width: 100%;
-    height: 12px;
+    height: 14px;
     background: #1a1a1a;
-    border-radius: 6px;
+    border-radius: 7px;
     overflow: hidden;
     position: relative;
 }
