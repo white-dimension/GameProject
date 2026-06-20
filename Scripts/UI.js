@@ -2989,6 +2989,7 @@ window.UISystem = (function () {
             }
         });
         html += '</span>';
+        if (opts.extraBtn) html += opts.extraBtn;
         html += '</div>';
         return html;
     };
@@ -3232,8 +3233,7 @@ window.UISystem = (function () {
             var canUpgrade = Object.keys(inv).reduce(function(a,k){ return a + (inv[k] * getWeight2(k)); }, 0) >= cost;
             var row = _ce('div');
             row.style.cssText = 'padding:14px;background:rgba(0,255,136,0.03);border:1px solid rgba(0,255,136,0.1);border-radius:6px;display:flex;flex-direction:column;gap:10px;';
-            var rowHTML = _renderOrganRow(s, d, {interactive:true});
-            // 进阶按钮
+            // 进阶按钮 — 同排右对齐
             var nextTier = d.tier + 1;
             var bonusDesc = s === 'predatory_organ' ? '攻击 +3, 生命 +5' : s === 'chitin_epidermis' ? '防御 +3, 生命 +3' : '进程回复 +1, 进程上限 +1';
             var tipText = "<b style='color:var(--accent-green)'>器官进阶：" + _fmtTierStars(d.tier) + " → " + _fmtTierStars(nextTier) + "</b>&#10;";
@@ -3241,8 +3241,8 @@ window.UISystem = (function () {
             tipText += "<b>进阶消耗：</b>任意组件 ×" + cost + "&#10;";
             tipText += "<b>当前库存：</b>共 " + Object.keys(inv).reduce(function(a,k){ return a + (inv[k] * getWeight2(k)); }, 0) + " (加权)";
             if (!canUpgrade) tipText += "&#10;<b style='color:var(--accent-red)'>材料不足，无法进阶</b>";
-            rowHTML += '<div style="display:flex;justify-content:flex-end;">' +
-                '<button class="btn btn-green btn-sm help-tip" ' + (canUpgrade ? '' : 'disabled') + ' data-tip="' + tipText + '" onclick="UISystem._showOrganUpgradePicker(\'' + s + '\')">进阶</button></div>';
+            var btnHTML = '<button class="btn btn-green btn-sm help-tip" style="flex-shrink:0;margin-left:auto;" ' + (canUpgrade ? '' : 'disabled') + ' data-tip="' + tipText + '" onclick="UISystem._showOrganUpgradePicker(\'' + s + '\')">进阶</button>';
+            var rowHTML = _renderOrganRow(s, d, {interactive:true, extraBtn:btnHTML});
             row.innerHTML = rowHTML;
             organBlock.appendChild(row);
         });
