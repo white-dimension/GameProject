@@ -1750,7 +1750,7 @@ window.UISystem = (function () {
              _r('enter_dungeon', '深入地下城', function () { return (p.dungeonsEntered || 0) > 0; }, 40, '+40 基因点数')],
 
             [_r('kill_boss', '挑战并击败区域领主', function () { return hasBossKill; }, 0, '+10 原始基因', { '原始基因': 10 }),
-             _r('reach_10f', '抵达实验室 10F', function () { return (gs.mapState.currentFloor || 1) >= 10; }, 200, '+200 基因点数'),
+             _r('reach_10f', '抵达实验室地下十层', function () { return (gs.mapState.currentFloor || 1) >= 10; }, 200, '+200 基因点数'),
              _r('mastery_5', '单系专精达到 5 级', function () { return Object.values(p.masteryPoints).some(function(v){return v>=5;}); }, 150, '+150 基因点数')],
 
             [_r('reach_lv15', '原体升至巅峰等阶 15', function() { return p.level >= 15; }, 0, '+8 导电凝胶', { '导电凝胶': 8 }),
