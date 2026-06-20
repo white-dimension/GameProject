@@ -261,14 +261,20 @@ window.UISystem = (function () {
         document.head.appendChild(_cursorStyle);
         var _cursorEl = _ce('div');
         _cursorEl.id = 'custom-cursor';
-        _cursorEl.style.cssText = 'position:fixed;pointer-events:none;z-index:99999;width:24px;height:24px;transform:translate(-12px,-12px);';
+        // [修复] 为解决 Electron 打包后鼠标右下角黑色块伪影：
+        // 1. 使用 top:0;left:0 配合 translate3d 移动坐标
+        // 2. 启用 will-change: transform 告知 GPU 提前优化
+        // 3. 强制 backface-visibility: hidden 稳定合成层渲染
+        _cursorEl.style.cssText = 'position:fixed;pointer-events:none;z-index:99999;width:24px;height:24px;top:0;left:0;will-change:transform;backface-visibility:hidden;transform:translate3d(-100px,-100px,0);';
         _cursorEl.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" style="display:block;"><circle cx="12" cy="12" r="10" fill="none" stroke="#00ff88" stroke-width="1" opacity="0.8"/><circle cx="12" cy="12" r="3" fill="none" stroke="#00ff88" stroke-width="1.2" opacity="0.6"/><line x1="12" y1="2" x2="12" y2="6" stroke="#00ff88" stroke-width="1" opacity="0.7"/><line x1="12" y1="18" x2="12" y2="22" stroke="#00ff88" stroke-width="1" opacity="0.7"/><line x1="2" y1="12" x2="6" y2="12" stroke="#00ff88" stroke-width="1" opacity="0.7"/><line x1="18" y1="12" x2="22" y2="12" stroke="#00ff88" stroke-width="1" opacity="0.7"/></svg>';
         document.body.appendChild(_cursorEl);
         var _cursorClickSVG = '<svg width="24" height="24" viewBox="0 0 24 24" style="display:block;"><circle cx="12" cy="12" r="10" fill="#00ff88" fill-opacity="0.12" stroke="#00ff88" stroke-width="1.5"/><circle cx="12" cy="12" r="2.5" fill="#00ff88" fill-opacity="0.9"/></svg>';
         var _cursorDefaultSVG = '<svg width="24" height="24" viewBox="0 0 24 24" style="display:block;"><circle cx="12" cy="12" r="10" fill="none" stroke="#00ff88" stroke-width="1" opacity="0.8"/><circle cx="12" cy="12" r="3" fill="none" stroke="#00ff88" stroke-width="1.2" opacity="0.6"/><line x1="12" y1="2" x2="12" y2="6" stroke="#00ff88" stroke-width="1" opacity="0.7"/><line x1="12" y1="18" x2="12" y2="22" stroke="#00ff88" stroke-width="1" opacity="0.7"/><line x1="2" y1="12" x2="6" y2="12" stroke="#00ff88" stroke-width="1" opacity="0.7"/><line x1="18" y1="12" x2="22" y2="12" stroke="#00ff88" stroke-width="1" opacity="0.7"/></svg>';
         document.addEventListener('mousemove', function(e) {
-            _cursorEl.style.left = e.clientX + 'px';
-            _cursorEl.style.top = e.clientY + 'px';
+            // [优化] 使用 translate3d 代替 left/top，彻底消除渲染残影
+            var tx = e.clientX - 12;
+            var ty = e.clientY - 12;
+            _cursorEl.style.transform = 'translate3d(' + tx + 'px, ' + ty + 'px, 0)';
             // 检测是否在可点击元素上
             var t = e.target.closest && e.target.closest('button:not(:disabled), .btn:not(:disabled), a, .path-card, .monster-card, [onclick], [data-clickable], .btn-organ, .btn-unload, .slot-ready, .mastery-btn');
             var isClickable = !!t;
@@ -2031,7 +2037,7 @@ window.UISystem = (function () {
         window.GameState.save();
         _pushLog('指令完成：' + rewardDesc);
         UISystem.showNotification(rewardDesc || '奖励已领取', null, 'var(--accent-yellow)');
-        UISystem.render({hudOnly: true});
+        UISystem.render();
     }
 
     function _claimAllTasks() {
@@ -2060,7 +2066,7 @@ window.UISystem = (function () {
         if (compCount > 0) {
             window.GameState.save();
             UISystem.showNotification('批量同步完成', '已领取 ' + compCount + ' 项指令奖励', 'var(--accent-green)');
-            UISystem.render({hudOnly: true});
+            UISystem.render();
         }
     }
 
@@ -3014,7 +3020,7 @@ window.UISystem = (function () {
         var syncLvl = gs.inventory.organSyncLevels[d.equipped] || 1;
         var html = '';
         // 名称行
-        html += '<div class="txt-xs txt-green txt-bold">' + organNames[s] + '</div>';
+        html += '<div class="txt-xs txt-green txt-bold">' + organNames[s] + ' ' + _fmtTierStars(d.tier) + '</div>';
         // 挂载行
         html += '<div class="txt-xs txt-dim" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">';
         html += '<span>挂载: </span>';
