@@ -255,6 +255,8 @@ window.UISystem = (function () {
         document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
 
         // —— 自定义 JS 光标（彻底隐藏系统光标）——
+        document.documentElement.style.cursor = 'none';
+        document.body.style.cursor = 'none';
         var _cursorEl = _ce('div');
         _cursorEl.id = 'custom-cursor';
         _cursorEl.style.cssText = 'position:fixed;pointer-events:none;z-index:99999;width:24px;height:24px;transform:translate(-12px,-12px);';
