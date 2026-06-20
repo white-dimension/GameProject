@@ -3029,7 +3029,7 @@ window.UISystem = (function () {
                     var hasAvail = false; Object.keys(inv).forEach(function(ck) { if (inv[ck] > 0 && comps[ck] && comps[ck].allowedSlots && comps[ck].allowedSlots.indexOf(s) !== -1) hasAvail = true; });
                     var slotCls = hasAvail ? 'slot-ready' : '';
                     var slotStyle = hasAvail ? 'padding:6px 10px;font-size:13px;background:rgba(0,255,136,0.04);border:1px dashed rgba(0,255,136,0.3);border-radius:4px;color:var(--accent-green);cursor:pointer;' : 'padding:6px 10px;font-size:13px;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.15);border-radius:4px;color:var(--text-dim);cursor:pointer;';
-                    slotHTML += '<span class="' + slotCls + '" style="' + slotStyle + '" onclick="UISystem._showSocketPicker(\'' + s + '\',' + si + ')">+ 空槽' + (hasAvail ? ' <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent-green);box-shadow:0 0 6px var(--accent-green);margin-left:2px;vertical-align:middle;"></span>&nbsp;<span style="font-size:11px;color:var(--accent-green);">可嵌入</span>' : '') + '</span>';
+                    slotHTML += '<span class="' + slotCls + '" style="' + slotStyle + '" onclick="UISystem._showSocketPicker(\'' + s + '\',' + si + ')">空槽</span>';
                 }
             });
             row.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px;width:100%;">' +
