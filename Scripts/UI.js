@@ -255,22 +255,22 @@ window.UISystem = (function () {
         document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
 
         // —— 自定义 JS 光标（彻底隐藏系统光标）——
-        document.documentElement.style.setProperty('cursor', 'none', 'important');
-        document.body.style.setProperty('cursor', 'none', 'important');
-        // MutationObserver: 动态覆盖所有新元素的cursor
-        var _cursorObs = new MutationObserver(function(mutations) {
-            mutations.forEach(function(m) {
-                m.addedNodes.forEach(function(node) {
-                    if (node.nodeType === 1) {
-                        node.style.setProperty('cursor', 'none', 'important');
-                        if (node.querySelectorAll) {
-                            node.querySelectorAll('*').forEach(function(el) { el.style.setProperty('cursor', 'none', 'important'); });
-                        }
-                    }
-                });
-            });
-        });
-        _cursorObs.observe(document.body, { childList: true, subtree: true });
+        function _forceHideCursor() {
+            document.documentElement.style.setProperty('cursor','none','important');
+            document.body.style.setProperty('cursor','none','important');
+        }
+        _forceHideCursor();
+        // 注入style — Chrome兼容
+        var _cursorStyle = document.createElement('style');
+        _cursorStyle.textContent = '*{cursor:none!important}';
+        document.head.appendChild(_cursorStyle);
+        // 首次用户交互后重新应用（Chrome安全限制）
+        document.addEventListener('click', function _firstClick() {
+            _forceHideCursor();
+            document.removeEventListener('click', _firstClick);
+        }, { once: true });
+        // 定时刷新兜底
+        setInterval(_forceHideCursor, 1000);
         var _cursorEl = _ce('div');
         _cursorEl.id = 'custom-cursor';
         _cursorEl.style.cssText = 'position:fixed;pointer-events:none;z-index:99999;width:24px;height:24px;transform:translate(-12px,-12px);';
