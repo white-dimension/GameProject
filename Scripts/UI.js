@@ -375,8 +375,12 @@ window.UISystem = (function () {
         });
     }
 
-    function render() {
+    function render(flags) {
         if (!_root) init(); var gs = GS(); if (!gs) return;
+
+        // [v3.0] 局部刷新：仅更新HUD数值，跳过全量DOM重建
+        if (flags && flags.hudOnly) { _refreshHUDValues(gs); return; }
+
         if (!gs.player.introSeen) { _showIntro(gs); return; }
 
         // [修复] HUD 必须优先渲染，确保在启动动画期间也能看到血条/进程条
@@ -466,21 +470,35 @@ window.UISystem = (function () {
             '</div>' +
             '<div class="hud-col hud-col-c">' +
             '<div class="hud-labels txt-xs">' +
-            _hudLabel('生命', p.hp, p.hp_max, 'icon-health') +
-            _hudLabel('进程', p.process, p.process_max, 'icon-ram', '<b>进程 (Process)</b>&#10;每回合回复3点（腺体阶位加成）&#10;技能消耗2~5进程&#10;上限通过腺体阶位和余烬专精提升') +
-            _hudLabel('毒性', p.toxicity, 50, 'icon-tox', '<b>基因毒性 (Toxicity)</b>&#10;喝魔药累加，超50后每回合扣2%HP&#10;每回合自然衰减1点&#10;回到母巢清零') +
-            _hudLabel('等阶 ' + p.level, (p.level >= 30 ? 'MAX' : p.xp), (p.level >= 30 ? 'MAX' : p.xpToNext), 'icon-upgrade') +
+            _hudLabel('生命', p.hp, p.hp_max, 'icon-health', 'hud-label-hp', '<b>生命 (HP)</b>') +
+            _hudLabel('进程', p.process, p.process_max, 'icon-ram', 'hud-label-process', '<b>进程 (Process)</b>&#10;每回合回复3点（腺体阶位加成）&#10;技能消耗2~5进程&#10;上限通过腺体阶位和余烬专精提升') +
+            _hudLabel('毒性', p.toxicity, 50, 'icon-tox', 'hud-label-tox', '<b>基因毒性 (Toxicity)</b>&#10;喝魔药累加，超50后每回合扣2%HP&#10;每回合自然衰减1点&#10;回到母巢清零') +
+            _hudLabel('等阶 ' + p.level, (p.level >= 30 ? 'MAX' : p.xp), (p.level >= 30 ? 'MAX' : p.xpToNext), 'icon-upgrade', 'hud-label-xp') +
             '</div>' +
             '<div class="hud-bars">' +
-            _hudBarFill(p.hp, p.hp_max, (CS() && CS().getBattleState() && CS().getBattleState().playerStatus && CS().getBattleState().playerStatus['toxDebuff'] ? 'tox-fill' : 'hp-fill')) +
-            _hudBarFill(p.process, p.process_max, 'ram-fill') +
-            _hudBarFill(p.toxicity, 50, 'tox-fill') +
-            _hudBarFill((p.level >= 30 ? 1 : p.xp), (p.level >= 30 ? 1 : p.xpToNext), 'xp-fill') +
+            _hudBarFill(p.hp, p.hp_max, (CS() && CS().getBattleState() && CS().getBattleState().playerStatus && CS().getBattleState().playerStatus['toxDebuff'] ? 'tox-fill' : 'hp-fill'), 'hud-bar-hp') +
+            _hudBarFill(p.process, p.process_max, 'ram-fill', 'hud-bar-process') +
+            _hudBarFill(p.toxicity, 50, 'tox-fill', 'hud-bar-tox') +
+            _hudBarFill((p.level >= 30 ? 1 : p.xp), (p.level >= 30 ? 1 : p.xpToNext), 'xp-fill', 'hud-bar-xp') +
             '</div>' +
             '</div>' +
             '<div class="hud-col hud-col-r" style="display:flex;gap:6px;align-items:center;">' +
             '<button class="btn btn-blue btn-sm" onclick="UISystem.showHelpPanel()">?</button>' +
             '</div>';
+    }
+
+    // [v3.0] HUD 局部刷新 — 仅更新数值和进度条，不重绘整个顶栏
+    function _refreshHUDValues(gs) {
+        var p = gs.player;
+        var el;
+        el = document.getElementById('hud-label-hp'); if (el) el.textContent = p.hp + '/' + p.hp_max;
+        el = document.getElementById('hud-label-process'); if (el) el.textContent = p.process + '/' + p.process_max;
+        el = document.getElementById('hud-label-tox'); if (el) el.textContent = p.toxicity + '/50';
+        el = document.getElementById('hud-label-xp'); if (el) el.textContent = (p.level >= 30 ? 'MAX' : p.xp) + '/' + (p.level >= 30 ? 'MAX' : p.xpToNext);
+        el = document.getElementById('hud-bar-hp'); if (el) el.style.width = Math.min(100, Math.max(0, p.hp / p.hp_max * 100)) + '%';
+        el = document.getElementById('hud-bar-process'); if (el) el.style.width = Math.min(100, Math.max(0, p.process / p.process_max * 100)) + '%';
+        el = document.getElementById('hud-bar-tox'); if (el) el.style.width = Math.min(100, Math.max(0, p.toxicity / 50 * 100)) + '%';
+        el = document.getElementById('hud-bar-xp'); if (el) el.style.width = Math.min(100, Math.max(0, (p.level >= 30 ? 1 : p.xp) / (p.level >= 30 ? 1 : p.xpToNext) * 100)) + '%';
     }
 
     var _hintTimer = 0, _hintIdx = 0, _hintTexts = [];
@@ -534,17 +552,17 @@ window.UISystem = (function () {
         return txt;
     }
 
-    function _hudLabel(label, val, max, iconClass, tip) {
+    function _hudLabel(label, val, max, iconClass, elId, tip) {
         var labelHTML = tip ? '<span class="help-tip" data-tip="' + tip + '"><span class="icon ' + iconClass + '"></span>' + label + '</span>' : '<span><span class="icon ' + iconClass + '"></span>' + label + '</span>';
-        return '<div class="hud-bar">' + labelHTML + '<span>' + val + '/' + max + '</span></div>';
+        return '<div class="hud-bar">' + labelHTML + '<span id="' + elId + '">' + val + '/' + max + '</span></div>';
     }
 
-    function _hudBarFill(val, max, fillClass) {
+    function _hudBarFill(val, max, fillClass, elId) {
         var R = window.TemplateEngine ? window.TemplateEngine.UIRenderers : null;
-        if (R) return '<div style="width:155px;">' + R.renderBar({current:val, max:max, width:155, fillClass:fillClass, animated:!_wakingUp}) + '</div>';
+        if (R) return '<div style="width:155px;">' + R.renderBar({current:val, max:max, width:155, fillClass:fillClass, animated:!_wakingUp, id:elId}) + '</div>';
         var pct = Math.min(100, Math.max(0, val / max * 100));
         var startPct = _wakingUp ? '0' : pct;
-        return '<div style="width:155px;"><div class="progress-container hp-bar"><div class="progress-fill ' + fillClass + '" style="width:' + startPct + '%;transition:width 1.2s ease-out;"></div></div></div>';
+        return '<div style="width:155px;"><div class="progress-container hp-bar"><div id="' + elId + '" class="progress-fill ' + fillClass + '" style="width:' + startPct + '%;transition:width 1.2s ease-out;"></div></div></div>';
     }
 
     function _handleDiscoveryResult(res, pathIndex, cardEl) {
@@ -1546,6 +1564,8 @@ window.UISystem = (function () {
 
                 var item = _ce('div');
                 item.setAttribute('data-bestiary-race', race);
+                // [修正] 确保非该种族的卡片在初始化时就隐藏，防止布局闪烁
+                if (race !== _filterRace) item.style.display = 'none';
 
                 var researchRow = '';
                 if (known) {
@@ -2004,7 +2024,7 @@ window.UISystem = (function () {
         window.GameState.save();
         _pushLog('指令完成：' + rewardDesc);
         UISystem.showNotification(rewardDesc || '奖励已领取', null, 'var(--accent-yellow)');
-        UISystem.render();
+        UISystem.render({hudOnly: true});
     }
 
     function _claimAllTasks() {
@@ -2033,7 +2053,7 @@ window.UISystem = (function () {
         if (compCount > 0) {
             window.GameState.save();
             UISystem.showNotification('批量同步完成', '已领取 ' + compCount + ' 项指令奖励', 'var(--accent-green)');
-            UISystem.render();
+            UISystem.render({hudOnly: true});
         }
     }
 
