@@ -1987,6 +1987,7 @@ window.UISystem = (function () {
         var logWrap = document.querySelector('.log-wrap'); if (logWrap) logWrap.style.display = 'none';
         var taskPanel = document.getElementById('ui-task-panel'); if (taskPanel) taskPanel.style.display = 'none';
         var roomInfo = document.getElementById('ui-room-info'); if (roomInfo) roomInfo.style.display = 'none';
+        var skillInfo = document.getElementById('ui-skill-info'); if (skillInfo) skillInfo.style.display = 'none';
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
         _modalOverlay.style.background = 'transparent';
