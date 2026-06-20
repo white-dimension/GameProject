@@ -440,8 +440,8 @@ window.UISystem = (function () {
             '<div class="hud-col hud-col-c">' +
             '<div class="hud-labels txt-xs">' +
             _hudLabel('生命', p.hp, p.hp_max, 'icon-health') +
-            _hudLabel('进程', p.process, p.process_max, 'icon-ram') +
-            _hudLabel('毒性', p.toxicity, 50, 'icon-tox') +
+            _hudLabel('进程', p.process, p.process_max, 'icon-ram', '<b>进程 (Process)</b>&#10;每回合回复3点（腺体阶位加成）&#10;技能消耗2~5进程&#10;上限通过腺体阶位和余烬专精提升') +
+            _hudLabel('毒性', p.toxicity, 50, 'icon-tox', '<b>基因毒性 (Toxicity)</b>&#10;喝魔药累加，超50后每回合扣2%HP&#10;每回合自然衰减1点&#10;回到母巢清零') +
             _hudLabel('等阶 ' + p.level, (p.level >= 30 ? 'MAX' : p.xp), (p.level >= 30 ? 'MAX' : p.xpToNext), 'icon-upgrade') +
             '</div>' +
             '<div class="hud-bars">' +
@@ -510,8 +510,9 @@ window.UISystem = (function () {
         return txt;
     }
 
-    function _hudLabel(label, val, max, iconClass) {
-        return '<div class="hud-bar"><span><span class="icon ' + iconClass + '"></span>' + label + '</span><span>' + val + '/' + max + '</span></div>';
+    function _hudLabel(label, val, max, iconClass, tip) {
+        var labelHTML = tip ? '<span class="help-tip" data-tip="' + tip + '"><span class="icon ' + iconClass + '"></span>' + label + '</span>' : '<span><span class="icon ' + iconClass + '"></span>' + label + '</span>';
+        return '<div class="hud-bar">' + labelHTML + '<span>' + val + '/' + max + '</span></div>';
     }
 
     function _hudBarFill(val, max, fillClass) {

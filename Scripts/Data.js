@@ -873,9 +873,10 @@ window.GameData = (function () {
                 { key: '2', label: '防御增殖', desc: '生成科技护盾。护盾存在时可阻挡大部分非毒素伤害。', color: 'var(--accent-green)' },
                 { key: '3', label: '连招引爆', desc: '引爆 [中毒/崩解] 标记。中毒引爆造成 300% 爆破+吸血；崩解引爆使目标闪避归零并陷入 50% 易伤。', color: 'var(--accent-yellow)' },
                 { key: '0', label: '深入地下城', desc: '地下城战斗胜利后，按 0 直接进入下一层，继承当前 HP 继续猎杀。', color: 'var(--accent-green)' },
-                { key: 'Space', label: '结束回合', desc: '进入代谢循环，回复进程点数。', color: 'var(--accent-orange)' }
+                { key: 'Space', label: '结束回合', desc: '进入代谢循环，回复进程点数。', color: 'var(--accent-orange)' },
+                { key: 'R', label: '种族克制', desc: '异变者 克 寄生群落 → 寄生 克 机械余烬 → 机械 克 异变者。专精种族对克制目标伤害 +50% 无视防御。', color: 'var(--accent-yellow)' }
             ],
-            tip: '右下角的「动态预测」面板会显示精确的最终伤害。若目标已被克制，会点亮红色双剑标记。'
+            tip: '异变→寄生→机械→异变 形成克制循环。右下角「动态预测」面板显示精确伤害，克制时点亮红色双剑标记。'
         },
         lab: {
             title: '基因重组实验室引导',
