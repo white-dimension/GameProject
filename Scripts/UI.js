@@ -1967,7 +1967,7 @@ window.UISystem = (function () {
             _typeText(div.querySelector('.typewriter'), li.text, function() {
                 idx++;
                 setTimeout(showNext, li.delay);
-            }, 30);
+            }, 55);
         };
         setTimeout(showNext, 500);
     }
@@ -2037,7 +2037,7 @@ window.UISystem = (function () {
             _typeText(div.querySelector('.typewriter'), li.text, function() {
                 idx++;
                 setTimeout(showNext, li.delay);
-            }, 30);
+            }, 55);
         };
         setTimeout(showNext, 300);
     }
