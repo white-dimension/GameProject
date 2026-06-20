@@ -57,7 +57,7 @@ window.GuideSystem = (function () {
                 l = leftPanel ? Math.max(10, leftPanel.getBoundingClientRect().left + 15) : Math.max(10, rect.left + 15);
             } else if (item.align === 'self-left') {
                 l = Math.max(10, rect.left);
-            } else if (item.align === 'right') l = Math.max(10, rect.right - cw);
+            } else if (item.align === 'right') l = Math.max(10, rect.right - cw + 20);
             else l = Math.max(10, rect.left + rect.width / 2 - cw / 2);
 
             card.style.left = l + 'px';
