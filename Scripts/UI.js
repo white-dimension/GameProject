@@ -2920,7 +2920,13 @@ window.UISystem = (function () {
     // --- Boss器官颜色/职业映射 ---
     var _BOSS_ORGAN_COLORS = {
         '暴君核心': { hex: '#ff6b4a', bg: 'rgba(255,107,74,0.1)', bd: 'rgba(255,107,74,0.2)', btnCls: 'btn-red' },
+        '暴君甲壳': { hex: '#ff6b4a', bg: 'rgba(255,107,74,0.08)', bd: 'rgba(255,107,74,0.15)', btnCls: 'btn-red' },
+        '暴君腺体': { hex: '#ff6b4a', bg: 'rgba(255,107,74,0.06)', bd: 'rgba(255,107,74,0.12)', btnCls: 'btn-red' },
+        '蜂后毒牙': { hex: '#9acd32', bg: 'rgba(154,205,50,0.1)', bd: 'rgba(154,205,50,0.2)', btnCls: 'btn-green' },
+        '蜂后甲壳': { hex: '#9acd32', bg: 'rgba(154,205,50,0.08)', bd: 'rgba(154,205,50,0.15)', btnCls: 'btn-green' },
         '蜂后髓核': { hex: '#9acd32', bg: 'rgba(154,205,50,0.1)', bd: 'rgba(154,205,50,0.2)', btnCls: 'btn-green' },
+        '核心钻头': { hex: '#4ab8ff', bg: 'rgba(74,184,255,0.1)', bd: 'rgba(74,184,255,0.2)', btnCls: 'btn-blue' },
+        '核心护盾': { hex: '#4ab8ff', bg: 'rgba(74,184,255,0.08)', bd: 'rgba(74,184,255,0.15)', btnCls: 'btn-blue' },
         '高能电泳核': { hex: '#4ab8ff', bg: 'rgba(74,184,255,0.1)', bd: 'rgba(74,184,255,0.2)', btnCls: 'btn-blue' },
         _default: { hex: 'var(--accent-green)', bg: 'rgba(0,255,136,0.08)', bd: 'rgba(0,255,136,0.2)', btnCls: 'btn-green' }
     };
@@ -3364,7 +3370,7 @@ window.UISystem = (function () {
             gs.inventory.organs.forEach(function(oid) {
                 var oc3 = _getOrganColor(oid);
                 var bo3 = bos3[oid]; var slotName3 = bo3 ? (_ORGAN_NAMES[bo3.slotType] || '未知') : '未知';
-                var oTip = '<b style=color:' + (organColors3[oid]||{}).hex + '>' + oid + '</b>&#10;<b>' + (bo3 ? bo3.skillName : '') + '</b>&#10;<span style=color:var(--accent-green)>消耗 ' + (bo3?bo3.skillCost:'') + ' 进程</span>';
+                var oTip = '<b style=color:' + oc3.hex + '>' + oid + '</b>&#10;<b>' + (bo3 ? bo3.skillName : '') + '</b>&#10;<span style=color:var(--accent-green)>消耗 ' + (bo3?bo3.skillCost:'') + ' 进程</span>';
                 if (bo3 && bo3.skillEffect) {
                     var se = bo3.skillEffect;
                     if (se.type === 'shield') {
