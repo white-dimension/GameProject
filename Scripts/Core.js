@@ -351,9 +351,7 @@ window.GameState = (function () {
             if (slot.equipped && data.BOSS_ORGANS && data.BOSS_ORGANS[slot.equipped]) {
                 var bo = data.BOSS_ORGANS[slot.equipped];
                 var syncLvl = gs.inventory.organSyncLevels[slot.equipped] || 1;
-                // 同调等级加成：Lv.2 +50%, Lv.3 +100%
                 var syncMult = 1 + (syncLvl - 1) * 0.5;
-
                 if (bo.tier >= 2) { p.atk += Math.ceil(bo.tier * syncMult); p.def += Math.ceil(bo.tier * syncMult); }
                 if (bo.tier >= 3) { p.hp_max += Math.ceil(30 * syncMult); }
             }
@@ -369,6 +367,32 @@ window.GameState = (function () {
                 if (aff.physMultiplier) p.atk = Math.ceil(p.atk * aff.physMultiplier);
             });
         });
+        // 基因共鸣：同Boss三件套联动加成
+        if (data && data.BOSS_ORGANS) {
+            var eq1 = p.predatory_organ.equipped;
+            var eq2 = p.chitin_epidermis.equipped;
+            var eq3 = p.gland_core.equipped;
+            if (eq1 && eq2 && eq3) {
+                var b1 = data.BOSS_ORGANS[eq1], b2 = data.BOSS_ORGANS[eq2], b3 = data.BOSS_ORGANS[eq3];
+                if (b1 && b2 && b3 && b1.bossSource === b2.bossSource && b2.bossSource === b3.bossSource) {
+                    p._setBonus = b1.bossSource; // MON_CH1_TYRANT / MON_CH1_QUEEN / MON_CH1_CORE
+                    if (b1.bossSource === 'MON_CH1_TYRANT') {
+                        p.atk = Math.ceil(p.atk * 1.2);
+                        p.hp_max += 50;
+                    } else if (b1.bossSource === 'MON_CH1_QUEEN') {
+                        p.process_recovery += 2;
+                        p._toxDmgBonus = 0.3;
+                    } else if (b1.bossSource === 'MON_CH1_CORE') {
+                        p._shieldBonus = 0.3;
+                        p.process_max = Math.min(20, p.process_max + 3);
+                    }
+                } else {
+                    p._setBonus = null;
+                }
+            } else {
+                p._setBonus = null;
+            }
+        }
         if (p.masteryPoints) {
             var mData = data.MASTERIES;
             if (mData) {

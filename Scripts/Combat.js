@@ -314,6 +314,8 @@ window.CombatSystem = (function () {
                 shield = Math.ceil(baseAtk * 0.6);
                 _log('<span style="color:var(--accent-green)">生物增殖，获得 ' + shield + ' 点防御护盾。</span>');
             }
+            // 核心三件套：护盾+30%
+            if (GS().player._shieldBonus) shield = Math.ceil(shield * (1 + GS().player._shieldBonus));
             _battleState.shieldAmount += shield;
             window.UISystem.showDamageFloat('<span class="icon icon-energy-shield"></span>' + shield, 'var(--accent-green)', 'player');
             return;

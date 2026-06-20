@@ -1893,6 +1893,14 @@ window.UISystem = (function () {
         if (compFx.poisonImmune) passives.push('毒素免疫');
         if (passives.length > 0) passiveHTML += '<div><span class="txt-xs txt-dim">◆ 组件:</span> ' + passives.map(function(t){return '<span class="txt-xs" style="color:var(--accent-yellow);">' + t + '</span>';}).join(' · ') + '</div>';
 
+        // 基因共鸣：同Boss三件套
+        if (p._setBonus) {
+            var setName = { MON_CH1_TYRANT: '暴君', MON_CH1_QUEEN: '蜂后', MON_CH1_CORE: '安保核心' }[p._setBonus] || '未知';
+            var setColor = { MON_CH1_TYRANT: 'var(--accent-red)', MON_CH1_QUEEN: 'var(--race-swarm)', MON_CH1_CORE: 'var(--accent-blue)' }[p._setBonus] || 'var(--accent-yellow)';
+            var setDesc = { MON_CH1_TYRANT: '攻击+20% · 生命+50', MON_CH1_QUEEN: '进程回复+2 · 毒素伤害+30%', MON_CH1_CORE: '护盾+30% · 进程上限+3' }[p._setBonus] || '';
+            passiveHTML += '<div style="margin-top:4px;"><span class="txt-xs" style="color:' + setColor + ';">◆ 基因共鸣·' + setName + '：</span><span class="txt-xs txt-dim">' + setDesc + '</span></div>';
+        }
+
         // Boss器官被动
         ['predatory_organ','chitin_epidermis','gland_core'].forEach(function(s){
             var eq = p[s].equipped; if (!eq) return;
