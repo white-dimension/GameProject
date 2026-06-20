@@ -17,7 +17,7 @@ window.GuideSystem = (function () {
             desc: '<b>阶段性目标</b>，完成后点击领取奖励。' },
         { id: 'ui-action-bar', pos: 'top', align: 'center', title: '操作栏',
             desc: '探索：实验室/图鉴/存档。<br>战斗：<b>1/2/3</b> 技能 · <b>空格</b> 结束回合。' },
-        { id: 'ui-log', pos: 'top', align: 'left', title: '神经日志',
+        { id: 'ui-log', pos: 'right', align: 'left', title: '神经日志',
             desc: '战斗记录、系统消息、奖励通知。' },
         { sel: '.hud-col-r button:last-child', pos: 'bottom', align: 'right', title: '帮助',
             desc: '<b style="color:var(--accent-green)">[引导]</b> 重温 · <b style="color:var(--accent-blue)">?</b> 手册' }
