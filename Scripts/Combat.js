@@ -971,10 +971,11 @@ window.CombatSystem = (function () {
                 var extraDrop = (_battleState.pathAffix && _battleState.pathAffix.id === 'scrap_rich') ? 1 : 0;
 
                 if (m.tier !== 'world_boss') {
-                    if (m.drop.type === 'organ') { gs.inventory.organs.push(m.drop.id); }
-                    else { gs.inventory.components[m.drop.id] = (gs.inventory.components[m.drop.id] || 0) + 1 + extraDrop; }
+                    var dropId = m.drop.pool ? GD().getRandomBossOrgan(m.drop.pool) : m.drop.id;
+                    if (m.drop.type === 'organ') { gs.inventory.organs.push(dropId); }
+                    else { gs.inventory.components[dropId] = (gs.inventory.components[dropId] || 0) + 1 + extraDrop; }
                 }
-                allDrops.push(m.drop.id);
+                allDrops.push(m.drop.pool ? '随机Boss器官' : m.drop.id);
                 if (extraDrop) allDrops.push(m.drop.id + "(额外)");
             }
         });
@@ -987,15 +988,16 @@ window.CombatSystem = (function () {
             if (bossData && bossData.drop) {
                 // [修复] 必须缓存总 BP 奖励，防止宝箱发放时计算丢失
                 var currentTotalBp = totalBp;
+                var bossDropId = bossData.drop.pool ? GD().getRandomBossOrgan(bossData.drop.pool) : bossData.drop.id;
                 _battleState._bossChest = {
                     bossName: bossData.name,
                     bpReward: currentTotalBp,
-                    dropId: bossData.drop.id,
-                    dropType: bossData.drop.type
+                    dropId: bossDropId,
+                    dropType: bossData.drop.type,
+                    dropPool: bossData.drop.pool || null
                 };
-                totalBp = 0; // 这里的 totalBp 仅用于显示在战报文字中，宝箱内容由 _bossChest 决定
-                // 从未掉落列表中移除Boss物品(宝箱必掉)
-                allDrops = allDrops.filter(function(d) { return d !== bossData.drop.id; });
+                totalBp = 0;
+                allDrops = allDrops.filter(function(d) { return d !== (bossData.drop.pool ? '随机Boss器官' : bossData.drop.id); });
             }
         }
         var dropCounts = {}; allDrops.forEach(function(d) { dropCounts[d] = (dropCounts[d] || 0) + 1; });

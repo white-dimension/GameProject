@@ -115,7 +115,7 @@ window.GameData = (function () {
                 { type: 'enrage', label: '<span class="icon icon-enrage"></span> 狂怒', value: 2.0, desc: '第 30 回合强制触发狂怒，攻击力永久提升至 2.0 倍', triggerTurn: 30 }
             ],
             weakness: '极度危险。皮肤免疫 50% 物理伤害。战前必须前往生物炼金釜配置【野性狂暴血清】进行速杀；战斗中先用捕食打击挂毒，再用腺体脉冲打出基因融毁爆破。',
-            drop: { type: 'organ', id: '暴君核心', chance: 1.0 },
+            drop: { type: 'organ', pool: 'MON_CH1_TYRANT', chance: 1.0 },
             bpReward: [100, 100]
         },
 
@@ -208,7 +208,7 @@ window.GameData = (function () {
                 { type: 'spawn', label: '<span class="icon icon-egg-clutch"></span> 产卵孵化', value: 0, desc: '每 3 回合产卵孵化一波怪潮，蜂后自身获得 100% 闪避', spawnInterval: 3, dodgeRate: 1.0, defenseZero: true }
             ],
             weakness: '产卵期间防御力归零，必须在其产卵意图亮起时，用腺体脉冲打出基因融毁爆破以终止其孵化。',
-            drop: { type: 'organ', id: '蜂后髓核', chance: 1.0 },
+            drop: { type: 'organ', pool: 'MON_CH1_QUEEN', chance: 1.0 },
             bpReward: [100, 100]
         },
 
@@ -366,7 +366,7 @@ window.GameData = (function () {
                 { type: 'shield', label: '<span class="icon icon-magic-shield"></span> 高能真菌护盾', value: 200, desc: '每回合开始时获得 200 点高能真菌护盾（最大 HP 的 50%）' }
             ],
             weakness: '机械终极体。护盾未破时一切物理和反伤对其无效。战前装配双专精【电子真菌】触发电荷偏转免进程，囤积上限进程后连续打出腺体脉冲爆破撕裂护盾，方可融毁核心。',
-            drop: { type: 'organ', id: '高能电泳核', chance: 1.0 },
+            drop: { type: 'organ', pool: 'MON_CH1_CORE', chance: 1.0 },
             bpReward: [100, 100]
         },
         TRAINING_DUMMY_MUTANT: {
@@ -641,35 +641,65 @@ window.GameData = (function () {
     // 4. Boss 独占突变体器官
     // =========================================================================
     const BOSS_ORGANS = {
+        // --- 暴君（巨兽/物理撕裂）---
         '暴君核心': {
-            id: '暴君核心',
-            slotType: 'predatory_organ',
-            tier: 3,
-            skillName: '暴君撕裂',
-            skillCost: 4,
-            skillEffect: { type: 'physical', baseMultiplier: 2.5, armorPenetration: 0.3 }
+            id: '暴君核心', slotType: 'predatory_organ', tier: 3, bossSource: 'MON_CH1_TYRANT',
+            skillName: '暴君撕裂', skillCost: 4,
+            skillEffect: { type: 'physical', baseMultiplier: 2.5, armorPenetration: 0.3, desc: '重型物理撕裂，2.5×倍率，无视30%防御' }
+        },
+        '暴君甲壳': {
+            id: '暴君甲壳', slotType: 'chitin_epidermis', tier: 3, bossSource: 'MON_CH1_TYRANT',
+            skillName: '骨板硬化', skillCost: 3,
+            skillEffect: { type: 'shield', shieldMultiplier: 1.2, thornsReflect: 0.15, desc: '生成攻击力×1.2护盾，受击反弹15%伤害' }
+        },
+        '暴君腺体': {
+            id: '暴君腺体', slotType: 'gland_core', tier: 3, bossSource: 'MON_CH1_TYRANT',
+            skillName: '震波咆哮', skillCost: 5,
+            skillEffect: { type: 'physical', baseMultiplier: 2.0, stunChance: 0.4, desc: '2.0×倍率，40%概率使目标跳过下回合' }
+        },
+        // --- 蜂后（虫群/寄生召唤）---
+        '蜂后毒牙': {
+            id: '蜂后毒牙', slotType: 'predatory_organ', tier: 2, bossSource: 'MON_CH1_QUEEN',
+            skillName: '毒液注射', skillCost: 3,
+            skillEffect: { type: 'toxin', baseMultiplier: 1.5, poisonDuration: 5, poisonDamage: 3, desc: '1.5×倍率，施加5回合猛毒（每回合3点）' }
+        },
+        '蜂后甲壳': {
+            id: '蜂后甲壳', slotType: 'chitin_epidermis', tier: 2, bossSource: 'MON_CH1_QUEEN',
+            skillName: '幼虫护盾', skillCost: 2,
+            skillEffect: { type: 'shield', shieldMultiplier: 0.8, healOnShield: 0.1, desc: '生成攻击力×0.8护盾，护盾存在时每回合回复10%最大HP' }
         },
         '蜂后髓核': {
-            id: '蜂后髓核',
-            slotType: 'gland_core',
-            tier: 2,
-            skillName: '畸变群落母体孵化',
-            skillCost: 4,
-            skillEffect: {
-                type: 'summon',
-                summonCount: 3,
-                drones: { attackMultiplier: 0.3, duration: 5 },
-                hordeRule: '每只工蜂直接消灭 Math.ceil(p.atk * 0.3) 只小怪，不计算防御力'
-            }
+            id: '蜂后髓核', slotType: 'gland_core', tier: 2, bossSource: 'MON_CH1_QUEEN',
+            skillName: '畸变群落母体孵化', skillCost: 4,
+            skillEffect: { type: 'summon', baseMultiplier: 3.0, summonCount: 3, desc: '3.0×倍率召唤集群突袭，伤害全额吸血' }
+        },
+        // --- 安保核心（机械/电弧）---
+        '核心钻头': {
+            id: '核心钻头', slotType: 'predatory_organ', tier: 3, bossSource: 'MON_CH1_CORE',
+            skillName: '超频贯穿', skillCost: 4,
+            skillEffect: { type: 'physical', baseMultiplier: 2.0, armorPenetration: 0.5, critChance: 0.2, desc: '2.0×倍率+50%破甲，20%概率暴击（×2伤害）' }
+        },
+        '核心护盾': {
+            id: '核心护盾', slotType: 'chitin_epidermis', tier: 3, bossSource: 'MON_CH1_CORE',
+            skillName: '纳米修复场', skillCost: 3,
+            skillEffect: { type: 'shield', shieldMultiplier: 0.6, regenPerTurn: 0.05, desc: '生成攻击力×0.6护盾，每回合自动回复5%进程' }
         },
         '高能电泳核': {
-            id: '高能电泳核',
-            slotType: 'gland_core',
-            tier: 3,
-            skillName: '电弧过载风暴',
-            skillCost: 5,
-            skillEffect: { type: 'electric', baseMultiplier: 2.0, chainTargets: 3 }
+            id: '高能电泳核', slotType: 'gland_core', tier: 3, bossSource: 'MON_CH1_CORE',
+            skillName: '电弧过载风暴', skillCost: 5,
+            skillEffect: { type: 'electric', baseMultiplier: 2.0, chainTargets: 3, desc: '2.0×倍率高压电弧，连锁3个目标' }
         }
+    };
+
+    // Boss器官掉落池（每Boss三个槽位各一，随机掉落其一）
+    var _bossOrganPools = {
+        MON_CH1_TYRANT: ['暴君核心','暴君甲壳','暴君腺体'],
+        MON_CH1_QUEEN: ['蜂后毒牙','蜂后甲壳','蜂后髓核'],
+        MON_CH1_CORE: ['核心钻头','核心护盾','高能电泳核']
+    };
+    var _getRandomBossOrgan = function(bossId) {
+        var pool = _bossOrganPools[bossId]; if (!pool) return null;
+        return pool[Math.floor(Math.random() * pool.length)];
     };
 
     // =========================================================================
@@ -1140,6 +1170,7 @@ window.GameData = (function () {
         STATUS_CONSTANTS: STATUS_CONSTANTS,
         TUTORIALS: TUTORIALS,
         RANDOM_EVENTS: RANDOM_EVENTS,
-        calcTierUpgradeCost: calcTierUpgradeCost
+        calcTierUpgradeCost: calcTierUpgradeCost,
+        getRandomBossOrgan: _getRandomBossOrgan
     };
 })();
