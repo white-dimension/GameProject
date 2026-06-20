@@ -146,6 +146,23 @@ motion: gentle camera sway like breathing, flickering lights, spark showers, mis
 
 ---
 
+### 标题画面背景（16:9 横屏）
+```
+dark sci-fi opening sequence, slow dramatic push-in through a derelict underground laboratory corridor,
+heavy blast door slowly grinding open revealing a vast abandoned bio-research chamber beyond,
+pulsating red emergency lights casting long shadows across walls covered in organic growth,
+shattered containment tubes lining both sides, their glass frosted with age,
+a single flickering holographic terminal displaying corrupted genetic sequence data in the distance,
+thick atmospheric fog hugging the floor, dust motes suspended in stagnant air,
+deep sub-bass rumble of failing life support systems, occasional distant metallic groan,
+camera slowly advances forward through the corridor like entering the maw of a sleeping beast,
+16:9 landscape aspect ratio, seamless loop, 12 second clip,
+style of cinematic sci-fi horror opening, slow and ominous, building dread,
+motion: steady slow dolly-in, no sudden movements, perfect for title overlay
+```
+
+---
+
 ## 五、出图规格汇总
 
 | 类型 | 尺寸 | 比例 | 格式 |
