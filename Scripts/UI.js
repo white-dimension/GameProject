@@ -3200,9 +3200,9 @@ window.UISystem = (function () {
         swarm:  { hex: '#9acd32', bg: 'rgba(154,205,50,0.08)', bd: 'rgba(154,205,50,0.2)' },
         ember:  { hex: '#4ab8ff', bg: 'rgba(74,184,255,0.08)', bd: 'rgba(74,184,255,0.2)' }
     };
-    var _RACE_NAMES = { mutant: '异变者', swarm: '寄生群落', ember: '机械余烬' };
-    var _RACE_ICONS = { mutant: 'icon-mutant', swarm: 'icon-swarm', ember: 'icon-ember' };
-    var _ORGAN_NAMES = { predatory_organ: '捕食器官', chitin_epidermis: '生物表皮', gland_core: '腺体核心' };
+    var _RACE_NAMES = window.GameStrings.RACE_NAMES;
+    var _RACE_ICONS = window.GameStrings.RACE_ICONS;
+    var _ORGAN_NAMES = window.GameStrings.ORGAN_NAMES;
 
     // 构建专精详情
     var _buildMasteryDetail = function(race) {
