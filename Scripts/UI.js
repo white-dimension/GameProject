@@ -3044,12 +3044,21 @@ window.UISystem = (function () {
         // 左侧固定说明栏
         var infoBar = _ce('div');
         infoBar.style.cssText = 'flex:0 0 200px;padding:24px 16px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:6px;text-align:left;align-self:flex-start;';
-        infoBar.innerHTML = '<div style="margin-bottom:10px;"><span class="txt-xs txt-green">进阶</span><div class="txt-xs txt-dim">消耗碎片提升器官阶位</div></div>' +
-            '<div style="margin-bottom:10px;"><span class="txt-xs txt-green">挂载</span><div class="txt-xs txt-dim">更换器官，Boss器官提供专属技能</div></div>' +
-            '<div style="margin-bottom:10px;"><span class="txt-xs txt-green">组件</span><div class="txt-xs txt-dim">空槽嵌入碎片，获得词条加成</div></div>' +
-            '<div style="margin-bottom:10px;"><span class="txt-xs txt-purple">魔药</span><div class="txt-xs txt-dim">炼制战斗药剂，最多3瓶</div></div>' +
-            '<div style="margin-bottom:10px;"><span class="txt-xs txt-gold">涂层</span><div class="txt-xs txt-dim">针对特定种族造成融毁伤害</div></div>' +
-            '<div><span class="txt-xs txt-gold">基因点数</span><div class="txt-xs txt-dim">卸载组件10BP，击败怪物获得</div></div>';
+        infoBar.innerHTML = '<div style="margin-bottom:14px;"><span class="txt-xs txt-bold" style="color:var(--accent-green);">> 准备流程</span></div>' +
+            '<div style="margin-bottom:10px;"><span class="txt-xs txt-dim">① 击败Boss → 获得器官</span></div>' +
+            '<div style="margin-bottom:10px;"><span class="txt-xs txt-dim">② 挂载器官 → 获得技能</span></div>' +
+            '<div style="margin-bottom:10px;"><span class="txt-xs txt-dim">③ 嵌入组件 → 属性加成</span></div>' +
+            '<div style="margin-bottom:10px;"><span class="txt-xs txt-dim">④ 炼制魔药 → 战斗中[4-6]使用</span></div>' +
+            '<div style="margin-bottom:10px;"><span class="txt-xs txt-dim">⑤ 涂抹涂层 → 克制目标种族</span></div>' +
+            '<div style="margin-bottom:14px;"><span class="txt-xs txt-dim">⑥ 进阶/同调 → 强化器官</span></div>' +
+            '<div style="border-top:1px solid var(--border-dim);padding-top:10px;">' +
+            '<div style="margin-bottom:8px;"><span class="txt-xs txt-green">进阶</span><div class="txt-xs txt-dim" style="font-size:10px;">消耗组件提升阶位 → 属性+技能倍率↑</div></div>' +
+            '<div style="margin-bottom:8px;"><span class="txt-xs txt-green">挂载</span><div class="txt-xs txt-dim" style="font-size:10px;">Boss器官替换标准技能</div></div>' +
+            '<div style="margin-bottom:8px;"><span class="txt-xs txt-green">组件</span><div class="txt-xs txt-dim" style="font-size:10px;">每槽2孔，镶嵌获得词条</div></div>' +
+            '<div style="margin-bottom:8px;"><span class="txt-xs txt-purple">魔药</span><div class="txt-xs txt-dim" style="font-size:10px;">战斗快捷键[4-6]，注意毒性</div></div>' +
+            '<div style="margin-bottom:8px;"><span class="txt-xs txt-gold">涂层</span><div class="txt-xs txt-dim" style="font-size:10px;">持续100回合，种族克制增伤</div></div>' +
+            '<div><span class="txt-xs txt-gold">基因点数</span><div class="txt-xs txt-dim" style="font-size:10px;">击败怪物/完成任务获得</div></div>' +
+            '</div>';
         // 左右布局容器
         var wrapper = _ce('div');
         wrapper.style.cssText = 'display:flex;gap:20px;align-items:flex-start;width:min(920px,95vw);';
@@ -3064,7 +3073,7 @@ window.UISystem = (function () {
         var comps = GD().COMPONENTS || {};
         var organBlock = _ce('div');
         organBlock.style.cssText = 'padding:20px;background:rgba(0,255,136,0.02);border:1px solid rgba(0,255,136,0.15);border-radius:8px;display:flex;flex-direction:column;gap:12px;';
-        organBlock.innerHTML = '<div class="txt-xs txt-green txt-bold">> 器官装备</div>';
+        organBlock.innerHTML = '<div class="txt-xs txt-green txt-bold">> 器官装备</div><div class="txt-xs txt-dim" style="margin-bottom:4px;">三个槽位对应战斗中技能卡牌 [1]捕食打击 [2]生物防御 [3]腺体脉冲，装备Boss器官可替换为专属技能</div>';
         ['predatory_organ', 'chitin_epidermis', 'gland_core'].forEach(function(s) {
             var d = p[s];
             var cost = Math.ceil(5 * Math.pow(1.6, d.tier));
