@@ -1136,7 +1136,7 @@ window.UISystem = (function () {
                 var envPenalty = (bsv && bsv.dungeonEnv ? bsv.dungeonEnv.effect.ramPenalty || 0 : 0);
                 var actualCost = baseCost + penalty + envPenalty;
 
-                var can = gs.player.process >= actualCost;
+                var can = gs.player.process >= actualCost && !isVictory;
                 var b = _ce('button', 'btn btn-battle-card ' + (can ? btn.cls : 'btn-gray'));
                 var costHTML = (penalty + envPenalty > 0) ? '<span style="color:var(--accent-red); font-weight:bold;">' + actualCost + '</span>' : actualCost;
                 b.innerHTML = '<span class="txt-sm txt-bold">[' + btn.k + '] ' + btn.l + '</span>' +
