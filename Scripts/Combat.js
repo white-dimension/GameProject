@@ -330,11 +330,10 @@ window.CombatSystem = (function () {
                 var stunChance = syncLvl >= 3 ? 0.7 : 0.4;
                 if (Math.random() < stunChance) { curMon.status['stunned'] = 1; if (syncLvl >= 3) curMon._slowed = 2; }
             }
-            if (!p.gland_core.equipped) {
-                if (curMon.status['poison']) { pipeCtx.organMultiplier = 3.0; }
-                else if (curMon.status['compromised']) { pipeCtx.organMultiplier = 2.0; }
-                else { pipeCtx.organMultiplier = 0.5; }
-            }
+            // 连招引爆：所有腺体均可触发（Boss腺体无标记时才用专属效果）
+            if (curMon.status['poison']) { pipeCtx.organMultiplier = 3.0; }
+            else if (curMon.status['compromised']) { pipeCtx.organMultiplier = 2.0; }
+            else if (!p.gland_core.equipped) { pipeCtx.organMultiplier = 0.5; }
         }
 
         // ===== predatory 器官特效 =====
@@ -361,8 +360,8 @@ window.CombatSystem = (function () {
         var result = TE.DamagePipeline.calculate(pipeCtx);
         var damage = result.damage;
 
-        // ===== 默认器官 标记/连招 =====
-        if (slot === 'predatory_organ' && !p.predatory_organ.equipped && m && m.race === 'ember') {
+        // ===== 标记/连招（所有捕食器官均可触发）=====
+        if (slot === 'predatory_organ' && m && m.race === 'ember') {
             if (curMon.status['ionized']) {
                 delete curMon.status['ionized'];
                 var shieldStrip = curMon._shield || 0; curMon._shield = 0;
@@ -380,13 +379,17 @@ window.CombatSystem = (function () {
         } else if (slot === 'predatory_organ') {
             _log('<span style="color:var(--accent-red)">发起'+_getSkillName('predatory_organ')+'，造成 ' + damage + ' 点物理伤害。</span>');
         }
-        if (slot === 'predatory_organ' && !p.predatory_organ.equipped && m && m.race === 'swarm') {
+        if (slot === 'predatory_organ' && m && m.race === 'swarm') {
             curMon._compTicks = (curMon._compTicks || 0) + 1;
             if (curMon._compTicks >= 2) { curMon.status['compromised'] = 3; _log('<span style="color:var(--accent-yellow)">连续打击生效：目标已被【生物崩解标记】。</span>'); curMon._compTicks = 0; }
         }
 
         // ===== gland 器官日志 =====
         if (slot === 'gland_core') {
+            var hadMark = false;
+            if (curMon.status['poison']) { delete curMon.status['poison']; var heal = damage; p.hp = Math.min(p.hp_max, p.hp + heal); _log('<span style="color:var(--accent-yellow)">>> [基因融毁] 触发连招爆破！造成 ' + damage + ' 点伤害</span>，<span style="color:var(--accent-green)">吸取 ' + heal + ' HP</span>。'); window.UISystem.showDamageFloat('+' + heal, 'var(--accent-green)', 'player'); hadMark = true; }
+            else if (curMon.status['compromised']) { curMon._dodging = false; curMon._vulnerable = 2; delete curMon.status['compromised']; _log('<span style="color:var(--accent-yellow)">>> [生物崩解] 连招触发！目标闪避归零，陷入易伤状态。造成 ' + damage + ' 点伤害。</span>'); hadMark = true; }
+            if (!hadMark) {
             if (p.gland_core.equipped === '暴君腺体') {
                 var extra2 = curMon.status['stunned'] ? '目标眩晕！' : '';
                 if (syncLvl >= 3 && extra2) extra2 += ' 追加减速2回合 <b>觉醒强化！</b>';
@@ -412,10 +415,9 @@ window.CombatSystem = (function () {
                 }
                 _log('<span style="color:var(--accent-blue)">>> [电弧过载风暴] 释放高压电弧！造成 ' + damage + ' 点电离伤害。</span>');
             } else {
-                if (curMon.status['poison']) { delete curMon.status['poison']; var heal = damage; p.hp = Math.min(p.hp_max, p.hp + heal); _log('<span style="color:var(--accent-yellow)">>> [基因融毁] 触发连招爆破！造成 ' + damage + ' 点伤害</span>，<span style="color:var(--accent-green)">吸取 ' + heal + ' HP</span>。'); window.UISystem.showDamageFloat('+' + heal, 'var(--accent-green)', 'player'); }
-                else if (curMon.status['compromised']) { curMon._dodging = false; curMon._vulnerable = 2; delete curMon.status['compromised']; _log('<span style="color:var(--accent-yellow)">>> [生物崩解] 连招触发！目标闪避归零，陷入易伤状态。造成 ' + damage + ' 点伤害。</span>'); }
-                else { _log('<span style="color:var(--accent-yellow)">'+_getSkillName('gland_core')+'造成 ' + damage + ' 点轻微酸蚀。</span>'); }
+                _log('<span style="color:var(--accent-yellow)">'+_getSkillName('gland_core')+'造成 ' + damage + ' 点轻微酸蚀。</span>');
             }
+            } // end if (!hadMark)
         }
 
         // ===== 通用后处理 =====
