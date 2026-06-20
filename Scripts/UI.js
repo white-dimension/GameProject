@@ -1451,12 +1451,13 @@ window.UISystem = (function () {
         // 左右布局容器
         var wrapper = _ce('div');
         wrapper.style.cssText = 'display:flex;gap:20px;align-items:flex-start;width:min(1050px,95vw);';
+        wrapper.style.cssText = 'display:flex;gap:20px;align-items:flex-start;width:min(950px,95vw);';
         wrapper.appendChild(infoBar);
         wrapper.appendChild(box);
         _modalOverlay.appendChild(wrapper);
 
         var body = _ce('div');
-        body.style.cssText = 'padding:25px 30px;display:flex;flex-direction:column;gap:15px;overflow-y:auto;flex:1;';
+        body.style.cssText = 'padding:15px 20px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;flex:1;';
         var killed = gs.bestiary.killCount || {};
         var research = gs.bestiary.researchLevels || {};
         var tierNames = { common: '普通', elite: '精英', world_boss: '世界首领' };
