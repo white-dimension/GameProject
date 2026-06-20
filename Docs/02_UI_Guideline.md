@@ -282,4 +282,36 @@ _bgVideos.push(newVid);
 
 ---
 
-> v1.0 初始 | v2.0 字体+状态条+光标 | v2.1 布局重构 | v3.6 颜色/图标/地图/战斗全面重制 | v3.8 逻辑同步与清理 | **V2.1 视听升级 (2026-06-20)**
+## 9. CSS 解耦规则 (v3.0+)
+
+> 当前 UI.js 中存在大量 `element.style.cssText = '...'` 内联样式。
+> 一次性全部迁移风险过大，采用渐进式策略。
+
+**新代码规则**：
+- **新增 UI 布局用类名**，写入 `styles.css`，JS 只负责 `element.classList.add/remove/toggle`
+- **状态切换用类名**：`.is-active` / `.is-disabled` / `.is-hidden`，避免 JS 直接改 `style.display`
+- **改旧 UI 顺手迁移**：修改已有模块时，将内联样式提取为 CSS 类，随功能迭代自然收敛
+
+**反例**（避免）：
+```javascript
+el.style.cssText = 'display:flex;gap:20px;padding:16px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:6px;';
+```
+
+**正例**（推荐）：
+```css
+/* styles.css */
+.modal-sidebar { display: flex; gap: 20px; padding: 16px; background: var(--bg-card); border: 1px solid var(--border-dim); border-radius: 6px; }
+.modal-sidebar.is-hidden { display: none; }
+```
+```javascript
+// UI.js
+el.className = 'modal-sidebar';
+// 需要隐藏时：
+el.classList.add('is-hidden');
+```
+
+**迁移优先级**：弹窗骨架 > HUD 槽位 > 卡片容器 > 按钮变体
+
+---
+
+> v1.0 初始 | v2.0 字体+状态条+光标 | v2.1 布局重构 | v3.6 颜色/图标/地图/战斗全面重制 | v3.8 逻辑同步与清理 | **v3.0 性能优化 (2026-06-20)**
