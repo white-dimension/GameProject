@@ -3368,6 +3368,7 @@ window.UISystem = (function () {
             organInvRow.style.cssText = 'padding:15px 20px;background:rgba(0,255,136,0.02);border:1px solid rgba(0,255,136,0.1);border-radius:6px;';
             var orgHTML = '<div class="txt-xs txt-green txt-bold" style="margin-bottom:6px;">> 突变器官（' + gs.inventory.organs.length + '个）</div><div style="display:flex;flex-wrap:wrap;gap:8px;">';
             gs.inventory.organs.forEach(function(oid) {
+                if (!oid || oid === 'null' || oid === 'undefined') return; // 过滤脏数据
                 var oc3 = _getOrganColor(oid);
                 var bo3 = bos3[oid]; var slotName3 = bo3 ? (_ORGAN_NAMES[bo3.slotType] || '未知') : '未知';
                 var oTip = '<b style=color:' + oc3.hex + '>' + oid + '</b>&#10;<b>' + (bo3 ? bo3.skillName : '') + '</b>&#10;<span style=color:var(--accent-green)>消耗 ' + (bo3?bo3.skillCost:'') + ' 进程</span>';
