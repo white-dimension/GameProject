@@ -2787,12 +2787,13 @@ window.UISystem = (function () {
         _modalOverlay._returnToLab = true;
         var organs = gs.inventory.organs || [];
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
-        _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
-        var box = _ce('div', 'modal-box');
-        box.style.cssText = 'width:min(450px,90vw);background:var(--bg-modal);border:1px solid var(--accent-green);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
+        // 浮动子面板 — 不覆盖实验室主界面
+        var box = _ce('div');
+        box.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:3500;width:min(450px,90vw);background:var(--bg-modal);border:1px solid var(--accent-green);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.8);';
+        box.id = 'organ-picker-panel';
         var head = _ce('div');
         head.style.cssText = 'padding:14px 20px;background:rgba(0,255,136,0.05);border-bottom:1px solid var(--accent-green);display:flex;justify-content:space-between;align-items:center;';
-        head.innerHTML = '<div class="txt-md txt-green txt-bold">[ 器官挂载 ]</div><button class="btn btn-blue btn-sm" onclick="UISystem.closeModal();UISystem.showReorganizeModal();">取消</button>';
+        head.innerHTML = '<div class="txt-md txt-green txt-bold">[ 器官挂载 ]</div><button class="btn btn-blue btn-sm" onclick="var p=document.getElementById(\'organ-picker-panel\');if(p)p.remove();">取消</button>';
         box.appendChild(head);
         var body = _ce('div'); body.style.cssText = 'padding:12px 20px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;max-height:50vh;';
         if (organs.length === 0) {
@@ -2824,12 +2825,12 @@ window.UISystem = (function () {
                 var row = _ce('div');
                 row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:' + oc.bg + ';border:1px solid ' + oc.bd + ';border-radius:4px;cursor:pointer;';
                 row.innerHTML = '<div><span class="txt-xs txt-bold" style="color:' + oc.hex + ';">' + oid + '</span><span class="txt-xs txt-dim"> ' + desc + '</span></div>';
-                row.onclick = function() { try { window.GameState.equipOrgan(slot, oid); } catch(e) {} UISystem.showReorganizeModal(); UISystem.render(); };
+                row.onclick = function() { try { window.GameState.equipOrgan(slot, oid); } catch(e) {} var p=document.getElementById('organ-picker-panel');if(p)p.remove(); UISystem.showReorganizeModal(); UISystem.render(); };
                 body.appendChild(row);
             });
             }
         }
-        box.appendChild(body); _modalOverlay.appendChild(box);
+        box.appendChild(body); document.body.appendChild(box);
     }
 
     // --- 组件详情通用模板 ---
