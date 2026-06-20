@@ -2020,18 +2020,17 @@ window.UISystem = (function () {
     function _renderIntroTexts() {
         var box = _ce('div');
         box.style.cssText = 'width:min(650px,90vw);padding:50px 40px 30px 40px;text-align:left;';
-        box.innerHTML = '<div class="txt-lg txt-green txt-bold" style="margin-bottom:24px;">黑平线：原体觉醒</div>' +
-            '<div style="display:flex;flex-direction:column;gap:0;" id="intro-log"></div>' +
+        box.innerHTML = '<div style="display:flex;flex-direction:column;gap:0;" id="intro-log"></div>' +
             '<button class="btn btn-green btn-capsule" id="intro-btn" style="margin-top:24px;padding:10px 40px;font-size:14px;opacity:0;transition:opacity 0.5s;">激活原体</button>';
         _modalOverlay.appendChild(box);
         var lines = [
-            { text: '神经链路初始化...', cls: 'txt-xs txt-dim', delay: 200 },
-            { text: '黑地平线超生物复合实验室 地下一层', cls: 'txt-xs txt-green', delay: 600 },
-            { text: '2099年，基因剥离计划「余烬」彻底失控。', cls: 'txt-sm txt-dim', delay: 400 },
-            { text: '三股力量在深达数千米的地下疯狂增殖：变异血肉、寄生毒素飞蛾、纳米真菌改写的安保机械。', cls: 'txt-sm txt-dim', delay: 300 },
-            { text: '你是唯一的——', cls: 'txt-sm txt-dim', delay: 200 },
-            { text: '原体-II · 无限拟态白血球始祖', cls: 'txt-md txt-green txt-bold', delay: 600 },
-            { text: '链接已建立。苏醒吧。', cls: 'txt-sm txt-green', delay: 500 }
+            { text: '神经链路初始化...', cls: 'txt-xs', clr: 'rgba(0,255,136,0.45)', delay: 200 },
+            { text: '黑地平线超生物复合实验室 地下一层', cls: 'txt-xs', clr: 'rgba(0,255,136,0.6)', delay: 600 },
+            { text: '2099年，基因剥离计划「余烬」彻底失控。', cls: 'txt-sm', clr: 'rgba(0,255,136,0.75)', delay: 400 },
+            { text: '三股力量在深达数千米的地下疯狂增殖：变异血肉、寄生毒素飞蛾、纳米真菌改写的安保机械。', cls: 'txt-sm', clr: 'rgba(0,255,136,0.75)', delay: 300 },
+            { text: '你是唯一的——', cls: 'txt-sm', clr: 'rgba(0,255,136,0.8)', delay: 200 },
+            { text: '原体-II · 无限拟态白血球始祖', cls: 'txt-md txt-bold', clr: 'var(--accent-green)', delay: 600 },
+            { text: '链接已建立。苏醒吧。', cls: 'txt-sm', clr: 'var(--accent-green)', delay: 500 }
         ];
         var log = document.getElementById('intro-log');
         var idx = 0;
@@ -2044,15 +2043,15 @@ window.UISystem = (function () {
             var li = lines[idx];
             var div = document.createElement('div');
             div.className = li.cls;
-            div.style.cssText = 'margin-bottom:10px;';
-            div.innerHTML = '<span class="txt-green">></span> <span class="typewriter"></span>';
+            div.style.cssText = 'margin-bottom:10px;color:' + (li.clr || '');
+            div.innerHTML = '<span>></span> <span class="typewriter"></span>';
             log.appendChild(div);
             _typeText(div.querySelector('.typewriter'), li.text, function() {
                 idx++;
                 setTimeout(showNext, li.delay);
             }, 55);
         };
-        setTimeout(showNext, 300);
+        setTimeout(showNext, 500);
     }
     function closeIntro() {
         _introActive = false;
