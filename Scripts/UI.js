@@ -2388,8 +2388,8 @@ window.UISystem = (function () {
         setTimeout(function() {
             el.style.opacity = '0';
             el.style.transform = 'translate(-50%,-50%) translateY(-20px)';
-        }, 1600);
-        setTimeout(function() { document.body.removeChild(el); }, 2100);
+        }, 600);
+        setTimeout(function() { document.body.removeChild(el); }, 1000);
     }
     function closeModal() { _modalOverlay.style.display = 'none'; }
 
