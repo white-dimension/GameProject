@@ -1389,11 +1389,11 @@ window.UISystem = (function () {
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
         var box = _ce('div', 'modal-box status-modal');
-        box.style.cssText = 'width:min(900px,95vw);max-height:calc(100vh - 200px);background:var(--bg-modal);border:1px solid #f57f17;padding:0;display:flex;flex-direction:column;overflow:hidden;';
+        box.style.cssText = 'width:min(1050px,95vw);max-height:calc(100vh - 200px);background:var(--bg-modal);border:1px solid #f57f17;padding:0;display:flex;flex-direction:column;overflow:hidden;';
 
         var killedCount = 0; Object.keys(gs.bestiary.killCount || {}).forEach(function(id) { killedCount += (gs.bestiary.killCount[id] || 0); });
         var infoBar = _ce('div');
-        infoBar.style.cssText = 'margin-bottom:20px;padding:12px 16px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;width:min(900px,95vw);text-align:left;';
+        infoBar.style.cssText = 'margin-bottom:20px;padding:12px 16px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;width:min(1050px,95vw);text-align:left;';
         infoBar.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
             '<span><span class="txt-xs txt-gold">已击杀 ' + killedCount + ' 只</span><span class="txt-xs txt-dim"> · 共收录 ' + Object.keys(allMonsters).length + ' 种</span></span>' +
             '<span class="txt-xs txt-gold">当前基因点数: ' + gs.player.bp + '</span></div>' +
