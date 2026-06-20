@@ -3202,7 +3202,7 @@ window.UISystem = (function () {
                 }
             });
             row.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px;width:100%;">' +
-                '<div class="txt-xs txt-green txt-bold">' + organNames[s] + ' <span class="txt-xs" style="color:var(--accent-yellow);">' + _fmtTierStars(d.tier) + '</span></div>' +
+                '<div class="txt-xs txt-green txt-bold">' + organNames[s] + '<span style="color:var(--accent-yellow);margin-left:4px;">' + _fmtTierStars(d.tier) + '</span></div>' +
                 '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between;">' +
                 '<span class="txt-xs txt-dim" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">挂载: ' + (d.equipped ? '<span class="help-tip btn-organ" style="padding:6px 10px;font-size:13px;background:' + (_organColors[d.equipped]||_organColors._default).bg + ';border:1px solid ' + (_organColors[d.equipped]||_organColors._default).bd + ';border-radius:4px;color:' + (_organColors[d.equipped]||_organColors._default).hex + ';cursor:pointer;" data-tip="点击卸下该器官" onclick="try{GameState.equipOrgan(\'' + s + '\',null);}catch(e){}UISystem.showReorganizeModal();UISystem.render();">' + d.equipped + '</span>' : '<span class="btn-organ' + (gs.inventory.organs.length > 0 ? ' slot-ready' : '') + '" style="padding:6px 10px;font-size:13px;background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);border-radius:4px;color:var(--accent-green);cursor:pointer;" onclick="UISystem._showOrganPicker(\'' + s + '\')">标准原型</span>') + ' 组件: <span style="display:inline-flex;align-items:center;gap:8px;">' + slotHTML + '</span></span>' +
                 (function() {
