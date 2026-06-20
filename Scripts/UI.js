@@ -80,10 +80,10 @@ window.UISystem = (function () {
             v.volume = 1.0;
             v.autoplay = false;
             v.playsInline = true;
-            v.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;display:none;pointer-events:none;filter:brightness(0.5);transition:opacity 0.4s ease;';
+            v.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;display:none;pointer-events:none;filter:brightness(0.5);transition:opacity 1.2s ease;';
             v.addEventListener('timeupdate', function() {
                 if (v._fading || !v.duration) return;
-                if (v.currentTime > v.duration - 0.5) {
+                if (v.currentTime > v.duration - 1.5) {
                     v._fading = true;
                     v.style.opacity = '0';
                     clearTimeout(v._fadeTimer);
@@ -92,7 +92,7 @@ window.UISystem = (function () {
                         v.style.opacity = '1';
                         v.play().catch(function(){});
                         v._fading = false;
-                    }, 450);
+                    }, 1200);
                 }
             });
             _root.appendChild(v);
