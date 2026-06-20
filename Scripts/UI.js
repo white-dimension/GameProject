@@ -3169,6 +3169,12 @@ window.UISystem = (function () {
                         if (ea.thornsPercent) ep.push('反伤' + Math.round(ea.thornsPercent*100) + '%');
                         if (ea.dotBonus) ep.push('毒伤+' + ea.dotBonus);
                         if (ea.bonusVsSwarm) ep.push('对寄生+' + Math.round(ea.bonusVsSwarm*100) + '%');
+                        if (ea.deathDefy) ep.push('免死一次');
+                        if (ea.poisonImmune) ep.push('毒素免疫');
+                        if (ea.killHeal) ep.push('击杀回复' + ea.killHeal + 'HP');
+                        if (ea.critChance) ep.push('暴击率' + Math.round(ea.critChance*100) + '%');
+                        if (ea.critMultiplier && ea.critMultiplier > 1.5) ep.push('暴伤×' + ea.critMultiplier.toFixed(1));
+                        if (ea.processOnHit) ep.push('受击回' + ea.processOnHit + '进程');
                         if (ep.length > 0) etip += '&#10;' + ep.join(' · ');
                     }
                     var _bgL = 'rgba(255,213,79,0.08)'; var _bdL = 'rgba(255,213,79,0.2)'; var _clL = 'var(--accent-yellow)';
