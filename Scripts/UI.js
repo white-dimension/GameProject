@@ -226,7 +226,7 @@ window.UISystem = (function () {
 
         var skillInfo = _ce('div', 'skill-info-panel');
         skillInfo.id = 'ui-skill-info';
-        skillInfo.style.cssText = 'position:absolute;right:25px;bottom:25px;border:1px solid var(--border-dim);background:var(--bg-card);border-radius:8px;padding:15px;box-shadow:0 10px 30px rgba(0,0,0,0.8);';
+        skillInfo.style.cssText = 'position:absolute;right:25px;bottom:25px;border:1px solid var(--border-dim);background:var(--bg-card);border-radius:8px;padding:15px;box-shadow:0 10px 30px rgba(0,0,0,0.8);display:none;';
         _viewport.appendChild(skillInfo);
 
         var actionBar = _ce('div', 'action-bar');
