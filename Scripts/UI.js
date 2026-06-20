@@ -2940,7 +2940,7 @@ window.UISystem = (function () {
             var oTip = '<b style=color:' + ocl.hex + '>' + d.equipped + '：</b>&#10;' + ((GD().BOSS_ORGANS[d.equipped] || {}).skillEffect ? GD().BOSS_ORGANS[d.equipped].skillName + '&#10;消耗 ' + GD().BOSS_ORGANS[d.equipped].skillCost + ' 进程&#10;同调等级: ' + syncLabel + (awDesc ? '&#10;<b style=color:var(--accent-yellow)>觉醒: ' + awDesc + '</b>' : '') : 'Boss 专属器官');
             html += '<span class="help-tip btn-organ" style="padding:6px 10px;font-size:13px;background:' + ocl.bg + ';border:1px solid ' + ocl.bd + ';border-radius:4px;color:' + ocl.hex + ';cursor:pointer;" data-tip="' + oTip + '"';
             if (opts.interactive) html += ' onclick="try{GameState.equipOrgan(\'' + s + '\',null);}catch(e){}UISystem.showReorganizeModal();UISystem.render();"';
-            html += '>' + _fmtTierStars(syncLvl) + ' ' + d.equipped + '</span>';
+            html += '>' + (syncLvl >= 3 ? 'MAX ' : _fmtTierStars(syncLvl) + ' ') + d.equipped + '</span>';
         } else {
             html += '<span class="btn-organ' + (gs.inventory.organs.length > 0 ? ' slot-ready' : '') + '" style="padding:6px 10px;font-size:13px;background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);border-radius:4px;color:var(--accent-green);';
             if (opts.interactive) html += 'cursor:pointer;" onclick="UISystem._showOrganPicker(\'' + s + '\')"';
@@ -3432,7 +3432,8 @@ window.UISystem = (function () {
                     }
                 }
                 oTip += '&#10;可装备于：' + slotName3;
-                orgHTML += '<span class="help-tip" style="padding:4px 10px;font-size:13px;background:' + oc3.bg + ';border:1px solid ' + oc3.bd + ';border-radius:4px;color:' + oc3.hex + ';" data-tip="' + oTip + '">' + _fmtTierStars(syncLvl) + ' ' + oid + '</span>';
+                var starLabel = syncLvl >= 3 ? 'MAX ' : _fmtTierStars(syncLvl) + ' ';
+                orgHTML += '<span class="help-tip" style="padding:4px 10px;font-size:13px;background:' + oc3.bg + ';border:1px solid ' + oc3.bd + ';border-radius:4px;color:' + oc3.hex + ';" data-tip="' + oTip + '">' + starLabel + oid + '</span>';
             });
             orgHTML += '</div>'; organInvRow.innerHTML = orgHTML; body.appendChild(organInvRow);
         }
