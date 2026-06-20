@@ -14,9 +14,6 @@ function createWindow() {
 
   win.setMenuBarVisibility(false);
   win.loadFile('HTML/index.html');
-  win.webContents.on('dom-ready', function() {
-    win.webContents.executeJavaScript('document.documentElement.style.setProperty("cursor","none","important");document.body.style.setProperty("cursor","none","important");');
-  });
 }
 
 app.whenReady().then(() => {
