@@ -28,6 +28,7 @@ window.GameData = (function () {
         // —— 🧬 异变者生态群 ——
         MON_CH1_ZOMBIE: {
             id: 'MON_CH1_ZOMBIE',
+                        icon: 'mon_ch1_zombie',
             name: '实验室废弃体',
             race: RACE.MUTANT,
             tier: 'common',
@@ -44,6 +45,7 @@ window.GameData = (function () {
         },
         MON_CH1_RIOT: {
             id: 'MON_CH1_RIOT',
+                        icon: 'mon_ch1_riot',
             name: '暴动实验体',
             race: RACE.MUTANT,
             tier: 'common',
@@ -60,6 +62,7 @@ window.GameData = (function () {
         },
         MON_CH1_CLEANER: {
             id: 'MON_CH1_CLEANER',
+                        icon: 'mon_ch1_cleaner',
             name: '异化保洁员',
             race: RACE.MUTANT,
             tier: 'elite',
@@ -76,6 +79,7 @@ window.GameData = (function () {
         },
         MON_CH1_GUARD: {
             id: 'MON_CH1_GUARD',
+                        icon: 'mon_ch1_guard',
             name: '受损生化卫兵',
             race: RACE.MUTANT,
             tier: 'elite',
@@ -92,6 +96,7 @@ window.GameData = (function () {
         },
         MON_CH1_TYRANT: {
             id: 'MON_CH1_TYRANT',
+                        icon: 'mon_ch1_tyrant',
             name: '一号实验体：暴君',
             race: RACE.MUTANT,
             tier: 'world_boss',
@@ -113,6 +118,7 @@ window.GameData = (function () {
         // —— 🦟 寄生群落生态群 ——
         MON_CH1_RAT: {
             id: 'MON_CH1_RAT',
+                        icon: 'mon_ch1_rat',
             name: '变异实验鼠',
             race: RACE.SWARM,
             tier: 'common',
@@ -129,6 +135,7 @@ window.GameData = (function () {
         },
         MON_CH1_LARVA: {
             id: 'MON_CH1_LARVA',
+                        icon: 'mon_ch1_larva',
             name: '实验舱幼体',
             race: RACE.SWARM,
             tier: 'common',
@@ -145,6 +152,7 @@ window.GameData = (function () {
         },
         MON_CH1_SPORE: {
             id: 'MON_CH1_SPORE',
+                        icon: 'mon_ch1_spore',
             name: '孢子蔓延者',
             race: RACE.SWARM,
             tier: 'elite',
@@ -162,6 +170,7 @@ window.GameData = (function () {
         },
         MON_CH1_HIVE: {
             id: 'MON_CH1_HIVE',
+                        icon: 'mon_ch1_hive',
             name: '母体蜂群',
             race: RACE.SWARM,
             tier: 'elite',
@@ -178,6 +187,7 @@ window.GameData = (function () {
         },
         MON_CH1_QUEEN: {
             id: 'MON_CH1_QUEEN',
+                        icon: 'mon_ch1_queen',
             name: '畸变蜂后',
             race: RACE.SWARM,
             tier: 'world_boss',
@@ -197,6 +207,7 @@ window.GameData = (function () {
         // —— 🤖 机械余烬生态群 ——
         MON_CH1_CLEANER_ROBOT: {
             id: 'MON_CH1_CLEANER_ROBOT',
+                        icon: 'mon_ch1_cleaner_robot',
             name: '报废清理机',
             race: RACE.EMBER,
             tier: 'common',
@@ -214,6 +225,7 @@ window.GameData = (function () {
         },
         MON_CH1_WATCHER: {
             id: 'MON_CH1_WATCHER',
+                        icon: 'mon_ch1_watcher',
             name: '监控者幼体',
             race: RACE.EMBER,
             tier: 'common',
@@ -233,6 +245,7 @@ window.GameData = (function () {
         // —— v3.7 新增变异体 ——
         MON_CH1_AMALGAM: {
             id: 'MON_CH1_AMALGAM',
+                        icon: 'mon_ch1_amalgam',
             name: '变异融合体',
             race: RACE.MUTANT,
             tier: 'common',
@@ -249,6 +262,7 @@ window.GameData = (function () {
         },
         MON_CH1_MOTH: {
             id: 'MON_CH1_MOTH',
+                        icon: 'mon_ch1_moth',
             name: '毒素飞蛾',
             race: RACE.SWARM,
             tier: 'common',
@@ -265,6 +279,7 @@ window.GameData = (function () {
         },
         MON_CH1_DRONE: {
             id: 'MON_CH1_DRONE',
+                        icon: 'mon_ch1_drone',
             name: '电弧无人机',
             race: RACE.EMBER,
             tier: 'common',
@@ -284,6 +299,7 @@ window.GameData = (function () {
 
         MON_CH1_BEE: {
             id: 'MON_CH1_BEE',
+                        icon: 'mon_ch1_bee',
             name: '失控巡逻蜂',
             race: RACE.EMBER,
             tier: 'elite',
@@ -302,6 +318,7 @@ window.GameData = (function () {
         },
         MON_CH1_SENTINEL: {
             id: 'MON_CH1_SENTINEL',
+                        icon: 'mon_ch1_sentinel',
             name: '组装哨兵',
             race: RACE.EMBER,
             tier: 'elite',
@@ -319,6 +336,7 @@ window.GameData = (function () {
         },
         MON_CH1_CORE: {
             id: 'MON_CH1_CORE',
+                        icon: 'mon_ch1_core',
             name: '安保系统核心',
             race: RACE.EMBER,
             tier: 'world_boss',
@@ -363,6 +381,7 @@ window.GameData = (function () {
         // —— v2.1 新怪 ——
         MON_CH2_WORM: {
             id: 'MON_CH2_WORM', name: '腐肉蠕虫',
+                        icon: 'mon_ch2_worm',
             race: RACE.SWARM, tier: 'common', level: 2,
             hp: 35, atk: 6, def: 1,
             intents: [
@@ -374,6 +393,7 @@ window.GameData = (function () {
         },
         MON_CH2_CAMERA: {
             id: 'MON_CH2_CAMERA', name: '监控摄像头',
+                        icon: 'mon_ch2_camera',
             race: RACE.EMBER, tier: 'common', level: 2,
             hp: 28, atk: 7, def: 3,
             intents: [
@@ -385,6 +405,7 @@ window.GameData = (function () {
         },
         MON_CH2_GROWTH: {
             id: 'MON_CH2_GROWTH', name: '骨骼增生体',
+                        icon: 'mon_ch2_growth',
             race: RACE.MUTANT, tier: 'common', level: 3,
             hp: 60, atk: 10, def: 8,
             intents: [
@@ -396,6 +417,7 @@ window.GameData = (function () {
         },
         MON_CH2_PARASITE: {
             id: 'MON_CH2_PARASITE', name: '神经寄生虫',
+                        icon: 'mon_ch2_parasite',
             race: RACE.SWARM, tier: 'common', level: 3,
             hp: 40, atk: 9, def: 2,
             intents: [
@@ -408,6 +430,7 @@ window.GameData = (function () {
         },
         MON_CH2_VULTURE: {
             id: 'MON_CH2_VULTURE', name: '数据秃鹫',
+                        icon: 'mon_ch2_vulture',
             race: RACE.EMBER, tier: 'common', level: 4,
             hp: 45, atk: 11, def: 4,
             intents: [
@@ -419,6 +442,7 @@ window.GameData = (function () {
         },
         MON_CH2_GHOST: {
             id: 'MON_CH2_GHOST', name: '数据幽灵',
+                        icon: 'mon_ch2_ghost',
             race: RACE.EMBER, tier: 'elite', level: 6,
             hp: 110, atk: 18, def: 6,
             dodgeChance: 0.3,
@@ -432,6 +456,7 @@ window.GameData = (function () {
         },
         MON_CH2_BEAST: {
             id: 'MON_CH2_BEAST', name: '毒雾巨兽',
+                        icon: 'mon_ch2_beast',
             race: RACE.MUTANT, tier: 'elite', level: 7,
             hp: 180, atk: 22, def: 12,
             intents: [
@@ -444,6 +469,7 @@ window.GameData = (function () {
         },
         MON_CH2_BROODMOTHER: {
             id: 'MON_CH2_BROODMOTHER', name: '腐化母体',
+                        icon: 'mon_ch2_broodmother',
             race: RACE.SWARM, tier: 'elite', level: 7,
             hp: 150, atk: 16, def: 10,
             intents: [
@@ -456,6 +482,7 @@ window.GameData = (function () {
         },
         MON_CH2_CANNON: {
             id: 'MON_CH2_CANNON', name: '脉冲炮台',
+                        icon: 'mon_ch2_cannon',
             race: RACE.EMBER, tier: 'elite', level: 8,
             hp: 130, atk: 26, def: 15,
             intents: [
@@ -467,6 +494,7 @@ window.GameData = (function () {
         },
         MON_CH2_ABOMINATION: {
             id: 'MON_CH2_ABOMINATION', name: '变异憎恶',
+                        icon: 'mon_ch2_abomination',
             race: RACE.MUTANT, tier: 'elite', level: 8,
             hp: 240, atk: 30, def: 18,
             thornsPercent: 0.15,

@@ -732,7 +732,7 @@ window.UISystem = (function () {
             }
 
             // 图标
-            var iconClass = raceIcons[md.race] || 'icon-mutant';
+            var iconClass = (md.icon ? 'icon-mid-' + md.icon : raceIcons[md.race] || 'icon-mutant');
             var ico = _ce('div');
             ico.className = 'icon ' + iconClass + ' icon-lg icon-pulse';
             ico.style.cssText = 'margin:0 auto;' + (dead ? 'color:var(--text-disabled);' : 'color:' + mclr + ';');
