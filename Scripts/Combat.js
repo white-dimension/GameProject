@@ -428,7 +428,7 @@ window.CombatSystem = (function () {
             _log('<span style="color:var(--accent-red)">' + curMon.name + ' 已融毁。</span>');
             if (compFx.killHeal > 0) { var healAmt = compFx.killHeal; p.hp = Math.min(p.hp_max, p.hp + healAmt); _log('<span style="color:var(--accent-green)">肾上腺素晶体：击杀回复 ' + healAmt + ' HP。</span>'); window.UISystem.showDamageFloat('+' + healAmt, 'var(--accent-green)', 'player'); }
         }
-        if (_allMonstersDead()) { _winBattle(); return; }
+        if (_allMonstersDead()) { window.UISystem.render(); setTimeout(function(){ _winBattle(); }, 600); return; }
     }
 
     function endTurn() {
@@ -533,8 +533,8 @@ window.CombatSystem = (function () {
                 var cfx3 = _getComponentEffects();
                 if (cfx3.processOnHit > 0 && finalDmg > 0) { _battleState.playerProcess = Math.min(GS().player.process_max, _battleState.playerProcess + cfx3.processOnHit); GS().player.process = _battleState.playerProcess; _log('<span style="color:var(--accent-green)">神经突触激活，受击回复 ' + cfx3.processOnHit + ' 进程。</span>'); }
                 var cfx2 = _getComponentEffects();
-                if (cfx2.thornsPct > 0 && rawDmg > 0) { var thornDmg = Math.ceil(rawDmg * cfx2.thornsPct); mon.hp = Math.max(0, mon.hp - thornDmg); _log('<span style="color:var(--accent-blue)">电磁反伤！' + mon.name + ' 受到 ' + thornDmg + ' 点反击伤害。</span>'); window.UISystem.showDamageFloat('<span class="icon icon-lightning-arc"></span>-' + thornDmg, 'var(--accent-blue)', 'monster'); if (_allMonstersDead()) { _winBattle(); return; } }
-                if (_battleState._chitinThorns && rawDmg > 0) { var boneThorn = Math.ceil(rawDmg * _battleState._chitinThorns); mon.hp = Math.max(0, mon.hp - boneThorn); _log('<span style="color:var(--race-mutant)">骨板反伤！' + mon.name + ' 受到 ' + boneThorn + ' 点反伤。</span>'); window.UISystem.showDamageFloat('-' + boneThorn, 'var(--accent-red)', 'monster'); if (_allMonstersDead()) { _winBattle(); return; } }
+                if (cfx2.thornsPct > 0 && rawDmg > 0) { var thornDmg = Math.ceil(rawDmg * cfx2.thornsPct); mon.hp = Math.max(0, mon.hp - thornDmg); _log('<span style="color:var(--accent-blue)">电磁反伤！' + mon.name + ' 受到 ' + thornDmg + ' 点反击伤害。</span>'); window.UISystem.showDamageFloat('<span class="icon icon-lightning-arc"></span>-' + thornDmg, 'var(--accent-blue)', 'monster'); if (_allMonstersDead()) { window.UISystem.render(); setTimeout(function(){ _winBattle(); }, 600); return; } }
+                if (_battleState._chitinThorns && rawDmg > 0) { var boneThorn = Math.ceil(rawDmg * _battleState._chitinThorns); mon.hp = Math.max(0, mon.hp - boneThorn); _log('<span style="color:var(--race-mutant)">骨板反伤！' + mon.name + ' 受到 ' + boneThorn + ' 点反伤。</span>'); window.UISystem.showDamageFloat('-' + boneThorn, 'var(--accent-red)', 'monster'); if (_allMonstersDead()) { window.UISystem.render(); setTimeout(function(){ _winBattle(); }, 600); return; } }
                 if (intent.bleed && !md.bleedImmune) { _battleState.playerStatus['bleed'] = intent.bleed.duration || 3; _log('<span style="color:var(--accent-red);">施加流血 ' + intent.bleed.duration + ' 回合。</span>'); }
                 if (intent.selfDefBuff) mon._defBuff = (mon._defBuff || 0) + intent.selfDefBuff;
                 if (md.recoilDamage && finalDmg > 0) { mon.hp = Math.max(0, mon.hp - md.recoilDamage); _log('<span style="color:var(--accent-blue)">' + mon.name + ' 受到 ' + md.recoilDamage + ' 反噬伤害。</span>'); window.UISystem.showDamageFloat('<span class="icon icon-lightning-arc"></span>-' + md.recoilDamage, 'var(--accent-blue)', 'monster'); }
@@ -663,7 +663,7 @@ window.CombatSystem = (function () {
             if (window.Sound) window.Sound.electric();
             var psvLogs = TE.PassiveEngine.applyResults(psvResults, psvCtx, _battleState);
             psvLogs.forEach(function(l){ _log('<span style="color:' + (l.color||'var(--accent-blue)') + '">' + l.msg + '</span>'); });
-            if (_allMonstersDead()) { _winBattle(); return; }
+            if (_allMonstersDead()) { window.UISystem.render(); setTimeout(function(){ _winBattle(); }, 600); return; }
         }
         window.UISystem.render();
     }
