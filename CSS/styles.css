@@ -346,7 +346,7 @@ body::after {
     .hud-labels { gap: 20px; }
     .hud-bars { gap: 20px; }
     .hud-bar { width: 100px !important; }
-    .btn-battle-card { width: 120px !important; height: 80px !important; padding: 6px !important; }
+    .btn-battle-card { width: 150px !important; height: 80px !important; padding: 6px !important; white-space: nowrap; }
     .left-panel-col { width: 260px; }
     #ui-log { width: 260px !important; }
     .task-panel { width: 260px !important; }
@@ -363,7 +363,7 @@ body::after {
     .hud-bar { width: 80px !important; }
     .left-panel-col { display: none; }
     .skill-info-panel { display: none; }
-    .btn-battle-card { width: 90px !important; height: 70px !important; font-size: 12px; }
+    .btn-battle-card { width: 90px !important; height: 70px !important; font-size: 12px; white-space: nowrap; }
     .path-card { padding: 10px; }
 }
 
@@ -515,12 +515,15 @@ body::after {
 
 /* 战斗卡牌按钮 */
 .btn-battle-card {
-    width: 150px;
+    width: 175px;
     height: 95px;
     flex-direction: column;
     gap: 5px;
     font-size: 14px;
     justify-content: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .btn-battle-card .icon { margin-right: 4px; }
 
