@@ -2130,7 +2130,7 @@ window.UISystem = (function () {
             }
             window.GameState.save();
             UISystem.showNotification('合成完成！', consumed.join(' + ') + ' → ' + (allSame ? selKeys[0] + '+' : '新组件'), 'var(--accent-yellow)');
-            UISystem.showReorganizeModal();
+            UISystem._showSynthesizeModal();
         };
         btnRow.appendChild(confirmBtn);
         box.appendChild(body);
