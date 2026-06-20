@@ -992,3 +992,22 @@ window.GameState = (function () {
         _genFloorNodePool: _genFloorNodePool
     };
 })();
+
+// [v3.0] 最小化事件总线 — 解耦状态变更与UI刷新
+window.EventBus = (function () {
+    'use strict';
+    var _listeners = {};
+    function on(event, fn) {
+        if (!_listeners[event]) _listeners[event] = [];
+        _listeners[event].push(fn);
+    }
+    function off(event, fn) {
+        if (!_listeners[event]) return;
+        _listeners[event] = _listeners[event].filter(function (f) { return f !== fn; });
+    }
+    function emit(event, data) {
+        if (!_listeners[event]) return;
+        _listeners[event].forEach(function (fn) { fn(data); });
+    }
+    return { on: on, off: off, emit: emit };
+})();

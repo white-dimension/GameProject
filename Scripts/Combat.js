@@ -464,6 +464,7 @@ window.CombatSystem = (function () {
         _log('<span style="color:var(--accent-orange)">--- 第 ' + _battleState.turn + ' 回合结束 ---</span>');
         _battleState.turn++; // 统一在回合结束时自增，确保玩家和怪物处于同回合
         _processStatusEffects();
+        window.EventBus.emit('playerStatsChanged');
         window.UISystem.render();
         setTimeout(_monsterAction, 800);
     }
@@ -638,7 +639,7 @@ window.CombatSystem = (function () {
         aliveMons.forEach(function(mon) {
             var md = GD().MONSTERS[mon.id]; if (!md) return;
             // 护盾刷新
-            if (md.shieldPerTurn) mon._shield = (mon._shield || 0) + md.shieldPerTurn;
+            if (mon.hp > 0 && md.shieldPerTurn) mon._shield = (mon._shield || 0) + md.shieldPerTurn;
             // 维度词缀处理
             (mon.affixes || []).forEach(function(a) {
                 if (a.id === 'regen') { var rgn = Math.ceil(mon.hpMax * 0.05); mon.hp = Math.min(mon.hpMax, mon.hp + rgn); _log('<span style="color:var(--accent-green)">【再生】' + mon.name + ' 恢复了 ' + rgn + ' HP。</span>'); window.UISystem.showDamageFloat('+' + rgn, 'var(--accent-green)', 'monster'); }
@@ -843,11 +844,16 @@ window.CombatSystem = (function () {
                 var extraDrop = (patTpl && patTpl.extraDrop) ? patTpl.extraDrop : 0;
                 if (m.tier !== 'world_boss') {
                     var dropId = m.drop.pool ? GD().getRandomBossOrgan(m.drop.pool) : m.drop.id;
-                    if (m.drop.type === 'organ') { gs.inventory.organs.push(dropId); }
-                    else { gs.inventory.components[dropId] = (gs.inventory.components[dropId] || 0) + 1 + extraDrop; }
+                    if (dropId) {
+                        if (m.drop.type === 'organ') { gs.inventory.organs.push(dropId); }
+                        else { gs.inventory.components[dropId] = (gs.inventory.components[dropId] || 0) + 1 + extraDrop; }
+                    }
                 }
-                allDrops.push(m.drop.pool ? '随机Boss器官' : m.drop.id);
-                if (extraDrop) allDrops.push(m.drop.id + "(额外)");
+                var dropLabel = m.drop.pool ? '随机Boss器官' : m.drop.id;
+                if (dropLabel) {
+                    allDrops.push(dropLabel);
+                    if (extraDrop) allDrops.push(m.drop.id + "(额外)");
+                }
             }
         });
 

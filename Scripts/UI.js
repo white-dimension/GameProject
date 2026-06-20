@@ -373,6 +373,13 @@ window.UISystem = (function () {
                 }
             }
         });
+
+        // [v3.0] EventBus 监听 — 战斗状态变更时自动刷新HUD
+        if (window.EventBus) {
+            window.EventBus.on('playerStatsChanged', function () {
+                var gs = GS(); if (gs) _refreshHUDValues(gs);
+            });
+        }
     }
 
     function render(flags) {
