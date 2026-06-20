@@ -2020,32 +2020,34 @@ window.UISystem = (function () {
         logPanel.innerHTML = '';
         logPanel.style.cssText = logPanel.style.cssText.replace(/max-height[^;]+;?/g, '') + 'max-height:none;';
         var lines = [
-            { text: '神经链路初始化...', cls: 'txt-xs', clr: 'rgba(0,255,136,0.45)', delay: 200 },
-            { text: '黑地平线超生物复合实验室 地下一层', cls: 'txt-xs', clr: 'rgba(0,255,136,0.6)', delay: 600 },
-            { text: '2099年，基因剥离计划「余烬」彻底失控。', cls: 'txt-sm', clr: 'rgba(0,255,136,0.75)', delay: 400 },
-            { text: '三股力量在深达数千米的地下疯狂增殖：变异血肉、寄生毒素飞蛾、纳米真菌改写的安保机械。', cls: 'txt-sm', clr: 'rgba(0,255,136,0.75)', delay: 300 },
-            { text: '你是唯一的——', cls: 'txt-sm', clr: 'rgba(0,255,136,0.8)', delay: 200 },
-            { text: '原体-II · 无限拟态白血球始祖', cls: 'txt-md txt-bold', clr: 'var(--accent-green)', delay: 600 },
-            { text: '链接已建立。苏醒吧。', cls: 'txt-sm', clr: 'var(--accent-green)', delay: 500 }
+            { text: '神经链路初始化...', clr: 'rgba(0,255,136,0.45)', delay: 200 },
+            { text: '黑地平线超生物复合实验室 地下一层', clr: 'rgba(0,255,136,0.6)', delay: 600 },
+            { text: '2099年，基因剥离计划「余烬」彻底失控。', clr: 'rgba(0,255,136,0.75)', delay: 400 },
+            { text: '三股力量在深达数千米的地下疯狂增殖：变异血肉、寄生毒素飞蛾、纳米真菌改写的安保机械。', clr: 'rgba(0,255,136,0.75)', delay: 300 },
+            { text: '你是唯一的——', clr: 'rgba(0,255,136,0.8)', delay: 200 },
+            { text: '原体-II · 无限拟态白血球始祖', clr: 'var(--accent-green)', delay: 600 },
+            { text: '链接已建立。苏醒吧。', clr: 'var(--accent-green)', delay: 500 }
         ];
         var idx = 0;
         var showNext = function() {
             if (idx >= lines.length) {
                 // 激活按钮插入日志底部
                 var btnDiv = document.createElement('div');
-                btnDiv.style.cssText = 'margin-top:16px;text-align:center;';
-                btnDiv.innerHTML = '<button class="btn btn-green" id="intro-btn" style="padding:8px 32px;font-size:14px;opacity:0;transition:opacity 0.5s;">激活原体</button>';
+                btnDiv.style.cssText = 'margin-top:12px;text-align:center;';
+                var btn = document.createElement('button');
+                btn.className = 'btn btn-green';
+                btn.style.cssText = 'padding:4px 24px;font-size:13px;opacity:0;transition:opacity 0.5s;position:relative;z-index:9999;';
+                btn.textContent = '激活原体';
+                btn.onclick = function(e) { e.stopPropagation(); UISystem.closeIntro(); };
+                btnDiv.appendChild(btn);
                 logPanel.appendChild(btnDiv);
-                setTimeout(function() {
-                    var btn = document.getElementById('intro-btn');
-                    if (btn) { btn.style.opacity = '1'; btn.onclick = function() { UISystem.closeIntro(); }; }
-                }, 100);
+                requestAnimationFrame(function() { btn.style.opacity = '1'; });
                 return;
             }
             var li = lines[idx];
             var div = document.createElement('div');
-            div.className = li.cls;
-            div.style.cssText = 'margin-bottom:10px;color:' + (li.clr || '');
+            div.className = 'txt-xs txt-dim';
+            div.style.cssText = 'margin-bottom:4px;color:' + (li.clr || '');
             div.innerHTML = '<span>></span> <span class="typewriter"></span>';
             logPanel.appendChild(div);
             _typeText(div.querySelector('.typewriter'), li.text, function() {
