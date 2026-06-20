@@ -1408,7 +1408,7 @@ window.UISystem = (function () {
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
         var box = _ce('div', 'modal-box status-modal');
-        box.style.cssText = 'flex:1;max-height:calc(100vh - 200px);background:var(--bg-modal);border:1px solid #f57f17;display:flex;flex-direction:column;overflow:hidden;';
+        box.style.cssText = 'flex:1;min-width:0;max-height:calc(100vh - 200px);background:var(--bg-modal);border:1px solid #f57f17;display:flex;flex-direction:column;overflow:hidden;';
 
         var killedCount = 0; Object.keys(gs.bestiary.killCount || {}).forEach(function(id) { killedCount += (gs.bestiary.killCount[id] || 0); });
 
