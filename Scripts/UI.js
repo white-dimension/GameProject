@@ -2052,7 +2052,10 @@ window.UISystem = (function () {
             var count = inv[k]; if (count <= 0) return;
             var chip = _ce('div');
             chip.style.cssText = 'padding:6px 12px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;cursor:pointer;font-size:13px;color:var(--text-main);';
-            chip.textContent = k + ' ×' + count;
+            var renderChip = function() {
+              chip.innerHTML = '<span>' + k + '</span> <span class=\"txt-xs txt-dim\">×' + count + '</span>' + (selected[k] ? ' <span class=\"txt-xs txt-gold\">已选' + selected[k] + '</span>' : '') + (count >= 3 && selectCount === 0 ? ' <span class=\"txt-xs\" style=\"color:var(--accent-yellow);opacity:0.5;\">右键一键3连</span>' : '');
+            };
+            renderChip();
             chip.onclick = function() {
                 if (selectCount >= 3 && !selected[k]) return;
                 var cur = selected[k] || 0;
@@ -2060,7 +2063,16 @@ window.UISystem = (function () {
                 else { selectCount -= cur; delete selected[k]; }
                 chip.style.background = selected[k] ? 'rgba(255,213,79,0.15)' : 'var(--bg-card)';
                 chip.style.borderColor = selected[k] ? '#f57f17' : 'var(--border-dim)';
-                chip.innerHTML = '<span>' + k + '</span> <span class="txt-xs txt-dim">×' + count + '</span>' + (selected[k] ? ' <span class="txt-xs txt-gold">已选' + selected[k] + '</span>' : '');
+                renderChip();
+                updatePreview();
+            };
+            chip.oncontextmenu = function(e) {
+                e.preventDefault();
+                if (selectCount > 0 || count < 3) return;
+                selected[k] = 3; selectCount = 3;
+                chip.style.background = 'rgba(255,213,79,0.15)';
+                chip.style.borderColor = '#f57f17';
+                renderChip();
                 updatePreview();
             };
             compRow.appendChild(chip);
