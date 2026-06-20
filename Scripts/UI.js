@@ -1591,7 +1591,13 @@ window.UISystem = (function () {
                 if (cid) {
                     var dtl = _buildCompDetail(cid);
                     var tipText = '<b>' + cid + '</b>' + (dtl.affixText ? '&#10;' + dtl.affixText : '') + (dtl.slotText ? '&#10;可装备：' + dtl.slotText : '');
-                    organHTML += '<span class="txt-xs txt-dim"> 组件: </span><span class="help-tip" style="padding:6px 10px;font-size:13px;background:rgba(255,213,79,0.08);border:1px solid rgba(255,213,79,0.2);border-radius:4px;color:var(--accent-yellow);" data-tip="' + tipText + '">' + _fmtRoman(cid) + '</span>';
+                    var _tierBg3 = { 'Ⅲ': 'rgba(255,213,79,0.12)', 'Ⅱ': 'rgba(0,212,255,0.08)', 'Ⅰ': 'rgba(0,255,136,0.06)' };
+                    var _tierBd3 = { 'Ⅲ': 'rgba(255,213,79,0.35)', 'Ⅱ': 'rgba(0,212,255,0.25)', 'Ⅰ': 'rgba(0,255,136,0.2)' };
+                    var _tierClr3 = { 'Ⅲ': 'var(--accent-yellow)', 'Ⅱ': 'var(--accent-blue)', 'Ⅰ': 'var(--accent-green)' };
+                    var _ts3 = cid.match(/[ⅠⅡⅢ]$/); var _bg3 = _ts3 ? (_tierBg3[_ts3[0]] || 'rgba(255,213,79,0.08)') : 'rgba(255,213,79,0.08)';
+                    var _bd3 = _ts3 ? (_tierBd3[_ts3[0]] || 'rgba(255,213,79,0.2)') : 'rgba(255,213,79,0.2)';
+                    var _cl3 = _ts3 ? (_tierClr3[_ts3[0]] || 'var(--accent-yellow)') : 'var(--accent-yellow)';
+                    organHTML += '<span class="txt-xs txt-dim"> 组件: </span><span class="help-tip" style="padding:6px 10px;font-size:13px;background:' + _bg3 + ';border:1px solid ' + _bd3 + ';border-radius:4px;color:' + _cl3 + ';" data-tip="' + tipText + '">' + _fmtRoman(cid) + '</span>';
                 } else if (!cid) {
                     organHTML += '<span class="txt-xs txt-dim"> 组件: </span><span style="padding:6px 10px;font-size:13px;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.15);border-radius:4px;color:var(--text-dim);">空槽·未嵌入</span>';
                 }
@@ -2871,7 +2877,11 @@ window.UISystem = (function () {
                         if (ea.bonusVsSwarm) ep.push('对寄生+' + Math.round(ea.bonusVsSwarm*100) + '%');
                         if (ep.length > 0) etip += '&#10;' + ep.join(' · ');
                     }
-                    slotHTML += '<span class="help-tip" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;font-size:13px;background:rgba(255,213,79,0.08);border:1px solid rgba(255,213,79,0.2);border-radius:4px;color:var(--accent-yellow);' + (p.bp < 10 ? 'opacity:0.5;cursor:not-allowed;filter:grayscale(1);background:rgba(255,255,255,0.05);border-color:var(--border-dim);' : 'cursor:pointer;') + '" data-tip="' + etip + (p.bp < 10 ? '&#10;<b style=color:var(--accent-red)>BP 不足 (需10)</b>' : '&#10;点击卸下 (10 BP)') + '" data-slot="' + s + '" data-sidx="' + si + '">' + cid + '</span>';
+                    var _tsL = cid.match(/[ⅠⅡⅢ]$/);
+                    var _bgL = _tsL ? ({ 'Ⅲ': 'rgba(255,213,79,0.12)', 'Ⅱ': 'rgba(0,212,255,0.08)', 'Ⅰ': 'rgba(0,255,136,0.06)' }[_tsL[0]] || 'rgba(255,213,79,0.08)') : 'rgba(255,213,79,0.08)';
+                    var _bdL = _tsL ? ({ 'Ⅲ': 'rgba(255,213,79,0.35)', 'Ⅱ': 'rgba(0,212,255,0.25)', 'Ⅰ': 'rgba(0,255,136,0.2)' }[_tsL[0]] || 'rgba(255,213,79,0.2)') : 'rgba(255,213,79,0.2)';
+                    var _clL = _tsL ? ({ 'Ⅲ': 'var(--accent-yellow)', 'Ⅱ': 'var(--accent-blue)', 'Ⅰ': 'var(--accent-green)' }[_tsL[0]] || 'var(--accent-yellow)') : 'var(--accent-yellow)';
+                    slotHTML += '<span class="help-tip" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;font-size:13px;background:' + _bgL + ';border:1px solid ' + _bdL + ';border-radius:4px;color:' + _clL + ';' + (p.bp < 10 ? 'opacity:0.5;cursor:not-allowed;filter:grayscale(1);' : 'cursor:pointer;') + '" data-tip="' + etip + (p.bp < 10 ? '&#10;<b style=color:var(--accent-red)>BP 不足 (需10)</b>' : '&#10;点击卸下 (10 BP)') + '" data-slot="' + s + '" data-sidx="' + si + '">' + cid + '</span>';
                 } else {
                     var hasAvail = false; Object.keys(inv).forEach(function(ck) { if (inv[ck] > 0 && comps[ck] && comps[ck].allowedSlots && comps[ck].allowedSlots.indexOf(s) !== -1) hasAvail = true; });
                     var slotCls = hasAvail ? 'slot-ready' : '';
