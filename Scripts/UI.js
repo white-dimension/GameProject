@@ -1491,10 +1491,30 @@ window.UISystem = (function () {
                 _bestiaryWrap.appendChild(loreDiv);
             }
 
-            Object.keys(allMonsters).forEach(function(id) {
-                var m = allMonsters[id];
-                if (m.trainingOnly) return;
-                if (m.race !== race) return;
+            // 按层级分组：普通→精英→首领
+            var tierOrder = ['common', 'elite', 'world_boss'];
+            var tierLabels = { common: '普通变异体', elite: '精英变异体', world_boss: '世界首领' };
+            tierOrder.forEach(function(tier) {
+                var tierMonsters = [];
+                Object.keys(allMonsters).forEach(function(id) {
+                    var m = allMonsters[id];
+                    if (m.trainingOnly || m.race !== race || m.tier !== tier) return;
+                    tierMonsters.push({ id: id, m: m });
+                });
+                if (tierMonsters.length === 0) return;
+                // 层级分隔标题
+                var tierHeader = _ce('div');
+                tierHeader.setAttribute('data-bestiary-race', race);
+                tierHeader.className = 'txt-xs txt-bold';
+                tierHeader.style.cssText = 'width:100%;margin-top:4px;margin-bottom:2px;color:var(--text-dim);border-bottom:1px solid var(--border-dim);padding-bottom:4px;';
+                tierHeader.textContent = '> ' + tierLabels[tier];
+                _bestiaryWrap.appendChild(tierHeader);
+                tierMonsters.forEach(function(tm) {
+                var id = tm.id;
+                var m = tm.m;
+                var kc = killed[id] || 0;
+                var rl = research[id] || 0;
+                var known = kc > 0;
                 var kc = killed[id] || 0;
                 var rl = research[id] || 0;
                 var known = kc > 0;
@@ -1558,7 +1578,8 @@ window.UISystem = (function () {
                     '</div>';
 
                 _bestiaryWrap.appendChild(item);
-            });
+            }); // tierMonsters.forEach
+            }); // tierOrder.forEach
         });
         _filterDisplay();
         box.appendChild(body);
