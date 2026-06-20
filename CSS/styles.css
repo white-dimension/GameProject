@@ -339,10 +339,10 @@ body::after {
 
 /* Boss立绘呼吸动画 */
 @keyframes boss-breathe {
-    0%, 100% { background-size: 100% auto; background-position: center; }
-    50% { background-size: 105% auto; background-position: 48% 48%; }
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.015); }
 }
-.boss-breathe { animation: boss-breathe 4s ease-in-out infinite; }
+.boss-breathe { animation: boss-breathe 4s cubic-bezier(0.45, 0, 0.55, 1) infinite; will-change: transform; }
 
 /* --- 响应式断点 --- */
 @media (max-width: 900px) {
