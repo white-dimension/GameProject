@@ -352,6 +352,9 @@ body::after {
 /* 多怪物战斗卡片 */
 .monster-card { transition: border-color 0.2s, box-shadow 0.2s; }
 .monster-card:hover { }
+.bestiary-card { transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer; }
+.bestiary-card:hover { transform: scale(1.05); z-index: 10; box-shadow: 0 8px 30px rgba(0,0,0,0.6); }
+.bestiary-card .card-bg { animation: boss-breathe 4s cubic-bezier(0.45, 0, 0.55, 1) infinite; will-change: transform; }
 .monster-target { }
 
 /* 全局隐藏滚动条 */

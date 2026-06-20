@@ -1581,9 +1581,9 @@ window.UISystem = (function () {
                         (traits.length > 0 ? '\n\n<b style=color:var(--accent-yellow)>特质</b>\n  ' + traits.join('\n  ') : '') +
                         '\n\n<b>弱点</b>\n  ' + (m.weakness || '无特殊弱点');
                 }
-                item.className = known ? 'help-tip' : '';
+                item.className = 'bestiary-card' + (known ? ' help-tip' : '');
                 if (known) item.setAttribute('data-tip', cardTip);
-                item.innerHTML = imgLayer +
+                item.innerHTML = (known && m.image ? '<div class="card-bg" style="position:absolute;inset:0;background:url(' + m.image + ') center/cover no-repeat;filter:brightness(0.5);z-index:0;"></div>' : imgLayer) +
                     '<div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.92) 0%,rgba(0,0,0,0.3) 55%,rgba(0,0,0,0.4) 100%);z-index:1;"></div>' +
                     '<div style="position:relative;z-index:2;display:flex;flex-direction:column;justify-content:flex-end;height:100%;padding:10px;">' +
                         (known ? '<div style="margin-bottom:3px;">' + tierBadge + '</div>' : '') +
