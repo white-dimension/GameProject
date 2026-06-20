@@ -1171,7 +1171,7 @@ window.UISystem = (function () {
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
         var box = _ce('div', 'modal-box');
-        box.style.cssText = 'width:min(700px,90vw);max-height:55vh;background:var(--bg-modal);border:1px solid var(--accent-blue);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
+        box.style.cssText = 'width:min(700px,90vw);max-height:calc(100vh - 220px);background:var(--bg-modal);border:1px solid var(--accent-blue);border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
         var head = _ce('div');
         head.style.cssText = 'padding:20px 30px;background:rgba(0,212,255,0.05);border-bottom:1px solid var(--accent-blue);display:flex;justify-content:space-between;align-items:center;';
         var tabNames = { stats: '基础', fight: '战斗', lab: '实验室', craft: '配方' };
@@ -1221,7 +1221,7 @@ window.UISystem = (function () {
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
         var box = _ce('div', 'modal-box');
-        box.style.cssText = 'width:min(700px,90vw);max-height:85vh;background:var(--bg-modal);border:1px solid #9c27b0;border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
+        box.style.cssText = 'width:min(700px,90vw);max-height:calc(100vh - 200px);background:var(--bg-modal);border:1px solid #9c27b0;border-radius:12px;padding:0;display:flex;flex-direction:column;overflow:hidden;';
         var head = _ce('div');
         head.style.cssText = 'padding:20px 30px;background:rgba(156,39,176,0.08);border-bottom:1px solid #9c27b0;display:flex;justify-content:space-between;align-items:center;';
         head.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;width:100%;">' +
@@ -1269,7 +1269,7 @@ window.UISystem = (function () {
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
         var box = _ce('div', 'modal-box status-modal');
-        box.style.cssText = 'width:min(700px,90vw);max-height:85vh;background:var(--bg-modal);border:1px solid #f57f17;padding:0;display:flex;flex-direction:column;overflow:hidden;';
+        box.style.cssText = 'width:min(700px,90vw);max-height:calc(100vh - 200px);background:var(--bg-modal);border:1px solid #f57f17;padding:0;display:flex;flex-direction:column;overflow:hidden;';
 
         var killedCount = 0; Object.keys(gs.bestiary.killCount || {}).forEach(function(id) { killedCount += (gs.bestiary.killCount[id] || 0); });
         var infoBar = _ce('div');
@@ -1475,7 +1475,7 @@ window.UISystem = (function () {
 
         // 3. 右侧主内容盒
         var box = _ce('div', 'modal-box status-modal');
-        box.style.cssText = 'flex:1;max-height:90vh;background:var(--bg-modal);border:1px solid var(--accent-blue);display:flex;flex-direction:column;gap:0;padding:0;overflow:hidden;';
+        box.style.cssText = 'flex:1;max-height:calc(100vh - 200px);background:var(--bg-modal);border:1px solid var(--accent-blue);display:flex;flex-direction:column;gap:0;padding:0;overflow:hidden;';
 
         // 挂载
         wrapper.appendChild(infoBar);
@@ -2763,7 +2763,7 @@ window.UISystem = (function () {
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
         var box = _ce('div', 'modal-box status-modal');
-        box.style.cssText = 'flex:1;max-height:90vh;background:var(--bg-modal);border:1px solid var(--accent-green);display:flex;flex-direction:column;gap:0;padding:0;overflow:hidden;';
+        box.style.cssText = 'flex:1;max-height:calc(100vh - 200px);background:var(--bg-modal);border:1px solid var(--accent-green);display:flex;flex-direction:column;gap:0;padding:0;overflow:hidden;';
         var head = _ce('div');
         head.style.cssText = 'padding:20px 30px;background:rgba(0,255,136,0.05);border-bottom:1px solid var(--accent-green);display:flex;justify-content:space-between;align-items:center;';
         head.innerHTML = '<div class="txt-md txt-green txt-bold">[ 基因重组实验室 ]</div>' +
