@@ -2413,7 +2413,7 @@ window.UISystem = (function () {
             var row = _ce('div');
             row.style.cssText = 'display:flex;flex-direction:column;gap:4px;padding:10px 14px;background:rgba(255,213,79,0.06);border:1px solid rgba(255,213,79,0.2);border-radius:4px;cursor:pointer;';
             row.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-                '<div><span class="txt-xs txt-gold txt-bold">' + ck + '</span><span class="txt-xs txt-gold"> ×' + inv[ck] + '</span></div>' +
+                '<div><span class="txt-xs txt-gold txt-bold">' + _fmtRoman(ck) + '</span><span class="txt-xs txt-gold"> ×' + inv[ck] + '</span></div>' +
                 '</div><div class="txt-xs txt-dim" style="display:flex;flex-wrap:wrap;gap:8px;">' + (diffParts.length > 0 ? diffParts.join('') : '无属性') + '</div>';
             row.onclick = function() { try { window.GameState.socketComponent(slot, socketIndex, ck); } catch(e) {} UISystem.showReorganizeModal(); UISystem.render(); };
             body.appendChild(row);
@@ -2463,7 +2463,7 @@ window.UISystem = (function () {
         items.forEach(function(item) {
             var chip = _ce('div');
             chip.style.cssText = 'padding:6px 12px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;cursor:pointer;font-size:13px;color:var(--text-main);';
-            chip.textContent = item.id + ' ×' + item.count + ' [' + item.weight + ']';
+            chip.textContent = _fmtRoman(item.id) + ' ×' + item.count + ' [' + item.weight + ']';
             chip.onclick = function() {
                 var cur = selected[item.id] || 0;
                 if (cur < item.count) { selected[item.id] = cur + 1; curWeight += item.weight; }
@@ -2526,7 +2526,7 @@ window.UISystem = (function () {
         items.forEach(function(item) {
             var chip = _ce('div');
             chip.style.cssText = 'padding:6px 12px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;cursor:pointer;font-size:13px;color:var(--text-main);';
-            chip.textContent = item.id + ' ×' + item.count;
+            chip.textContent = _fmtRoman(item.id) + ' ×' + item.count;
             chip.onclick = function() {
                 var cur = selected[item.id] || 0;
                 if (cur < item.count && selCount < count) { selected[item.id] = cur + 1; selCount++; }
@@ -2870,7 +2870,7 @@ window.UISystem = (function () {
                         if (ep.length > 0) etip += '&#10;' + ep.join(' · ');
                     }
                     var _bgL = 'rgba(255,213,79,0.08)'; var _bdL = 'rgba(255,213,79,0.2)'; var _clL = 'var(--accent-yellow)';
-                    slotHTML += '<span class="help-tip" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;font-size:13px;background:' + _bgL + ';border:1px solid ' + _bdL + ';border-radius:4px;color:' + _clL + ';' + (p.bp < 10 ? 'opacity:0.5;cursor:not-allowed;filter:grayscale(1);' : 'cursor:pointer;') + '" data-tip="' + etip + (p.bp < 10 ? '&#10;<b style=color:var(--accent-red)>BP 不足 (需10)</b>' : '&#10;点击卸下 (10 BP)') + '" data-slot="' + s + '" data-sidx="' + si + '">' + cid + '</span>';
+                    slotHTML += '<span class="help-tip" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;font-size:13px;background:' + _bgL + ';border:1px solid ' + _bdL + ';border-radius:4px;color:' + _clL + ';' + (p.bp < 10 ? 'opacity:0.5;cursor:not-allowed;filter:grayscale(1);' : 'cursor:pointer;') + '" data-tip="' + etip + (p.bp < 10 ? '&#10;<b style=color:var(--accent-red)>BP 不足 (需10)</b>' : '&#10;点击卸下 (10 BP)') + '" data-slot="' + s + '" data-sidx="' + si + '">' + _fmtRoman(cid) + '</span>';
                 } else {
                     var hasAvail = false; Object.keys(inv).forEach(function(ck) { if (inv[ck] > 0 && comps[ck] && comps[ck].allowedSlots && comps[ck].allowedSlots.indexOf(s) !== -1) hasAvail = true; });
                     var slotCls = hasAvail ? 'slot-ready' : '';
