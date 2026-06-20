@@ -1395,10 +1395,21 @@ window.UISystem = (function () {
         confirmBtn.textContent = '我准备好了';
         confirmBtn.onclick = function() {
             UISystem.closeModal();
-            // [修复] 确认后才淡出卡片并触发 discover，统一走处理中枢
+            // 地下城直接进入战斗，不走 _handleDiscoveryResult 避免死循环
             _fadeOutCards(function() {
                 var res = WS().discover(pathIndex);
-                _handleDiscoveryResult(res, pathIndex, null);
+                // 消耗路径卡片
+                path._used = true;
+                // 选取怪物：随机普通+精英，同种族混合
+                var all = Object.keys(GD().MONSTERS).filter(function(k) {
+                    var m = GD().MONSTERS[k]; return !m.trainingOnly && (m.tier === 'common' || m.tier === 'elite');
+                });
+                var dungeonMids = [];
+                for (var di = 0; di < 2; di++) {
+                    dungeonMids.push(all[Math.floor(Math.random() * all.length)]);
+                }
+                CS().startBattle(dungeonMids, { isDungeon: true });
+                render();
             });
         };
         var cancelBtn = _ce('button', 'btn btn-blue btn-capsule');
