@@ -315,19 +315,26 @@ window.CombatSystem = (function () {
             damage = Math.ceil(baseAtk * researchBonus * tierFactor);
 
             // === Boss器官专有特效 ===
-            // 暴君核心
-            if (sData.equipped === '暴君核心') {
-                if (syncLvl >= 3) { ignoreDef = true; _log('<span style="color:var(--accent-red)">【暴君觉醒】终极撕裂无视防御！</span>'); }
+            // 暴君核心 Lv.3 觉醒
+            if (sData.equipped === '暴君核心' && syncLvl >= 3) {
+                ignoreDef = true; _log('<span style="color:var(--accent-red)">【暴君觉醒】终极撕裂无视防御！</span>');
             }
             // 蜂后毒牙: 1.5× + 挂猛毒
             if (sData.equipped === '蜂后毒牙') {
-                curMon.status['poison'] = (curMon.status['poison'] || 0) + 5;
-                _log('<span style="color:var(--accent-purple)">【毒液注射】目标陷入猛毒，持续5回合！</span>');
+                var poisonDur = syncLvl >= 3 ? 5 : 3;
+                var poisonDmg = syncLvl >= 3 ? 5 : 2;
+                curMon.status['poison'] = (curMon.status['poison'] || 0) + poisonDur;
+                curMon._poisonDamage = poisonDmg;
+                _log('<span style="color:var(--accent-purple)">【毒液注射】目标陷入猛毒，持续' + poisonDur + '回合！' + (syncLvl >= 3 ? ' <b>觉醒强化！</b>' : '') + '</span>');
             }
-            // 核心钻头: 20%暴击
-            if (sData.equipped === '核心钻头' && Math.random() < 0.2) {
-                damage = Math.ceil(damage * 2);
-                _log('<span style="color:var(--accent-yellow)">【超频贯穿】暴击！伤害翻倍！</span>');
+            // 核心钻头: 暴击
+            if (sData.equipped === '核心钻头') {
+                var critRate = syncLvl >= 3 ? 0.4 : 0.2;
+                var critMult = syncLvl >= 3 ? 3 : 2;
+                if (Math.random() < critRate) {
+                    damage = Math.ceil(damage * critMult);
+                    _log('<span style="color:var(--accent-yellow)">【超频贯穿】暴击×' + critMult + '！' + (syncLvl >= 3 ? ' <b>觉醒强化！</b>' : '') + '</span>');
+                }
             }
 
             // 涂层：细胞壁溶解酶（反异变）
@@ -407,9 +414,11 @@ window.CombatSystem = (function () {
             // Boss器官：暴君腺体
             if (p.gland_core.equipped === '暴君腺体') {
                 damage = Math.ceil(baseAtk * 2.0 * tierFactor3);
-                if (Math.random() < 0.4) {
+                var stunChance = syncLvl3 >= 3 ? 0.7 : 0.4;
+                if (Math.random() < stunChance) {
                     curMon.status['stunned'] = 1;
-                    _log('<span style=\"color:var(--race-mutant)\">>> [震波咆哮] 造成 ' + damage + '点伤害，目标眩晕跳过下回合！</span>');
+                    if (syncLvl3 >= 3) curMon._slowed = 2;
+                    _log('<span style=\"color:var(--race-mutant)\">>> [震波咆哮] 造成 ' + damage + '点伤害，目标眩晕！' + (syncLvl3 >= 3 ? ' 追加减速2回合 <b>觉醒强化！</b>' : '') + '</span>');
                 } else {
                     _log('<span style=\"color:var(--race-mutant)\">>> [震波咆哮] 造成 ' + damage + '点伤害。</span>');
                 }
@@ -467,18 +476,21 @@ window.CombatSystem = (function () {
             var eqChitin = p.chitin_epidermis.equipped;
             var shield = 0;
             // === Boss器官专有效果 ===
+            var eqChitin = p.chitin_epidermis.equipped;
+            var chitinSync = gs.inventory.organSyncLevels[eqChitin] || 1;
             if (eqChitin === '暴君甲壳') {
-                shield = Math.ceil(baseAtk * 1.2);
-                _battleState._chitinThorns = 0.15; // 受击反弹15%
-                _log('<span style=\"color:var(--accent-red)\">骨板硬化！获得 ' + shield + ' 护盾，受击反弹15%伤害。</span>');
+                var mult = chitinSync >= 3 ? 1.8 : 1.2;
+                shield = Math.ceil(baseAtk * mult);
+                _battleState._chitinThorns = chitinSync >= 3 ? 0.25 : 0.15;
+                _log('<span style=\"color:var(--accent-red)\">骨板硬化！获得 ' + shield + ' 护盾，受击反弹' + Math.round(_battleState._chitinThorns*100) + '%伤害。' + (chitinSync >= 3 ? ' <b>觉醒强化！</b>' : '') + '</span>');
             } else if (eqChitin === '蜂后甲壳') {
                 shield = Math.ceil(baseAtk * 0.8);
-                _battleState._chitinHeal = 0.1; // 每回合回复10%HP
-                _log('<span style=\"color:var(--race-swarm)\">幼虫护盾生成！获得 ' + shield + ' 护盾+每回合回复10%HP。</span>');
+                _battleState._chitinHeal = chitinSync >= 3 ? 0.2 : 0.1;
+                _log('<span style=\"color:var(--race-swarm)\">幼虫护盾生成！获得 ' + shield + ' 护盾+每回合回复' + Math.round(_battleState._chitinHeal*100) + '%HP。' + (chitinSync >= 3 ? ' <b>觉醒强化！</b>' : '') + '</span>');
             } else if (eqChitin === '核心护盾') {
                 shield = Math.ceil(baseAtk * 0.6);
-                _battleState._chitinRegen = 1; // 每回合+1进程
-                _log('<span style=\"color:var(--race-ember)\">纳米修复场启动！获得 ' + shield + ' 护盾+每回合+1进程。</span>');
+                _battleState._chitinRegen = chitinSync >= 3 ? 2 : 1;
+                _log('<span style=\"color:var(--race-ember)\">纳米修复场启动！获得 ' + shield + ' 护盾+每回合+' + _battleState._chitinRegen + '进程。' + (chitinSync >= 3 ? ' <b>觉醒强化！</b>' : '') + '</span>');
             } else {
                 shield = Math.ceil(baseAtk * 0.6);
                 _log('<span style=\"color:var(--accent-green)\">生物增殖，获得 ' + shield + ' 点防御护盾。</span>');
@@ -608,8 +620,9 @@ window.CombatSystem = (function () {
             if (!md) { _log('<span style="color:var(--accent-red);">[错误] 未知怪物数据: ' + mon.id + '，已跳过。</span>'); processMonster(idx + 1); return; }
             var intent = mon.intent;
 
-            if (intent.type === 'stun') {
-                _log('<span style="color:var(--text-dim);">' + mon.name + ' 处于神经抑制状态，跳过回合。</span>');
+            if (intent.type === 'stun' || mon.status['stunned']) {
+                if (mon.status['stunned']) { mon.status['stunned'] = 0; }
+                _log('<span style="color:var(--text-dim);">' + mon.name + ' 眩晕，跳过回合。</span>');
                 mon.intent = _generateIntent(md);
                 window.UISystem.render();
                 setTimeout(function() { processMonster(idx + 1); }, 400);
@@ -737,6 +750,14 @@ window.CombatSystem = (function () {
                     window.UISystem.showDamageFloat('<span class="icon icon-lightning-arc"></span>-' + thornDmg, 'var(--accent-blue)', 'monster');
                     if (_allMonstersDead()) { _winBattle(); return; }
                 }
+                // Boss器官：暴君甲壳反伤
+                if (_battleState._chitinThorns && rawDmg > 0) {
+                    var boneThorn = Math.ceil(rawDmg * _battleState._chitinThorns);
+                    mon.hp = Math.max(0, mon.hp - boneThorn);
+                    _log('<span style="color:var(--race-mutant)">骨板反伤！' + mon.name + ' 受到 ' + boneThorn + ' 点反伤。</span>');
+                    window.UISystem.showDamageFloat('-' + boneThorn, 'var(--accent-red)', 'monster');
+                    if (_allMonstersDead()) { _winBattle(); return; }
+                }
                 // 流血（机械余烬免疫）
                 if (intent.bleed && !md.bleedImmune) { _battleState.playerStatus['bleed'] = intent.bleed.duration || 3; _log('<span style="color:var(--accent-red);">施加流血 ' + intent.bleed.duration + ' 回合。</span>'); }
                 // 自防buff
@@ -844,6 +865,17 @@ window.CombatSystem = (function () {
         _battleState.playerProcess = Math.min(processCap, _battleState.playerProcess + recovery);
         GS().player.process = _battleState.playerProcess;
         _log('<span style="color:var(--accent-green);">进程回复 ' + recovery + ' 点，当前 ' + _battleState.playerProcess + '/' + processCap + '</span>');
+        // Boss器官被动：chitin_epidermis 回合效果
+        if (_battleState._chitinHeal && p.hp < p.hp_max) {
+            var healAmt2 = Math.ceil(p.hp_max * _battleState._chitinHeal);
+            p.hp = Math.min(p.hp_max, p.hp + healAmt2);
+            _log('<span style="color:var(--accent-green)">幼虫护盾恢复 ' + healAmt2 + ' HP。</span>');
+        }
+        if (_battleState._chitinRegen) {
+            _battleState.playerProcess = Math.min(processCap, _battleState.playerProcess + _battleState._chitinRegen);
+            GS().player.process = _battleState.playerProcess;
+            _log('<span style="color:var(--accent-blue)">纳米修复场回复 ' + _battleState._chitinRegen + ' 进程。</span>');
+        }
         if (p.coatingTurnsLeft > 0) { p.coatingTurnsLeft--; if (p.coatingTurnsLeft <= 0) { p.activeCoating = null; _log('<span class="txt-dim">涂层活性耗尽。</span>'); } }
         // 狂暴状态递减
         if (_battleState.playerStatus['berserk']) {
