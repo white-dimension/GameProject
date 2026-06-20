@@ -265,11 +265,11 @@ body::after {
 .hud-top { display: flex; flex-direction: row; align-items: stretch; gap: 0; }
 .hud-col { display: flex; flex-direction: column; }
 .hud-col-l { flex: 1; min-width: 100px; justify-content: center; }
-.hud-col-c { flex: 2; align-items: center; justify-content: center; gap: 8px; min-width: 480px; }
+.hud-col-c { flex: 2; align-items: center; justify-content: center; gap: 8px; min-width: 560px; }
 .hud-col-r { flex: 1; min-width: 60px; flex-direction: row; justify-content: flex-end; align-items: center; gap: 10px; padding-right: 5px; }
 .hud-labels { display: flex; justify-content: center; gap: 38px; }
 .hud-bars { display: flex; justify-content: center; gap: 38px; }
-.hud-bar { width: 130px; display: flex; justify-content: space-between; }
+.hud-bar { width: 155px; display: flex; justify-content: space-between; }
 .hud-top .txt-md { display: flex; align-items: center; }
 
 /* 左侧面板：任务+日志 */
