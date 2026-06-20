@@ -54,7 +54,7 @@ window.GuideSystem = (function () {
             var l;
             if (item.align === 'left') {
                 var leftPanel = document.querySelector('.left-panel-col');
-                l = leftPanel ? Math.max(10, leftPanel.getBoundingClientRect().left) : Math.max(10, rect.left);
+                l = leftPanel ? Math.max(10, leftPanel.getBoundingClientRect().left + 15) : Math.max(10, rect.left + 15);
             } else if (item.align === 'self-left') {
                 l = Math.max(10, rect.left);
             } else if (item.align === 'right') l = Math.max(10, rect.right - cw);
