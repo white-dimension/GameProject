@@ -109,7 +109,15 @@ window.UISystem = (function () {
         _bgTitleVideo.muted = true;
         _bgTitleVideo.volume = 0.5;
         _bgTitleVideo.playsInline = true;
-        _bgTitleVideo.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;display:none;pointer-events:none;filter:brightness(0.5);';
+        _bgTitleVideo.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;display:none;pointer-events:none;';
+        _bgTitleVideo._introTriggered = false;
+        _bgTitleVideo.addEventListener('timeupdate', function() {
+            if (!_bgTitleVideo._introTriggered && _bgTitleVideo.duration && _bgTitleVideo.currentTime > _bgTitleVideo.duration - 2) {
+                _bgTitleVideo._introTriggered = true;
+                _modalOverlay.style.display = 'flex';
+                _renderIntroTexts();
+            }
+        });
         _bgTitleVideo.addEventListener('ended', function() { _bgTitleVideo.pause(); });
         _root.appendChild(_bgTitleVideo);
         _bgVideos = [_bgVideo, _bgBattleVideo, _bgTitleVideo];
@@ -1967,7 +1975,10 @@ window.UISystem = (function () {
         _bgTitleVideo.play().catch(function(){});
         _root.className = '';
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
-        _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
+        _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'none';
+        // 文字内容预备，等视频最后2秒由 timeupdate 触发 _renderIntroTexts
+    }
+    function _renderIntroTexts() {
         var box = _ce('div');
         box.style.cssText = 'width:min(650px,90vw);padding:50px 40px 30px 40px;text-align:left;';
         box.innerHTML = '<div class="txt-lg txt-green txt-bold" style="margin-bottom:24px;">黑平线：原体觉醒</div>' +
