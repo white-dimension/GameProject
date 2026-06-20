@@ -2471,6 +2471,7 @@ window.UISystem = (function () {
 
         var chipRow = _ce('div');
         chipRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;';
+        items.forEach(function(item) {
             var chip = _ce('div');
             chip.style.cssText = 'padding:6px 12px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;cursor:pointer;font-size:13px;color:var(--text-main);';
             chip.textContent = item.id + ' ×' + item.count + ' [' + item.weight + ']';
