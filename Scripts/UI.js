@@ -1999,19 +1999,13 @@ window.UISystem = (function () {
             '三股力量在深达数千米的地下实验室疯狂增殖。你是唯一的原体。</div>' +
             '<button class="btn btn-green" style="padding:10px 40px;font-size:15px;box-shadow:0 0 16px rgba(0,255,136,0.3);">开始游戏</button>';
         startBox.querySelector('button').onclick = function() {
-            // 淡出开始按钮，1秒后启动视频
+            // 淡出按钮，立即开始加载日志
             startBox.style.transition = 'opacity 0.4s ease';
             startBox.style.opacity = '0';
-            _bgTitleVideo.muted = window.Sound ? window.Sound.isMuted() : false;
             setTimeout(function() {
                 _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'none';
-                _bgTitleVideo.currentTime = 0;
-                _bgTitleVideo._fadeTriggered = false;
-                _bgTitleVideo._introTriggered = false;
-                _bgTitleVideo._fadeOverlay.style.opacity = '0';
-                _bgTitleVideo.style.display = 'block';
-                _bgTitleVideo.play().catch(function(){});
-            }, 1000);
+                _renderIntroTexts();
+            }, 400);
         };
         _modalOverlay.appendChild(startBox);
     }
@@ -2031,16 +2025,45 @@ window.UISystem = (function () {
         var idx = 0;
         var showNext = function() {
             if (idx >= lines.length) {
-                // 全局点击/按键关闭intro
-                var _closeHandler = function(e) {
-                    if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
+                // 空格键提示
+                var tipDiv = document.createElement('div');
+                tipDiv.className = 'txt-xs';
+                tipDiv.style.cssText = 'margin-top:8px;color:var(--accent-green);animation:mastery-pulse 2s infinite;';
+                tipDiv.textContent = '> 按空格键激活原体';
+                logPanel.appendChild(tipDiv);
+                // 空格触发视频
+                var _spaceHandler = function(e) {
+                    if (e.key !== ' ') return;
                     e.preventDefault();
-                    document.removeEventListener('click', _closeHandler);
-                    document.removeEventListener('keydown', _closeHandler);
-                    window.UISystem.closeIntro();
+                    document.removeEventListener('keydown', _spaceHandler);
+                    // 启动标题视频
+                    _bgTitleVideo.muted = window.Sound ? window.Sound.isMuted() : false;
+                    _bgTitleVideo.currentTime = 0;
+                    _bgTitleVideo._fadeTriggered = false;
+                    _bgTitleVideo._introTriggered = true;
+                    _bgTitleVideo._fadeOverlay.style.opacity = '0';
+                    _bgTitleVideo.style.display = 'block';
+                    _bgTitleVideo.play().catch(function(){});
+                    // 视频结束后淡入主界面
+                    _bgTitleVideo.addEventListener('ended', function _onEnd() {
+                        _bgTitleVideo.removeEventListener('ended', _onEnd);
+                        var gs = GS(); if (gs) { gs.player.introSeen = true; GameState.save(); }
+                        _bgTitleVideo.style.display = 'none';
+                        _bgTitleVideo._fadeOverlay.style.opacity = '0';
+                        _bgTitleVideo.pause();
+                        _showBgVideo(_bgVideo);
+                        _root.className = '';
+                        _wakingUp = true;
+                        _introActive = false;
+                        var hud3 = document.querySelector('.hud-top'); if (hud3) hud3.style.display = '';
+                        var ab3 = document.getElementById('ui-action-bar'); if (ab3) ab3.style.display = '';
+                        var tp3 = document.getElementById('ui-task-panel'); if (tp3) tp3.style.display = '';
+                        var ri3 = document.getElementById('ui-room-info'); if (ri3) ri3.style.display = '';
+                        logPanel.style.cssText = logPanel.style.cssText.replace('max-height:none', '');
+                        UISystem.render();
+                    });
                 };
-                document.addEventListener('click', _closeHandler);
-                document.addEventListener('keydown', _closeHandler);
+                document.addEventListener('keydown', _spaceHandler);
                 return;
             }
             var li = lines[idx];
