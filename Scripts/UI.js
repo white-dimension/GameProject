@@ -1594,7 +1594,7 @@ window.UISystem = (function () {
                     var _tierBg3 = { 'Ⅲ': 'rgba(255,213,79,0.12)', 'Ⅱ': 'rgba(0,212,255,0.08)', 'Ⅰ': 'rgba(0,255,136,0.06)' };
                     var _tierBd3 = { 'Ⅲ': 'rgba(255,213,79,0.35)', 'Ⅱ': 'rgba(0,212,255,0.25)', 'Ⅰ': 'rgba(0,255,136,0.2)' };
                     var _tierClr3 = { 'Ⅲ': 'var(--accent-yellow)', 'Ⅱ': 'var(--accent-blue)', 'Ⅰ': 'var(--accent-green)' };
-                    var _ts3 = cid.match(/[ⅠⅡⅢ]$/); var _bg3 = _ts3 ? (_tierBg3[_ts3[0]] || 'rgba(255,213,79,0.08)') : 'var(--bg-card)';
+                    var _ts3 = cid.match(/[ⅠⅡⅢ]$/); var _bg3 = _ts3 ? (_tierBg3[_ts3[0]] || 'rgba(255,213,79,0.08)') : 'rgba(255,255,255,0.06)';
                     var _bd3 = _ts3 ? (_tierBd3[_ts3[0]] || 'rgba(255,213,79,0.2)') : 'var(--border-dim)';
                     var _cl3 = _ts3 ? (_tierClr3[_ts3[0]] || 'var(--text-main)') : 'var(--text-main)';
                     organHTML += '<span class="txt-xs txt-dim"> 组件: </span><span class="help-tip" style="padding:6px 10px;font-size:13px;background:' + _bg3 + ';border:1px solid ' + _bd3 + ';border-radius:4px;color:' + _cl3 + ';" data-tip="' + tipText + '">' + _fmtRoman(cid) + '</span>';
@@ -2282,7 +2282,7 @@ window.UISystem = (function () {
             // 根据组件等级区分背景色
             var tierBg = { 'Ⅲ': 'rgba(255,213,79,0.12)', 'Ⅱ': 'rgba(0,212,255,0.08)', 'Ⅰ': 'rgba(0,255,136,0.06)' };
             var tierBd = { 'Ⅲ': 'rgba(255,213,79,0.35)', 'Ⅱ': 'rgba(0,212,255,0.25)', 'Ⅰ': 'rgba(0,255,136,0.2)' };
-            var tierSuffix = k.match(/[ⅠⅡⅢ]$/); var _tBg = 'var(--bg-card)'; var _tBd = 'var(--border-dim)';
+            var tierSuffix = k.match(/[ⅠⅡⅢ]$/); var _tBg = 'rgba(255,255,255,0.06)'; var _tBd = 'rgba(255,255,255,0.12)';
             if (tierSuffix) { _tBg = tierBg[tierSuffix[0]] || _tBg; _tBd = tierBd[tierSuffix[0]] || _tBd; }
             var _tClr = tierSuffix ? (tierSuffix[0]==='Ⅲ'?'var(--accent-yellow)':tierSuffix[0]==='Ⅱ'?'var(--accent-blue)':'var(--accent-green)') : 'var(--text-main)';
             chip.style.cssText = 'padding:6px 12px;background:' + _tBg + ';border:1px solid ' + _tBd + ';border-radius:4px;cursor:pointer;font-size:13px;color:' + _tClr + ';';
@@ -2878,7 +2878,7 @@ window.UISystem = (function () {
                         if (ep.length > 0) etip += '&#10;' + ep.join(' · ');
                     }
                     var _tsL = cid.match(/[ⅠⅡⅢ]$/);
-                    var _bgL = _tsL ? ({ 'Ⅲ': 'rgba(255,213,79,0.12)', 'Ⅱ': 'rgba(0,212,255,0.08)', 'Ⅰ': 'rgba(0,255,136,0.06)' }[_tsL[0]] || 'rgba(255,213,79,0.08)') : 'var(--bg-card)';
+                    var _bgL = _tsL ? ({ 'Ⅲ': 'rgba(255,213,79,0.12)', 'Ⅱ': 'rgba(0,212,255,0.08)', 'Ⅰ': 'rgba(0,255,136,0.06)' }[_tsL[0]] || 'rgba(255,213,79,0.08)') : 'rgba(255,255,255,0.06)';
                     var _bdL = _tsL ? ({ 'Ⅲ': 'rgba(255,213,79,0.35)', 'Ⅱ': 'rgba(0,212,255,0.25)', 'Ⅰ': 'rgba(0,255,136,0.2)' }[_tsL[0]] || 'rgba(255,213,79,0.2)') : 'var(--border-dim)';
                     var _clL = _tsL ? ({ 'Ⅲ': 'var(--accent-yellow)', 'Ⅱ': 'var(--accent-blue)', 'Ⅰ': 'var(--accent-green)' }[_tsL[0]] || 'var(--text-main)') : 'var(--text-main)';
                     slotHTML += '<span class="help-tip" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;font-size:13px;background:' + _bgL + ';border:1px solid ' + _bdL + ';border-radius:4px;color:' + _clL + ';' + (p.bp < 10 ? 'opacity:0.5;cursor:not-allowed;filter:grayscale(1);' : 'cursor:pointer;') + '" data-tip="' + etip + (p.bp < 10 ? '&#10;<b style=color:var(--accent-red)>BP 不足 (需10)</b>' : '&#10;点击卸下 (10 BP)') + '" data-slot="' + s + '" data-sidx="' + si + '">' + cid + '</span>';
@@ -3081,7 +3081,7 @@ window.UISystem = (function () {
         Object.keys(inv).forEach(function(k) { if (inv[k] > 0) { hasAny = true; var tip = _buildCompTooltip(k);
             var tierBg2 = { 'Ⅲ': 'rgba(255,213,79,0.12)', 'Ⅱ': 'rgba(0,212,255,0.08)', 'Ⅰ': 'rgba(0,255,136,0.06)' };
             var tierBd2 = { 'Ⅲ': 'rgba(255,213,79,0.35)', 'Ⅱ': 'rgba(0,212,255,0.25)', 'Ⅰ': 'rgba(0,255,136,0.2)' };
-            var ts2 = k.match(/[ⅠⅡⅢ]$/); var bg2 = ts2 ? (tierBg2[ts2[0]] || 'rgba(255,213,79,0.1)') : 'var(--bg-card)';
+            var ts2 = k.match(/[ⅠⅡⅢ]$/); var bg2 = ts2 ? (tierBg2[ts2[0]] || 'rgba(255,213,79,0.1)') : 'rgba(255,255,255,0.06)';
             var bd2 = ts2 ? (tierBd2[ts2[0]] || 'rgba(255,213,79,0.2)') : 'var(--border-dim)';
             var cl2 = ts2 ? (ts2[0] === 'Ⅲ' ? 'var(--accent-yellow)' : ts2[0] === 'Ⅱ' ? 'var(--accent-blue)' : 'var(--accent-green)') : 'var(--text-main)';
             invHTML += '<span class="txt-xs help-tip" style="padding:4px 10px;background:' + bg2 + ';border:1px solid ' + bd2 + ';border-radius:4px;color:' + cl2 + ';" data-tip="' + tip + '" data-cname="' + k + '">' + _fmtRoman(k) + ' ×' + inv[k] + '</span>'; } });
