@@ -111,7 +111,14 @@ window.UISystem = (function () {
         _bgTitleVideo.playsInline = true;
         _bgTitleVideo.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;display:none;pointer-events:none;';
         _bgTitleVideo._introTriggered = false;
+        _bgTitleVideo._fadeOverlay = _ce('div');
+        _bgTitleVideo._fadeOverlay.style.cssText = 'position:fixed;inset:0;z-index:1;background:#000;opacity:0;transition:opacity 3s ease;pointer-events:none;';
+        _root.appendChild(_bgTitleVideo._fadeOverlay);
         _bgTitleVideo.addEventListener('timeupdate', function() {
+            if (!_bgTitleVideo._fadeTriggered && _bgTitleVideo.duration && _bgTitleVideo.currentTime > _bgTitleVideo.duration - 3) {
+                _bgTitleVideo._fadeTriggered = true;
+                _bgTitleVideo._fadeOverlay.style.opacity = '1';
+            }
             if (!_bgTitleVideo._introTriggered && _bgTitleVideo.duration && _bgTitleVideo.currentTime > _bgTitleVideo.duration - 2) {
                 _bgTitleVideo._introTriggered = true;
                 _modalOverlay.style.display = 'flex';
@@ -1970,6 +1977,9 @@ window.UISystem = (function () {
         _hideBgVideo(_bgVideo);
         _hideBgVideo(_bgBattleVideo);
         _bgTitleVideo.currentTime = 0;
+        _bgTitleVideo._fadeTriggered = false;
+        _bgTitleVideo._introTriggered = false;
+        _bgTitleVideo._fadeOverlay.style.opacity = '0';
         _bgTitleVideo.muted = window.Sound ? window.Sound.isMuted() : false;
         _bgTitleVideo.style.display = 'block';
         _bgTitleVideo.play().catch(function(){});
@@ -2021,6 +2031,7 @@ window.UISystem = (function () {
         _modalOverlay.style.display = 'none';
         _wakingUp = true;
         _bgTitleVideo.style.display = 'none';
+        _bgTitleVideo._fadeOverlay.style.opacity = '0';
         _bgTitleVideo.pause();
         _showBgVideo(_bgVideo);
         _root.className = '';
