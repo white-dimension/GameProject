@@ -1007,11 +1007,18 @@ window.UISystem = (function () {
                 }
                 if (isCounter) { dmg *= 1.5; ignoreDef = true; tag = " (弱点)"; }
 
-                // 2. 器官/同调加成
+                // 2. 器官基础倍率
                 var sData = gs.player[slot] || { tier: 1 };
-                var syncLvl = gs.inventory.organSyncLevels[sData.equipped] || 1;
+                var eqId = sData.equipped;
+                var boData = eqId ? (GD().BOSS_ORGANS || {})[eqId] : null;
+                var syncLvl = gs.inventory.organSyncLevels[eqId] || 1;
                 var tierFactor = 1 + (sData.tier - 1) * 0.1 * syncLvl;
-                dmg *= tierFactor;
+                // Boss器官的基础倍率
+                if (boData && boData.skillEffect && boData.skillEffect.baseMultiplier) {
+                    dmg *= boData.skillEffect.baseMultiplier * tierFactor;
+                } else {
+                    dmg *= tierFactor;
+                }
 
                 // 3. 特殊觉醒
                 if (slot === 'predatory_organ' && sData.equipped === '暴君核心' && syncLvl >= 3) ignoreDef = true;
