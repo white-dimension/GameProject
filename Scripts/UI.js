@@ -687,8 +687,9 @@ window.UISystem = (function () {
                 wrap.appendChild(intentBar);
             }
 
-            // Boss立绘：直接替换卡片背景
+            // 怪物立绘：有图则全卡背景，Boss加呼吸动画
             var isBoss = md.tier === 'world_boss' && md.image;
+            var hasBgImage = !!md.image;
 
             // 怪物卡片
             var card = _ce('div');
@@ -696,7 +697,7 @@ window.UISystem = (function () {
             card.setAttribute('data-monster-idx', idx);
             var cardBorder = dead ? 'var(--border-dim)' : mclr;
             var cardGlow = (isTarget && !dead && !isVictory) ? 'box-shadow:0 0 20px ' + (raceCardClrs[md.race] || '#ff4455') + ';' : '';
-            var cardBg = (isBoss && !dead)
+            var cardBg = (hasBgImage && !dead)
                 ? 'linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.25) 100%), linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url(' + md.image + ') center/cover no-repeat'
                 : 'var(--bg-card)';
             card.style.cssText = 'position:relative;background:' + cardBg + ';border:2px solid ' + cardBorder + ';border-radius:8px;padding:24px;text-align:center;min-width:280px;max-width:380px;min-height:320px;display:flex;flex-direction:column;justify-content:flex-end;' + cardGlow +
@@ -726,15 +727,8 @@ window.UISystem = (function () {
                 card.onmouseleave = function() { this.style.borderColor = isTarget ? mclr : (dead ? 'var(--border-dim)' : mclr); this.style.boxShadow = cardGlow || 'none'; };
             }
 
-            // 怪物立绘/图标
-            var hasPortrait = !isBoss && md.image;
-            if (hasPortrait) {
-                var portrait = _ce('img', 'monster-portrait');
-                portrait.src = md.image;
-                portrait.alt = mon.name;
-                if (dead) portrait.style.cssText = 'filter:grayscale(1);opacity:0.5;';
-                card.appendChild(portrait);
-            } else if (!isBoss) {
+            // 无背景图时显示怪物图标
+            if (!hasBgImage) {
                 var iconClass = (md.icon ? 'icon-mid-' + md.icon : raceIcons[md.race] || 'icon-mutant');
                 var ico = _ce('div');
                 ico.className = 'icon ' + iconClass + ' icon-lg icon-pulse';
