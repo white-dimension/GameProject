@@ -2471,9 +2471,8 @@ window.UISystem = (function () {
 
         var chipRow = _ce('div');
         chipRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;';
-var ts=k.match(/[ⅠⅡⅢ]$/);var bg=ts?({'Ⅲ':'rgba(255,213,79,0.12)','Ⅱ':'rgba(0,212,255,0.08)','Ⅰ':'rgba(0,255,136,0.06)'}[ts[0]]||'var(--bg-card)'):'var(--bg-card)';var bd=ts?({'Ⅲ':'rgba(255,213,79,0.35)','Ⅱ':'rgba(0,212,255,0.25)','Ⅰ':'rgba(0,255,136,0.2)'}[ts[0]]||'var(--border-dim)'):'var(--border-dim)';var cl=ts?({'Ⅲ':'var(--accent-yellow)','Ⅱ':'var(--accent-blue)','Ⅰ':'var(--accent-green)'}[ts[0]]||'var(--text-main)'):'var(--text-main)';
             var chip = _ce('div');
-            chip.style.cssText = 'padding:6px 12px;background:'+bg+';border:1px solid '+bd+';border-radius:4px;cursor:pointer;font-size:13px;color:'+cl+';';
+            chip.style.cssText = 'padding:6px 12px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;cursor:pointer;font-size:13px;color:var(--text-main);';
             chip.textContent = item.id + ' ×' + item.count + ' [' + item.weight + ']';
             chip.onclick = function() {
                 var cur = selected[item.id] || 0;
