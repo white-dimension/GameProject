@@ -1020,10 +1020,20 @@ window.UISystem = (function () {
                     dmg *= tierFactor;
                 }
 
-                // 3. 特殊觉醒
+                // 3. 涂层加成
+                if (slot === 'predatory_organ') {
+                    if (gs.player.activeCoating === 'COAT_ANTI_MUTANT' && md.race === 'mutant') { dmg *= 1.5; ignoreDef = true; }
+                    if (gs.player.activeCoating === 'COAT_ANTI_SWARM' && md.race === 'swarm') dmg *= 1.6;
+                    if (gs.player.activeCoating === 'COAT_ANTI_EMBER' && md.race === 'ember') dmg *= 1.3;
+                }
+
+                // 4. 双专精加成
+                if (slot === 'predatory_organ' && bsv && bsv.dualKey === 'mutant+mutant') { dmg *= 1.4; ignoreDef = true; }
+
+                // 5. 特殊觉醒
                 if (slot === 'predatory_organ' && sData.equipped === '暴君核心' && syncLvl >= 3) ignoreDef = true;
 
-                // 4. 连招引爆
+                // 6. 连招引爆
                 var heal = 0;
                 if (slot === 'gland_core') {
                     if (sData.equipped === '蜂后髓核') { dmg *= 3; heal = dmg; }
