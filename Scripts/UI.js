@@ -3302,7 +3302,7 @@ window.UISystem = (function () {
         var syncHTML = '<div class="txt-xs txt-gold txt-bold" style="margin-bottom:10px;">> 器官深度同调（消耗同名器官提升技能效能，最高 Lv.3）</div>';
         syncHTML += '<div style="display:flex;flex-wrap:wrap;gap:8px;">';
 
-        var bossOrganIds = ['暴君核心', '蜂后髓核', '高能电泳核'];
+        var bossOrganIds = ['暴君核心','暴君甲壳','暴君腺体','蜂后毒牙','蜂后甲壳','蜂后髓核','核心钻头','核心护盾','高能电泳核'];
         var hasAnyBossOrgan = false;
 
         bossOrganIds.forEach(function(oid) {
