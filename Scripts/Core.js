@@ -207,6 +207,16 @@ window.GameState = (function () {
             }
         });
 
+        // [v3.0] 图片预加载：提前缓存当前楼层可能出现的怪物立绘
+        var _preloaded = {};
+        nodes.forEach(function(n) {
+            if (n.monsterId && !_preloaded[n.monsterId]) {
+                _preloaded[n.monsterId] = true;
+                var md = GD().MONSTERS[n.monsterId];
+                if (md && md.image) { var img = new Image(); img.src = md.image; }
+            }
+        });
+
         return nodes;
     }
 
