@@ -3020,7 +3020,7 @@ window.UISystem = (function () {
         var syncLvl = gs.inventory.organSyncLevels[d.equipped] || 1;
         var html = '';
         // 名称行
-        html += '<div class="txt-xs txt-green txt-bold">' + organNames[s] + ' ' + _fmtTierStars(d.tier) + '</div>';
+        html += '<div class="txt-xs txt-green txt-bold">' + organNames[s] + ' ' + (d.tier >= 3 ? 'MAX' : _fmtTierStars(d.tier)) + '</div>';
         // 挂载行
         html += '<div class="txt-xs txt-dim" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">';
         html += '<span>挂载: </span>';
