@@ -268,7 +268,12 @@ window.UISystem = (function () {
             var th = tip.offsetHeight;
             tip.style.visibility = 'visible';
             tip.style.left = Math.min(r.left, window.innerWidth - 310) + 'px';
-            tip.style.top = (r.top - th - 6) + 'px';
+            // 上方空间不够时显示在下方
+            if (r.top - th - 6 < 10) {
+                tip.style.top = (r.bottom + 6) + 'px';
+            } else {
+                tip.style.top = (r.top - th - 6) + 'px';
+            }
         });
         document.addEventListener('mouseout', function(e) {
             var t = e.target.closest && e.target.closest('.help-tip');
