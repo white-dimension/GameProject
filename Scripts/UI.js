@@ -1567,9 +1567,21 @@ window.UISystem = (function () {
                 if (known && m.image) {
                     imgLayer = '<div style="position:absolute;inset:0;background:url(' + m.image + ') center/cover no-repeat;filter:brightness(0.5);z-index:0;"></div>';
                 }
-                var cardTip = known ? '<b style=color:' + rclr + '>' + m.name + '</b>&#10;' +
-                    'HP: ' + m.hp + ' | ATK: ' + m.atk + ' | DEF: ' + m.def + (m.physicalResist ? '&#10;物理抗性: ' + Math.round(m.physicalResist*100) + '%' : '') + (m.shieldPerTurn ? '&#10;每回合护盾: ' + m.shieldPerTurn : '') + (m.bleedImmune ? '&#10;流血免疫' : '') + (m.dodgeChance ? '&#10;闪避率: ' + Math.round(m.dodgeChance*100) + '%' : '') + (m.drugResist ? '&#10;耐药性: ' + Math.round(m.drugResist*100) + '%' : '') + (m.recoilDamage ? '&#10;反噬伤害: ' + m.recoilDamage : '') +
-                    '&#10;&#10;<b>弱点:</b> ' + (m.weakness || '无特殊弱点') : '';
+                var cardTip = '';
+                if (known) {
+                    var traits = [];
+                    if (m.physicalResist) traits.push('物理抗性 ' + Math.round(m.physicalResist*100) + '%');
+                    if (m.bleedImmune) traits.push('流血免疫');
+                    if (m.dodgeChance) traits.push('闪避 ' + Math.round(m.dodgeChance*100) + '%');
+                    if (m.drugResist) traits.push('耐药 ' + Math.round(m.drugResist*100) + '%');
+                    if (m.shieldPerTurn) traits.push('护盾 +' + m.shieldPerTurn + '/回合');
+                    if (m.recoilDamage) traits.push('反噬 ' + m.recoilDamage + '点');
+                    cardTip = '<b style=color:' + rclr + ';font-size:15px;>' + m.name + '</b>' +
+                        '&#10;<span style=color:var(--text-dim)>━━━━━━━━━━━━━━━</span>' +
+                        '&#10;<b>生命</b> ' + m.hp + '　<b>攻击</b> ' + m.atk + '　<b>防御</b> ' + m.def +
+                        (traits.length > 0 ? '&#10;&#10;<b style=color:var(--accent-yellow)>特质</b>&#10;  ' + traits.join('&#10;  ') : '') +
+                        '&#10;&#10;<b>弱点</b>&#10;  ' + (m.weakness || '无特殊弱点');
+                }
                 item.className = known ? 'help-tip' : '';
                 if (known) item.setAttribute('data-tip', cardTip);
                 item.innerHTML = imgLayer +
