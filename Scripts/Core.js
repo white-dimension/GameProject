@@ -174,7 +174,7 @@ window.GameState = (function () {
         nodes.push({ id: 'node_' + (id++), type: 'boss', monsterId: bossId, raceClr: _raceColors[bm.race] || _raceColors._default, label: '<span class="icon ' + ((bm.icon ? "icon-mid-" + bm.icon : _BOSS_ICONS[bm.race] || "icon-crown")) + '"></span> 领主：' + bm.name + ' <span style="opacity:0.6;">' + (bossRaceSuffix[bm.race] || '') + '</span>', desc: _pickDesc(_bossDescsBase, gs).replace('它', bm.name), exhausted: false, hidden: true });
 
         // 传送门（预置，portalUnlocked 时启用）
-        nodes.push({ id: 'node_' + (id++), type: 'portal', label: '<span class="icon icon-portal"></span> 传送门 [' + (floor + 1) + 'F]', desc: _portalDescs[Math.floor(Math.random() * _portalDescs.length)], exhausted: false, hidden: true });
+        nodes.push({ id: 'node_' + (id++), type: 'portal', label: '<span class="icon icon-portal"></span> 传送门', desc: _portalDescs[Math.floor(Math.random() * _portalDescs.length)], exhausted: false, hidden: true });
 
         // 打乱（保持首个节点不动——母巢起点）
         var startIdx = (nodes[0] && nodes[0].isStart) ? 1 : 0;

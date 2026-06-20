@@ -78,7 +78,7 @@ window.WorldSystem = (function () {
             gs.mapState.bossDefeated = false;
             gs.mapState.portalUnlocked = false;
             gs.mapState.floorNodePool = window.GameState._genFloorNodePool(gs.mapState.currentFloor, gs);
-            target.label = target.label + ' [B' + gs.mapState.currentFloor + 'F]';
+            // 传送门已穿越，不追加额外标签
             target.desc = target.desc + ' 传送门将你送到了更深层的实验室区域。';
         }
 

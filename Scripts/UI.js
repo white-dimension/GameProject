@@ -340,7 +340,8 @@ window.UISystem = (function () {
             if (gs.mapState.stepsTaken > 0) {
                 // 已有进度的存档跳过加载动画
                 _wakingUp = false; _tasksDone = true; _discoveryDone = true; _showScan = true;
-                _pushLog('神经链路重新校准。步数 ' + gs.mapState.stepsTaken + ' | B' + (gs.mapState.currentFloor || 1) + 'F');
+                var _flrInfo = (function(f){ var cn = ['','一','二','三','四','五','六','七','八','九','十']; return '地下' + (cn[f]||f) + '层'; })(gs.mapState.currentFloor || 1);
+                _pushLog('神经链路重新校准。步数 ' + gs.mapState.stepsTaken + ' | ' + _flrInfo);
                 UISystem.render(); // 重新触发一次渲染以更新视图
                 return;
             } else {
@@ -1077,7 +1078,8 @@ window.UISystem = (function () {
                 // 地下城：深入按钮
                 if (bs.isDungeon && (bs._dungeonFloor || 0) < 3) {
                     var deep = _ce('button', 'btn btn-green btn-battle-card');
-                    deep.innerHTML = '<span class="txt-sm txt-bold">[0] 深入地下城</span><span class="txt-xs">B' + ((bs._dungeonFloor||0)+2) + 'F</span>';
+                    var _df2 = (function(f){ var cn = ['','一','二','三','四','五','六','七','八','九','十']; return '地下' + (cn[f]||f) + '层'; })((bs._dungeonFloor||0)+2);
+                    deep.innerHTML = '<span class="txt-sm txt-bold">[0] 深入地下城</span><span class="txt-xs">' + _df2 + '</span>';
                     deep.onclick = function() { this.style.transform = 'translateY(2px)'; setTimeout(function() { CS().dungeonDeep(); }, 80); };
                     bar.appendChild(deep);
                 }
@@ -1117,7 +1119,7 @@ window.UISystem = (function () {
             var floorBar = _ce('div');
             floorBar.style.cssText = 'display:flex;align-items:center;justify-content:space-between;width:100%;padding-left:35px;padding-right:25px;font-size:14px;font-family:inherit;';
             floorBar.innerHTML = '<div style="display:flex;align-items:center;gap:16px;">' +
-                '<span class="txt-bold" style="color:var(--accent-blue);font-size:16px;">B' + floor + 'F</span>' +
+                '<span class="txt-bold" style="color:var(--accent-blue);font-size:16px;">' + (function(f){ var cn = ['','一','二','三','四','五','六','七','八','九','十']; return '地下' + (cn[f]||f) + '层'; })(floor) + '</span>' +
                 '<span class="txt-sm txt-bold" style="color:var(--text-main);">节点 ' + doneN + '/' + totalN + '</span>' +
                 '<div class="progress-container" style="width:180px;height:8px;"><div class="progress-fill ram-fill" style="width:' + pct + '%;"></div></div>' +
                 (gs.mapState.bossDefeated ? '<span style="color:var(--accent-red);">领主已击杀</span>' : (pct >= 60 ? '<span style="color:var(--accent-yellow);">领主已现身</span>' : '')) +
@@ -1884,7 +1886,7 @@ window.UISystem = (function () {
         _modalOverlay.appendChild(box);
         var lines = [
             { text: '神经链路初始化...', cls: 'txt-xs txt-dim', delay: 200 },
-            { text: '黑平线超生物复合实验室 B1F', cls: 'txt-xs txt-green', delay: 600 },
+            { text: '黑地平线超生物复合实验室 地下一层', cls: 'txt-xs txt-green', delay: 600 },
             { text: '2099年，基因剥离计划「余烬」彻底失控。', cls: 'txt-sm txt-dim', delay: 400 },
             { text: '三股力量在深达数千米的地下疯狂增殖：变异血肉、寄生毒素飞蛾、纳米真菌改写的安保机械。', cls: 'txt-sm txt-dim', delay: 300 },
             { text: '你是唯一的——', cls: 'txt-sm txt-dim', delay: 200 },

@@ -1128,7 +1128,8 @@ window.CombatSystem = (function () {
         if (!_battleState || !_battleState.isDungeon) return;
         var floor = (_battleState._dungeonFloor || 0) + 1;
         var gs = GS(); var p = gs.player;
-        _log('>> 深入地下城 B' + floor + 'F... HP 继承。');
+        var _df = (function(f){ var cn = ['','一','二','三','四','五','六','七','八','九','十']; return '地下' + (cn[f]||f) + '层'; })(floor);
+        _log('>> 深入地下城 ' + _df + '... HP 继承。');
         var pool2 = ['MON_CH1_CLEANER','MON_CH1_GUARD','MON_CH1_SPORE','MON_CH1_HIVE','MON_CH1_BEE','MON_CH1_SENTINEL'];
         var ids;
         if (floor >= 3) {

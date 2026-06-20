@@ -837,7 +837,7 @@ window.GameData = (function () {
             sections: [
                 { key: 'MAX', label: '巅峰等级', desc: '等阶上限提升至 30 级。满级后将以 MAX 状态展示在状态栏。10级后每级额外获得 1 专精点。', color: 'var(--accent-blue)' },
                 { key: 'Rank', label: '深度研究', desc: '在图鉴中消耗 BP 提升研究等级。Lv.1 解锁战斗数值透明，Lv.2 增伤，Lv.3 掉落加成。', color: 'var(--accent-yellow)' },
-                { key: 'Loop', label: '超越进化', desc: '通关 B10F 后开启无限循环。保留所有属性和物资，每轮怪物属性 ×1.5，BP 收益同步上扬。无硬上限，直到你无法战胜翻倍的敌人。Loop 2 解锁第三专精槽 + 精英词缀。', color: 'var(--accent-orange)' },
+                { key: 'Loop', label: '超越进化', desc: '通关地下十层后开启无限循环。保留所有属性和物资，每轮怪物属性 ×1.5，BP 收益同步上扬。无硬上限，直到你无法战胜翻倍的敌人。Loop 2 解锁第三专精槽 + 精英词缀。', color: 'var(--accent-orange)' },
                 { key: 'Event', label: '感官异常', desc: '路径跳转间 10% 概率触发随机事件，抉择可能改变你的进化路线或即时状态。', color: 'var(--accent-purple)' }
             ],
             tip: '当您进入 Loop 2 后，原体将自动解锁「第三专精插槽」，支持三系毒株融合。'
@@ -849,7 +849,7 @@ window.GameData = (function () {
                 { label: '高能电泳核 (Sync Lv.3)', desc: '技能进化为「全场溅射」，瞬间清理怪潮。', color: 'var(--accent-blue)' },
                 { label: '组件 Ⅲ 级', desc: '数值为基础级的 4 倍以上，是通往更高周目的必备武装。', color: 'var(--accent-yellow)' }
             ],
-            tip: '通过 B5-B10 的高级任务可以直接获得特定种族的组织碎片奖励。'
+            tip: '通过地下五~十层的高级任务可以直接获得特定种族的组织碎片奖励。'
         }
     };
 
@@ -1043,7 +1043,7 @@ window.GameData = (function () {
             title: '时空裂隙',
             desc: '一道扭曲的蓝色裂隙悬浮在半空中。透过它，你隐约看到了下一层楼的景象。某种引力正在拉扯周围的一切。',
             options: [
-                { label: '穿越裂隙', desc: '立即跳过当前楼层，直接进入下一层（传送门）。不可在 B10 使用。', action: function(gs) {
+                { label: '穿越裂隙', desc: '立即跳过当前楼层，直接进入下一层（传送门）。不可在最后一层（地下十层）使用。', action: function(gs) {
                     if (gs.mapState.currentFloor >= 10) return { msg: '裂隙的能量在这里变得极不稳定，无法穿越。', type: 'info' };
                     gs.mapState.bossDefeated = true; gs.mapState.portalUnlocked = true;
                     return { msg: '世界在眼前折叠又展开。你发现自己已站在了下一层的边缘。', type: 'reward' };
