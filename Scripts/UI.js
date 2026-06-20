@@ -2351,7 +2351,7 @@ window.UISystem = (function () {
                 inv[result] = (inv[result] || 0) + 1;
             }
             window.GameState.save();
-            UISystem.showNotification('合成完成！', consumed.join(' + ') + ' → ' + (allSame ? selKeys[0] + '+' : '新组件'), 'var(--accent-yellow)');
+            UISystem.showNotification('合成完成！', consumed.join(' + ') + ' → ' + (allSame ? _fmtRoman(upgradedName) : '新组件'), 'var(--accent-yellow)');
             UISystem._showSynthesizeModal();
         };
         btnRow.appendChild(confirmBtn);
