@@ -83,6 +83,11 @@ window.CombatSystem = (function () {
         _battleState.componentEffects = _getComponentEffects();
 
         window.UISystem.render();
+        // 首次战斗自动弹出教学
+        if (gs && !gs.player._battleTutSeen && !_battleState._isTraining) {
+            gs.player._battleTutSeen = true;
+            setTimeout(function(){ window.UISystem.showHelpPanel('fight'); }, 600);
+        }
         if (window.Sound && _battleState.monsters.length > 0) {
             var md = window.GameData.MONSTERS[_battleState.monsters[0].id];
             if (md && md.tier === 'world_boss') {

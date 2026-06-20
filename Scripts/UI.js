@@ -1250,7 +1250,8 @@ window.UISystem = (function () {
         }
     }
 
-    function showHelpPanel() {
+    function showHelpPanel(initialTab) {
+        UISystem._helpTab = initialTab || 'stats';
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
         var box = _ce('div', 'modal-box');
@@ -3034,6 +3035,11 @@ window.UISystem = (function () {
 
     function showReorganizeModal() {
         var gs = GS(); var p = gs.player;
+        // 首次进入实验室自动弹出引导
+        if (!gs.player._labTutSeen) {
+            gs.player._labTutSeen = true;
+            setTimeout(function(){ UISystem.showHelpPanel('lab'); }, 300);
+        }
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
         var box = _ce('div', 'modal-box status-modal');
