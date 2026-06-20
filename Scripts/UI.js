@@ -620,7 +620,7 @@ window.UISystem = (function () {
                     if (p.synapseAffix) {
                         card.style.border = '1px solid ' + p.synapseAffix.color;
                         card.style.boxShadow = 'inset 0 0 10px ' + p.synapseAffix.color + '33';
-                        affixHTML = '<div class="help-tip" style="position:absolute;top:-10px;right:10px;background:var(--bg-deep);border:1px solid ' + p.synapseAffix.color + ';padding:2px 8px;border-radius:4px;font-size:11px;color:' + p.synapseAffix.color + ';" data-tip="<b style=color:' + p.synapseAffix.color + '>【环境感官共鸣：' + p.synapseAffix.name + '】</b>&#10;' + p.synapseAffix.desc + '">' + p.synapseAffix.name + '</div>';
+                        affixHTML = '<div class="help-tip" style="position:absolute;top:-10px;right:10px;background:var(--bg-deep);border:1px solid ' + p.synapseAffix.color + ';padding:2px 8px;border-radius:4px;font-size:12px;color:' + p.synapseAffix.color + ';" data-tip="<b style=color:' + p.synapseAffix.color + '>【环境感官共鸣：' + p.synapseAffix.name + '】</b>&#10;' + p.synapseAffix.desc + '">' + p.synapseAffix.name + '</div>';
                     }
 
                     card.innerHTML = affixHTML + '<div class="txt-xs txt-green">[ 路径 0' + (i+1) + ' ]</div>' +
@@ -825,7 +825,7 @@ window.UISystem = (function () {
             var affixIcons = "";
             if (mon.affixes && mon.affixes.length > 0) {
                 mon.affixes.forEach(function(aff) {
-                    affixIcons += '<span class="help-tip" style="margin-left:8px;padding:1px 6px;border:1px solid ' + aff.color + ';border-radius:3px;font-size:10px;color:' + aff.color + ';animation:glitch 2s infinite;" data-tip="<b style=color:' + aff.color + '>【' + aff.name + '】</b>&#10;' + aff.desc + '">' + aff.name + '</span>';
+                    affixIcons += '<span class="help-tip" style="margin-left:8px;padding:1px 6px;border:1px solid ' + aff.color + ';border-radius:3px;font-size:12px;color:' + aff.color + ';animation:glitch 2s infinite;" data-tip="<b style=color:' + aff.color + '>【' + aff.name + '】</b>&#10;' + aff.desc + '">' + aff.name + '</span>';
                 });
             }
 
@@ -1959,7 +1959,7 @@ window.UISystem = (function () {
                 var tag = '';
                 if (s.justDone && !s.claimed) {
                     var compArg = s.t.comps ? JSON.stringify(s.t.comps).replace(/"/g, '&quot;') : 'null';
-                    tag = ' <button class="btn btn-green" style="padding:2px 10px;font-size:11px;height:22px;" onclick="UISystem._claimReward(\'' + s.t.id + '\',' + (s.t.reward||0) + ',\'' + (s.t.rewardDesc||'奖励') + '\',' + compArg + ')">领取奖励</button>';
+                    tag = ' <button class="btn btn-green" style="padding:2px 10px;font-size:13px;height:22px;" onclick="UISystem._claimReward(\'' + s.t.id + '\',' + (s.t.reward||0) + ',\'' + (s.t.rewardDesc||'奖励') + '\',' + compArg + ')">领取奖励</button>';
                 } else if (s.done && s.claimed) {
                     style = 'text-decoration:line-through;color:var(--text-disabled);';
                 }
@@ -2574,7 +2574,7 @@ window.UISystem = (function () {
                 var sign = diff > 0 ? '+' : '';
                 var valStr = f.pct ? Math.round(nv*100)+'%' : (f.mul ? '×'+nv.toFixed(1) : nv);
                 var diffStr = f.pct ? Math.round(diff*100)+'%' : (f.mul ? diff.toFixed(1) : diff);
-                diffParts.push('<span>' + f.l + ': ' + valStr + ' <span style="color:' + color + '; font-size:11px;">(' + sign + diffStr + ')</span></span>');
+                diffParts.push('<span>' + f.l + ': ' + valStr + ' <span style="color:' + color + '; font-size:12px;">(' + sign + diffStr + ')</span></span>');
             });
 
             var row = _ce('div');
@@ -3052,12 +3052,12 @@ window.UISystem = (function () {
             '<div style="margin-bottom:10px;"><span class="txt-xs txt-dim">⑤ 涂抹涂层 → 克制目标种族</span></div>' +
             '<div style="margin-bottom:14px;"><span class="txt-xs txt-dim">⑥ 进阶/同调 → 强化器官</span></div>' +
             '<div style="border-top:1px solid var(--border-dim);padding-top:10px;">' +
-            '<div style="margin-bottom:8px;"><span class="txt-xs txt-green">进阶</span><div class="txt-xs txt-dim" style="font-size:10px;">消耗组件提升阶位 → 属性+技能倍率↑</div></div>' +
-            '<div style="margin-bottom:8px;"><span class="txt-xs txt-green">挂载</span><div class="txt-xs txt-dim" style="font-size:10px;">Boss器官替换标准技能</div></div>' +
-            '<div style="margin-bottom:8px;"><span class="txt-xs txt-green">组件</span><div class="txt-xs txt-dim" style="font-size:10px;">每槽2孔，镶嵌获得词条</div></div>' +
-            '<div style="margin-bottom:8px;"><span class="txt-xs txt-purple">魔药</span><div class="txt-xs txt-dim" style="font-size:10px;">战斗快捷键[4-6]，注意毒性</div></div>' +
-            '<div style="margin-bottom:8px;"><span class="txt-xs txt-gold">涂层</span><div class="txt-xs txt-dim" style="font-size:10px;">持续100回合，种族克制增伤</div></div>' +
-            '<div><span class="txt-xs txt-gold">基因点数</span><div class="txt-xs txt-dim" style="font-size:10px;">击败怪物/完成任务获得</div></div>' +
+            '<div style="margin-bottom:8px;"><span class="txt-xs txt-green">进阶</span><div class="txt-xs txt-dim">消耗组件提升阶位 → 属性+技能倍率↑</div></div>' +
+            '<div style="margin-bottom:8px;"><span class="txt-xs txt-green">挂载</span><div class="txt-xs txt-dim">Boss器官替换标准技能</div></div>' +
+            '<div style="margin-bottom:8px;"><span class="txt-xs txt-green">组件</span><div class="txt-xs txt-dim">每槽2孔，镶嵌获得词条</div></div>' +
+            '<div style="margin-bottom:8px;"><span class="txt-xs txt-purple">魔药</span><div class="txt-xs txt-dim">战斗快捷键[4-6]，注意毒性</div></div>' +
+            '<div style="margin-bottom:8px;"><span class="txt-xs txt-gold">涂层</span><div class="txt-xs txt-dim">持续100回合，种族克制增伤</div></div>' +
+            '<div><span class="txt-xs txt-gold">基因点数</span><div class="txt-xs txt-dim">击败怪物/完成任务获得</div></div>' +
             '</div>';
         // 左右布局容器
         var wrapper = _ce('div');
