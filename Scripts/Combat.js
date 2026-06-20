@@ -261,6 +261,7 @@ window.CombatSystem = (function () {
         return effects;
     }
 
+    function _getSkillName(slot) { var p=GS().player; var eq=p[slot].equipped; if(eq){ var bo=GD().BOSS_ORGANS||{}; if(bo[eq]&&bo[eq].skillName) return bo[eq].skillName; } var defs={predatory_organ:'捕食打击',chitin_epidermis:'生物防御',gland_core:'腺体脉冲'}; return defs[slot]||'攻击'; }
     function _executePlayerSkill(slot) {
         var gs = GS(); var p = gs.player;
         var m = _getMonsterData();
@@ -366,16 +367,16 @@ window.CombatSystem = (function () {
                 } else {
                     // 首次命中 → 施加电离标记（下次命中引爆）
                     curMon.status['ionized'] = true;
-                    _log('<span style="color:var(--accent-blue)">捕食打击造成电荷残留：目标已被【电离标记】。</span>');
+                    _log('<span style="color:var(--accent-blue)">'+_getSkillName('predatory_organ')+'造成电荷残留：目标已被【电离标记】。</span>');
                 }
             }
 
             // 挂毒：30%概率
             if (Math.random() < 0.3) {
                 curMon.status['poison'] = 3;
-                _log('<span style="color:var(--accent-red)">发起捕食打击：' + damage + '点伤害</span>，注入毒素标记。');
+                _log('<span style="color:var(--accent-red)">发起'+_getSkillName('predatory_organ')+'：' + damage + '点伤害</span>，注入毒素标记。');
             } else {
-                _log('<span style="color:var(--accent-red)">发起捕食打击，造成 ' + damage + ' 点物理伤害。</span>');
+                _log('<span style="color:var(--accent-red)">发起'+_getSkillName('predatory_organ')+'，造成 ' + damage + ' 点物理伤害。</span>');
             }
 
             // 生物崩解积攒
@@ -439,7 +440,7 @@ window.CombatSystem = (function () {
             }
             else {
                 damage = Math.ceil(baseAtk * 0.5);
-                _log('<span style="color:var(--accent-yellow)">腺体脉冲造成 ' + damage + ' 点轻微酸蚀。</span>');
+                _log('<span style="color:var(--accent-yellow)">'+_getSkillName('gland_core')+'造成 ' + damage + ' 点轻微酸蚀。</span>');
             }
         } else if (slot === 'chitin_epidermis') {
             var shield = Math.ceil(baseAtk * 0.6);
