@@ -1977,6 +1977,10 @@ window.UISystem = (function () {
         _hideBgVideo(_bgVideo);
         _hideBgVideo(_bgBattleVideo);
         _root.className = '';
+        // 隐藏界面元素
+        var logWrap = document.querySelector('.log-wrap'); if (logWrap) logWrap.style.display = 'none';
+        var taskPanel = document.getElementById('ui-task-panel'); if (taskPanel) taskPanel.style.display = 'none';
+        var roomInfo = document.getElementById('ui-room-info'); if (roomInfo) roomInfo.style.display = 'none';
         document.querySelectorAll('.help-popup').forEach(function(el) { el.remove(); });
         _modalOverlay.innerHTML = ''; _modalOverlay.style.display = 'flex';
         // 开始按钮 — 点击后触发视频（绕过浏览器自动播放限制）
@@ -2044,6 +2048,10 @@ window.UISystem = (function () {
         _bgTitleVideo.pause();
         _showBgVideo(_bgVideo);
         _root.className = '';
+        // 恢复界面元素
+        var logWrap2 = document.querySelector('.log-wrap'); if (logWrap2) logWrap2.style.display = '';
+        var taskPanel2 = document.getElementById('ui-task-panel'); if (taskPanel2) taskPanel2.style.display = '';
+        var roomInfo2 = document.getElementById('ui-room-info'); if (roomInfo2) roomInfo2.style.display = '';
         // [修复] 不再手动设置 _isFirstLoad = false，让 render() 统一处理启动序列
         UISystem.render();
     }
