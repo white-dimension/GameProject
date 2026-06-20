@@ -773,15 +773,14 @@ window.UISystem = (function () {
             card.setAttribute('data-monster-idx', idx);
             var cardBorder = dead ? 'var(--border-dim)' : mclr;
             var cardGlow = (isTarget && !dead && !isVictory) ? 'box-shadow:0 0 20px ' + (raceCardClrs[md.race] || '#ff4455') + ';' : '';
-            card.style.cssText = 'position:relative;background:' + (hasBgImage && !dead ? 'transparent' : 'var(--bg-card)') + ';border:1px solid ' + cardBorder + ';border-radius:8px;padding:24px;text-align:center;min-width:280px;max-width:380px;min-height:320px;display:flex;flex-direction:column;justify-content:flex-start;overflow:hidden;' + cardGlow +
-                (dead ? 'opacity:0.4;filter:grayscale(0.5);' : '') + 'cursor:' + (isVictory || dead ? 'default' : 'pointer') + ';';
+            card.style.cssText = 'position:relative;background:' + (hasBgImage ? 'transparent' : 'var(--bg-card)') + ';border:1px solid ' + cardBorder + ';border-radius:8px;padding:24px;text-align:center;min-width:280px;max-width:380px;min-height:320px;display:flex;flex-direction:column;justify-content:flex-start;overflow:hidden;' + cardGlow +
+                (dead ? 'opacity:0.5;' : '') + 'cursor:' + (isVictory || dead ? 'default' : 'pointer') + ';';
 
-            // 背景图层（独立呼吸，不影响卡片大小）
-            if (hasBgImage && !dead) {
+            // 背景图层（死亡保留灰度显示）
+            if (hasBgImage) {
                 var bgLayer = _ce('div');
-                bgLayer.style.cssText = 'position:absolute;inset:0;z-index:-2;background:url(' + md.image + ') center/cover no-repeat;border-radius:8px;';
-                bgLayer.className = 'boss-breathe';
-                bgLayer.style.animationDelay = '-' + (Math.random() * 4).toFixed(2) + 's';
+                bgLayer.style.cssText = 'position:absolute;inset:0;z-index:-2;background:url(' + md.image + ') center/cover no-repeat;border-radius:8px;' + (dead ? 'filter:grayscale(1);' : '');
+                if (!dead) { bgLayer.className = 'boss-breathe'; bgLayer.style.animationDelay = '-' + (Math.random() * 4).toFixed(2) + 's'; }
                 card.appendChild(bgLayer);
                 // 遮罩层（在背景图上方，内容下方）
                 var overlayLayer = _ce('div');
