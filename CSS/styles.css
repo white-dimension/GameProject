@@ -326,6 +326,17 @@ body::after {
     50% { filter: drop-shadow(0 0 40px rgba(220, 80, 80, 0.8)); }
 }
 
+/* 非Boss怪物肖像 */
+.monster-portrait {
+    width: 200px; height: 200px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid var(--border-dim);
+    margin: 0 auto;
+    display: block;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+
 /* Boss立绘呼吸动画 */
 @keyframes boss-breathe {
     0%, 100% { background-size: 110% 110%; background-position: center; }

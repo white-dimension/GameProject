@@ -726,12 +726,21 @@ window.UISystem = (function () {
                 card.onmouseleave = function() { this.style.borderColor = isTarget ? mclr : (dead ? 'var(--border-dim)' : mclr); this.style.boxShadow = cardGlow || 'none'; };
             }
 
-            // 图标
-            var iconClass = (md.icon ? 'icon-mid-' + md.icon : raceIcons[md.race] || 'icon-mutant');
-            var ico = _ce('div');
-            ico.className = 'icon ' + iconClass + ' icon-lg icon-pulse';
-            ico.style.cssText = 'margin:0 auto;' + (dead ? 'color:var(--text-disabled);' : 'color:' + mclr + ';');
-            card.appendChild(ico);
+            // 怪物立绘/图标
+            var hasPortrait = !isBoss && md.image;
+            if (hasPortrait) {
+                var portrait = _ce('img', 'monster-portrait');
+                portrait.src = md.image;
+                portrait.alt = mon.name;
+                if (dead) portrait.style.cssText = 'filter:grayscale(1);opacity:0.5;';
+                card.appendChild(portrait);
+            } else if (!isBoss) {
+                var iconClass = (md.icon ? 'icon-mid-' + md.icon : raceIcons[md.race] || 'icon-mutant');
+                var ico = _ce('div');
+                ico.className = 'icon ' + iconClass + ' icon-lg icon-pulse';
+                ico.style.cssText = 'margin:0 auto;' + (dead ? 'color:var(--text-disabled);' : 'color:' + mclr + ';');
+                card.appendChild(ico);
+            }
 
             // [新增] 怪物维度词缀显示 (紧凑化，放在名字右侧)
             var affixIcons = "";
