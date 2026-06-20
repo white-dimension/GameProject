@@ -127,8 +127,9 @@ window.WorldSystem = (function () {
                 });
                 if (bossPool.length > 0) {
                     var bm = bossPool[Math.floor(Math.random() * bossPool.length)];
-                    gs.inventory.organs.push(bm.drop.id);
-                    relicEvent = { type: 'relic', msg: '【异常反应】！从遗迹中剥离出：' + bm.drop.id };
+                    var organId = window.GameData.getRandomBossOrgan(bm.drop.pool) || bm.drop.id;
+                    gs.inventory.organs.push(organId);
+                    relicEvent = { type: 'relic', msg: '【异常反应】！从遗迹中剥离出：' + organId };
                 } else {
                     p.bp += 100;
                     relicEvent = { type: 'relic', msg: '发现高价值核心！获得 100 基因点数' };
