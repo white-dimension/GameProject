@@ -2218,8 +2218,8 @@ window.UISystem = (function () {
         head.innerHTML = '<div class="txt-md txt-gold txt-bold">[ 组件合成 ]</div><button class="btn btn-blue btn-sm" onclick="UISystem.closeModal();UISystem.showReorganizeModal();">取消</button>';
         box.appendChild(head);
         var body = _ce('div');
-        body.style.cssText = 'padding:16px 24px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;max-height:50vh;';
-        body.innerHTML = '<div class="txt-xs txt-dim">选择三个组件（同种 → 升级版，不同 → 随机）</div>';
+        body.style.cssText = 'padding:16px 20px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;max-height:50vh;';
+        body.innerHTML = '';
         var selected = {};
         var selectCount = 0;
         var keys = []; Object.keys(inv).forEach(function(k) { if (inv[k] > 0) keys.push(k); });
@@ -2227,10 +2227,9 @@ window.UISystem = (function () {
             var selKeys = Object.keys(selected);
             var selNames = []; selKeys.forEach(function(sk) { for (var si = 0; si < selected[sk]; si++) selNames.push(sk); });
             var allSame = selKeys.length === 1 && selectCount === 3;
-            var dots = ''; for (var di = 0; di < 3; di++) {
-                if (di < selectCount) { dots += '<span style="display:inline-block;padding:4px 10px;margin:0 2px;border-radius:3px;background:rgba(255,213,79,0.15);border:1px solid #f57f17;font-size:12px;color:var(--accent-yellow);">' + _fmtRoman(selNames[di]) + '</span>'; }
-                else { dots += '<span style="display:inline-block;padding:4px 10px;margin:0 2px;border-radius:3px;border:1px dashed var(--border-dim);font-size:12px;color:var(--text-disabled);">空槽</span>'; }
-            }
+            // 更新状态行
+            statusLine.innerHTML = '<span class="txt-xs txt-dim">已选 </span><span style="color:var(--accent-yellow)">' + selectCount + '</span><span class="txt-xs txt-dim"> / 3</span>' +
+                (selectCount > 0 ? ' <span class="txt-xs txt-dim">— ' + selNames.map(function(n){return _fmtRoman(n);}).join(' + ') + '</span>' : '');
             if (selectCount === 3 && allSame) {
                 var selectedId = selKeys[0];
                 var c = GD().COMPONENTS && GD().COMPONENTS[selectedId];
@@ -2266,7 +2265,7 @@ window.UISystem = (function () {
             } else if (selectCount === 3) {
                 preview.innerHTML = '<div class="txt-xs txt-gold">→ 随机新组件</div>';
             } else {
-                preview.innerHTML = dots + ' <span class="txt-xs txt-dim">' + selectCount + '/3</span>';
+                preview.innerHTML = selectCount > 0 ? '<span class="txt-xs txt-dim">继续选择组件...</span>' : '';
             }
         };
         var compRow = _ce('div');
@@ -2301,10 +2300,14 @@ window.UISystem = (function () {
             compRow.appendChild(chip);
         });
         body.appendChild(compRow);
+        var statusLine = _ce('div');
+        statusLine.className = 'txt-sm txt-bold';
+        statusLine.style.cssText = 'text-align:left;';
+        statusLine.innerHTML = '<span class="txt-xs txt-dim">已选 </span><span style="color:var(--accent-yellow)">0</span><span class="txt-xs txt-dim"> / 3</span>';
+        body.appendChild(statusLine);
         var preview = _ce('div');
-        preview.style.cssText = 'text-align:center;padding:10px;';
-        var dots = ''; for (var di = 0; di < 3; di++) dots += '<span style="display:inline-block;width:28px;height:28px;border-radius:3px;border:1px solid var(--border-dim);background:transparent;margin:0 3px;vertical-align:middle;"> </span>';
-        preview.innerHTML = dots + ' <span class="txt-xs txt-dim">0/3</span>';
+        preview.style.cssText = 'text-align:left;padding:8px 0;min-height:24px;';
+        preview.innerHTML = '';
         body.appendChild(preview);
         var btnRow = _ce('div');
         btnRow.style.cssText = 'padding:12px 20px;display:flex;gap:10px;justify-content:flex-end;';
