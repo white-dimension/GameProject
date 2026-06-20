@@ -1983,8 +1983,6 @@ window.UISystem = (function () {
         // 隐藏界面元素
         var hud = document.querySelector('.hud-top'); if (hud) hud.style.display = 'none';
         var actionBar = document.getElementById('ui-action-bar'); if (actionBar) actionBar.style.display = 'none';
-        var leftCol = document.querySelector('.left-panel-col'); if (leftCol) leftCol.style.display = 'none';
-        var logWrap = document.querySelector('.log-wrap'); if (logWrap) logWrap.style.display = 'none';
         var taskPanel = document.getElementById('ui-task-panel'); if (taskPanel) taskPanel.style.display = 'none';
         var roomInfo = document.getElementById('ui-room-info'); if (roomInfo) roomInfo.style.display = 'none';
         var skillInfo = document.getElementById('ui-skill-info'); if (skillInfo) skillInfo.style.display = 'none';
@@ -2018,11 +2016,9 @@ window.UISystem = (function () {
         _modalOverlay.appendChild(startBox);
     }
     function _renderIntroTexts() {
-        var box = _ce('div');
-        box.style.cssText = 'width:min(650px,90vw);padding:50px 40px 30px 40px;text-align:left;';
-        box.innerHTML = '<div style="display:flex;flex-direction:column;gap:0;" id="intro-log"></div>' +
-            '<button class="btn btn-green btn-capsule" id="intro-btn" style="margin-top:24px;padding:10px 40px;font-size:14px;opacity:0;transition:opacity 0.5s;">激活原体</button>';
-        _modalOverlay.appendChild(box);
+        var logPanel = document.getElementById('ui-log'); if (!logPanel) return;
+        logPanel.innerHTML = '';
+        logPanel.style.cssText = logPanel.style.cssText.replace(/max-height[^;]+;?/g, '') + 'max-height:none;';
         var lines = [
             { text: '神经链路初始化...', cls: 'txt-xs', clr: 'rgba(0,255,136,0.45)', delay: 200 },
             { text: '黑地平线超生物复合实验室 地下一层', cls: 'txt-xs', clr: 'rgba(0,255,136,0.6)', delay: 600 },
@@ -2032,12 +2028,18 @@ window.UISystem = (function () {
             { text: '原体-II · 无限拟态白血球始祖', cls: 'txt-md txt-bold', clr: 'var(--accent-green)', delay: 600 },
             { text: '链接已建立。苏醒吧。', cls: 'txt-sm', clr: 'var(--accent-green)', delay: 500 }
         ];
-        var log = document.getElementById('intro-log');
         var idx = 0;
         var showNext = function() {
             if (idx >= lines.length) {
-                var btn = document.getElementById('intro-btn');
-                if (btn) { btn.style.opacity = '1'; btn.onclick = function() { UISystem.closeIntro(); }; }
+                // 激活按钮插入日志底部
+                var btnDiv = document.createElement('div');
+                btnDiv.style.cssText = 'margin-top:16px;text-align:center;';
+                btnDiv.innerHTML = '<button class="btn btn-green" id="intro-btn" style="padding:8px 32px;font-size:14px;opacity:0;transition:opacity 0.5s;">激活原体</button>';
+                logPanel.appendChild(btnDiv);
+                setTimeout(function() {
+                    var btn = document.getElementById('intro-btn');
+                    if (btn) { btn.style.opacity = '1'; btn.onclick = function() { UISystem.closeIntro(); }; }
+                }, 100);
                 return;
             }
             var li = lines[idx];
@@ -2045,7 +2047,7 @@ window.UISystem = (function () {
             div.className = li.cls;
             div.style.cssText = 'margin-bottom:10px;color:' + (li.clr || '');
             div.innerHTML = '<span>></span> <span class="typewriter"></span>';
-            log.appendChild(div);
+            logPanel.appendChild(div);
             _typeText(div.querySelector('.typewriter'), li.text, function() {
                 idx++;
                 setTimeout(showNext, li.delay);
@@ -2067,8 +2069,6 @@ window.UISystem = (function () {
         // 恢复界面元素
         var hud2 = document.querySelector('.hud-top'); if (hud2) hud2.style.display = '';
         var actionBar2 = document.getElementById('ui-action-bar'); if (actionBar2) actionBar2.style.display = '';
-        var leftCol2 = document.querySelector('.left-panel-col'); if (leftCol2) leftCol2.style.display = '';
-        var logWrap2 = document.querySelector('.log-wrap'); if (logWrap2) logWrap2.style.display = '';
         var taskPanel2 = document.getElementById('ui-task-panel'); if (taskPanel2) taskPanel2.style.display = '';
         var roomInfo2 = document.getElementById('ui-room-info'); if (roomInfo2) roomInfo2.style.display = '';
         // [修复] 不再手动设置 _isFirstLoad = false，让 render() 统一处理启动序列
